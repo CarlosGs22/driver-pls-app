@@ -1,0 +1,108 @@
+String? validateEmail(String value) {
+  String? _msg;
+  RegExp regex = new RegExp(
+      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+  if (value.isEmpty) {
+    _msg = "\u26A0 El campo es requerido";
+  } else if (!regex.hasMatch(value)) {
+    _msg = " \u26A0 Ingrese un correo válido";
+  }
+
+  return _msg;
+}
+
+String? validateField(String value) {
+  String? _msg;
+  if (value.isEmpty) {
+    _msg = "\u26A0 El campo es requerido";
+  }
+  if (value.length <= 0) {
+    _msg = "\u26A0 El campo es requerido";
+  }
+
+  if (value.trim().length == 0) {
+    _msg = "\u26A0 El campo es requerido";
+  }
+ 
+  return _msg;
+}
+
+var validateData = (var band, var value) {
+  if (band == "1") {
+    if (value == null || value.isEmpty) {
+      return "\u26A0 El campo es requerido";
+    } else {
+      if (value.toString().endsWith(".")) {
+        return "\u26A0 Valor invalido";
+      } else {
+        return null;
+      }
+    }
+  } else {
+    if (value.toString().endsWith(".")) {
+      return "\u26A0 Valor invalido";
+    } else {
+      return null;
+    }
+  }
+};
+
+String? validateFieldNumber(String value) {
+  String? _msg;
+  String valFormat = value.replaceAll(new RegExp(r"\D"), "");
+  if (value.isEmpty) {
+    _msg = "\u26A0 Campo requerido";
+  } else if (valFormat.length < 10) {
+    _msg = "\u26A0 Ingrese número con 10 dígitos";
+  } else if (double.tryParse(valFormat) == null) {
+    _msg = "\u26A0 Ingrese número valido";
+  }
+
+  return _msg;
+}
+
+String? validateFieldPassword(String value) {
+  String? _msg;
+  if (value.isEmpty) {
+    _msg = "\u26A0 El campo es requerido";
+  } else if (value.length < 9) {
+    _msg = "\u26A0 Ingrese una contraseña mayor a 8 dígitos";
+  }
+
+ 
+  return _msg;
+}
+
+validateArrayValues(var value) {
+  String? _msg;
+  if (value == null) {
+    _msg = "";
+  } else {
+    _msg = value;
+  }
+
+  return _msg;
+}
+
+formatArrayValues(var value) {
+  String? _msg;
+  if (value == 0) {
+    _msg = "";
+  } else if (value == null) {
+    _msg = "";
+  } else {
+    _msg = value;
+  }
+
+  return _msg;
+}
+
+validateEmailRegex(var value) {
+  if (RegExp(
+    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$',
+  ).hasMatch(value)) {
+    return true;
+  } else {
+    return false;
+  }
+}
