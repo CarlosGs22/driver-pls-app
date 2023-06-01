@@ -41,6 +41,18 @@ dependencies:
   geolocator: ^9.0.2
   google_maps_flutter: ^2.1.12
   http: ^0.13.5
+  flutter_chat_bubble: ^2.0.2
+  pagination_view: ^2.0.0
+  flutter_pagewise: ^2.0.4
+  loadmore: ^2.1.0
+  shared_preferences: ^2.0.7
+  flutter_polyline_points: ^1.0.0
+  geocoding: ^2.0.0
+  custom_marker: ^1.0.0
+  location: ^4.4.0
+  custom_map_markers: ^0.0.2+1
+  widget_marker_google_map: ^0.0.1+1
+
   
 
 dev_dependencies:

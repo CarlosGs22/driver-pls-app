@@ -1,5 +1,10 @@
+import 'package:driver_pls_flutter/models/user.dart';
+import 'package:driver_pls_flutter/providers/agent_provider.dart';
 import 'package:driver_pls_flutter/providers/taxi_trip_provider.dart';
+import 'package:driver_pls_flutter/screens/taximeter_screen.dart';
 import 'package:driver_pls_flutter/screens/login_screen.dart';
+import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
+import 'package:driver_pls_flutter/utils/shared_preference.dart';
 import 'package:driver_pls_flutter/utils/strings.dart';
 import 'package:driver_pls_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
@@ -12,17 +17,23 @@ class Main extends StatefulWidget {
   State<Main> createState() => _MainState();
 }
 
-class _MainState extends State<Main> {
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-  Future<String> getAgent() async {
-    return "login";
-  }
+void main() {
+  runApp(const Main());
+}
+
+class _MainState extends State<Main> {
+  Future<User> getUserData() => UserPreferences().getUser();
+
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => TaxiTripProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaxiTripProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider())
+      ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
         title: Strings.labelAppNameTitle,
@@ -30,9 +41,11 @@ class _MainState extends State<Main> {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: FutureBuilder<String>(
-          future: getAgent(),
+        home: FutureBuilder<User>(
+          future: getUserData(),
           builder: (context, snapshot) {
+            String userId = snapshot.data?.id ?? "";
+
             switch (snapshot.connectionState) {
               case ConnectionState.none:
               case ConnectionState.waiting:
@@ -40,8 +53,10 @@ class _MainState extends State<Main> {
               default:
                 if (snapshot.hasError) {
                   return const LoginScreen();
-                } else if (snapshot.connectionState == ConnectionState.done) {
+                } else if (userId == "null" || userId == "") {
                   return const LoginScreen();
+                } else if (snapshot.connectionState == ConnectionState.done) {
+                  return const TripListScreen();
                 }
             }
             return const LoginScreen();
@@ -49,12 +64,11 @@ class _MainState extends State<Main> {
         ),
         routes: {
           '/login-screen': (context) => const LoginScreen(),
+          '/viajes-listado-screen': (context) => const TripListScreen(),
+          '/home-screen': (context) => const TaximeterScreen(),
         },
       ),
     );
   }
 }
 
-void main() {
-  runApp(const Main());
-}

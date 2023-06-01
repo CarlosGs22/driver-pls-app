@@ -16,14 +16,14 @@ String? validateField(String value) {
   if (value.isEmpty) {
     _msg = "\u26A0 El campo es requerido";
   }
-  if (value.length <= 0) {
+  if (value.isEmpty) {
     _msg = "\u26A0 El campo es requerido";
   }
 
-  if (value.trim().length == 0) {
+  if (value.trim().isEmpty) {
     _msg = "\u26A0 El campo es requerido";
   }
- 
+
   return _msg;
 }
 
@@ -69,7 +69,6 @@ String? validateFieldPassword(String value) {
     _msg = "\u26A0 Ingrese una contraseña mayor a 8 dígitos";
   }
 
- 
   return _msg;
 }
 
@@ -106,3 +105,25 @@ validateEmailRegex(var value) {
     return false;
   }
 }
+
+
+ validateNullOrEmptyString(var value) {
+    if (value.toString() != "null" &&
+        value.toString() != "" &&
+        value != null) {
+      return value;
+    }
+    return null;
+  }
+
+
+  validateNullOrEmptyNumber(var value) {
+    if (value.toString() != "null" &&
+        value.toString() != "" &&
+        value != null &&
+        value.toString() != "0.00" &&
+        value.toString() != "0") {
+      return value;
+    }
+    return 0;
+  }

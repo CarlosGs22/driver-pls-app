@@ -1,3 +1,5 @@
+import 'package:driver_pls_flutter/utils/validator.dart';
+
 class ViajeModel {
     int idViaje;
     int ocupantes;
@@ -24,8 +26,10 @@ class ViajeModel {
   });
 
   factory ViajeModel.fromJson(Map<String, dynamic> json) {
+
+
     return ViajeModel(
-      idViaje: int.parse(json['id_viaje']),
+      idViaje: validateNullOrEmptyNumber(int.tryParse(json['id_viaje'])),
       ocupantes: json['ocupantes'] != null ? int.parse(json['ocupantes']) : 0, //que no salga cuando no tiene pasajeros
       nombreEmpresa: json['nombre_emp'],
       idEmp: json['id_emp'] != null ? int.parse(json['id_emp']) : null,

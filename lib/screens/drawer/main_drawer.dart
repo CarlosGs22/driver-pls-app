@@ -1,5 +1,5 @@
 import 'package:driver_pls_flutter/screens/login_screen.dart';
-import 'package:driver_pls_flutter/screens/viajes_list_screen.dart';
+import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
 import 'package:driver_pls_flutter/utils/strings.dart';
 import 'package:driver_pls_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
@@ -46,21 +46,9 @@ class MainDrawer extends StatelessWidget {
                 margin: const EdgeInsets.all(0.0),
                 padding: const EdgeInsets.only(top: 0, left: 0)),
           ),
+         
           Ink(
-              color: _selectedDestination == 0
-                  ? _colorFromHex(Widgets.colorSecundayLight)
-                  : Colors.transparent,
-              child: ListTile(
-                  leading: const Icon(Icons.home_filled),
-                  title: Text("Inicio",
-                      style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          color: _colorFromHex(Widgets.colorGray),
-                          fontWeight: FontWeight.w500)),
-                  selected: _selectedDestination == 0,
-                  onTap: () async {})),
-          Ink(
-            color: _selectedDestination == 1
+            color: _selectedDestination == 0
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -70,16 +58,16 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 1,
+                selected: _selectedDestination == 0,
                 onTap: () => {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const ViajesListScreen()))
+                              builder: (context) => const TripListScreen()))
                     }),
           ),
           Ink(
-            color: _selectedDestination == 2
+            color: _selectedDestination == 1
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -89,7 +77,7 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 2,
+                selected: _selectedDestination == 1,
                 onTap: () => {
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(

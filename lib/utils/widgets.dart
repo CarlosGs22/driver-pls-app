@@ -1,3 +1,5 @@
+import 'package:driver_pls_flutter/utils/utility.dart';
+import 'package:driver_pls_flutter/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -150,16 +152,124 @@ buildTextFormField(Widget widget, double widht, double height,
 
 buidlDefaultFlushBar(
     BuildContext context, String tittle, String message, int duration) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),
-    backgroundColor:Widgets._colorFromHex2(Widgets.colorPrimary),
-    
-    duration:  Duration(seconds: duration),
+    backgroundColor: Widgets._colorFromHex2(Widgets.colorPrimary),
+    duration: Duration(seconds: duration),
     action: SnackBarAction(
       textColor: Colors.white,
       onPressed: () {},
       label: tittle,
     ),
   ));
+}
+
+buildBubblePadding(
+    IconData icon, Color colorIcon, var tittle, Color colorTitle, double size) {
+  return Padding(
+    //padding: EdgeInsets.all,
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(
+      children: [
+        Icon(
+          icon,
+          color: colorIcon,
+          size: size,
+        ),
+        Flexible(
+          child: buildText(tittle ?? "NA", 16, colorTitle, 0, "poppins", false,
+              0, TextAlign.start, FontWeight.normal, Colors.transparent),
+        )
+      ],
+    ),
+  );
+}
+
+Widget buildTextField(
+    String labelText, String placeholder, bool isPasswordTextField) {
+  return Padding(
+      padding: const EdgeInsets.only(bottom: 18.0),
+      child: TextField(
+        enabled: false,
+        decoration: InputDecoration(
+            contentPadding: const EdgeInsets.only(bottom: 3),
+            labelText:
+                validateNullOrEmptyNumber(labelText) != "" ? labelText : "-",
+            border: InputBorder.none,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: validateNullOrEmptyNumber(placeholder) != ""
+                ? placeholder
+                : "-",
+            hintStyle: GoogleFonts.poppins(
+              color: Colors.black,
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+            labelStyle: GoogleFonts.poppins(
+              color: Widgets._colorFromHex2(Widgets.colorGrayLight),
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            )),
+      ));
+}
+
+buildDetailform(String textTittle1, String textValue1, String textTittle2,
+    String textValue2) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: <Widget>[
+      validateNullOrEmptyString(textValue1) != null
+          ? Expanded(
+              flex: 5,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 7, right: 15, bottom: 0, left: 15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(textTittle1.isNotEmpty ? textTittle1 :  "",
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Widgets._colorFromHex2(Widgets.colorSecundary),
+                          fontWeight: FontWeight.w500,
+                        )),
+                    Text(textValue1.isNotEmpty  ? textValue1 : "",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Widgets._colorFromHex2(Widgets.colorGray),
+                          fontWeight: FontWeight.w500,
+                        )),
+                  ],
+                ),
+              ))
+          : const SizedBox(height: 0),
+      validateNullOrEmptyString(textValue2) != null
+          ? Expanded(
+              flex: 5,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 7, right: 15, bottom: 0, left: 15),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(textTittle2.isNotEmpty  ? textTittle2 : "",
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Widgets._colorFromHex2(Widgets.colorSecundary),
+                          fontWeight: FontWeight.w500,
+                        )),
+                    Text(textValue2.isNotEmpty ?  textValue2 : "",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Widgets._colorFromHex2(Widgets.colorGray),
+                          fontWeight: FontWeight.w500,
+                        ))
+                  ],
+                ),
+              ))
+          : const SizedBox(height: 0),
+    ],
+  );
 }

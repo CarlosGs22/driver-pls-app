@@ -1,14 +1,16 @@
 import 'dart:convert';
 
-import 'package:driver_pls_flutter/screens/home_screen.dart';
+import 'package:driver_pls_flutter/models/user.dart';
+import 'package:driver_pls_flutter/providers/agent_provider.dart';
+import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
 import 'package:driver_pls_flutter/utils/http_class.dart';
+import 'package:driver_pls_flutter/utils/shared_preference.dart';
 import 'package:driver_pls_flutter/utils/strings.dart';
 import 'package:driver_pls_flutter/utils/validator.dart';
 import 'package:driver_pls_flutter/utils/widgets.dart';
-// ignore: unnecessary_import
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -93,14 +95,22 @@ class _LoginState extends State<LoginScreen> {
     List<dynamic> datauser = json.decode(response["data"]);
 
     if (response["status"] && datauser.isNotEmpty) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (Route<dynamic> route) => false,
-      );
+      _loginSuccess(context, json.decode(response["data"]));
     } else {
       buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
     }
+  }
+
+  _loginSuccess(BuildContext context, List<dynamic> data) {
+    User authUser = User.fromJson(data[0]);
+    Provider.of<UserProvider>(context, listen: false).setUser(authUser);
+    UserPreferences().saveUser(authUser);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const TripListScreen()),
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
