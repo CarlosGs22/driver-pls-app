@@ -6,7 +6,7 @@ class Strings {
   static const String labelDetailTrip = "Detalle de viaje";
   
 
-  static const String labelAppNameTitle = "Driver Pls";
+  static const String labelAppNameTitle = "Driver Please";
   static const String labelLoginCreateAccount = "Crear cuenta";
   static const String labelLoginLostPassword = "¿Perdiste tu contraseña?";
   static const String labelLoginbtn = "Iniciar sesión";

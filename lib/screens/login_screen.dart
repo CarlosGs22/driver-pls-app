@@ -63,6 +63,10 @@ class _LoginState extends State<LoginScreen> {
       email = email.replaceAll(" ", "");
       email = email.trim();
 
+      setState(() {
+        isLoading = true;
+      });
+
       _loginResponse(
         context,
         email,
@@ -93,6 +97,10 @@ class _LoginState extends State<LoginScreen> {
 
   _handleLoginResponse(Map<String, dynamic> response, BuildContext context) {
     List<dynamic> datauser = json.decode(response["data"]);
+
+    setState(() {
+      isLoading = false;
+    });
 
     if (response["status"] && datauser.isNotEmpty) {
       _loginSuccess(context, json.decode(response["data"]));

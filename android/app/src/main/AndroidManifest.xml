@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.driver_pls_flutter">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.driver_please.app">
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -29,7 +29,7 @@
         </intent>
     </queries>
 
-    <application android:label="driver_pls_flutter" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">
+    <application android:label="Driver please" android:name="${applicationName}" android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyACVSpbNsG6Ax9teAMynp11bR6H2ZPQm_c"/>
         <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:theme="@style/LaunchTheme" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode" android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as

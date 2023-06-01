@@ -1,4 +1,4 @@
-package com.example.driver_pls_flutter
+package com.driver_please.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,0 +1,10 @@
+flutter_native_splash:
+  background_image: assets/images/gradient.png
+  image: assets/images/splash.png
+  android: true
+  ios: true
+
+  android_12:
+    image: assets/images/splash.png
+    background_image: assets/images/gradient.png
+    image_dark: assets/images/gradient.png
