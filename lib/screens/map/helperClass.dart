@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:driver_pls_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

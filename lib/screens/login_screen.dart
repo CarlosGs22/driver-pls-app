@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:driver_pls_flutter/models/user.dart';
-import 'package:driver_pls_flutter/providers/agent_provider.dart';
-import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
-import 'package:driver_pls_flutter/utils/http_class.dart';
-import 'package:driver_pls_flutter/utils/shared_preference.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/validator.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/models/user.dart';
+import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/utils/http_class.dart';
+import 'package:driver_please_flutter/utils/shared_preference.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';

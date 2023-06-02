@@ -1,4 +1,4 @@
-import 'package:driver_pls_flutter/models/user.dart';
+import 'package:driver_please_flutter/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserPreferences {
@@ -17,8 +17,8 @@ class UserPreferences {
     prefs.setString('comission', user.comission);
     prefs.setString('ratekm', user.rateKm);
     prefs.setString('rateM', user.rateM);
-
-    return prefs.commit();
+    prefs.reload();
+    return true;
   }
 
   Future<User> getUser() async {
@@ -61,6 +61,7 @@ class UserPreferences {
   Future<bool> saveValueUser(var key, var value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(key, "");
-    return prefs.commit();
+    prefs.reload();
+    return true;
   }
 }

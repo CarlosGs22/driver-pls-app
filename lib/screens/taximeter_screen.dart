@@ -1,8 +1,8 @@
-import 'package:driver_pls_flutter/screens/drawer/main_drawer.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/utility.dart';
-import 'package:driver_pls_flutter/utils/validator.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';

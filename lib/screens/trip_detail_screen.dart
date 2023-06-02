@@ -1,8 +1,8 @@
-import 'package:driver_pls_flutter/models/viaje_model.dart';
-import 'package:driver_pls_flutter/screens/map/google_map.dart';
-import 'package:driver_pls_flutter/screens/taximeter_screen.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/screens/map/google_map.dart';
+import 'package:driver_please_flutter/screens/taximeter_screen.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 
 import 'drawer/main_drawer.dart';

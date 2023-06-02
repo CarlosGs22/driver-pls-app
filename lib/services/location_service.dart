@@ -21,8 +21,13 @@ class LocationService {
   }
 
   void startLocationUpdates(Function(Position) callback) {
-    _positionStream = Geolocator.getPositionStream( // Actualiza cada 10 metros.
-    ).listen((Position newPosition) {
+    _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+    )
+        // Actualiza cada 10 metros.
+        ).listen((Position newPosition) {
       callback(newPosition);
     });
   }

@@ -1,4 +1,4 @@
-import 'package:driver_pls_flutter/utils/validator.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
 
 class ViajeModel {
     int idViaje;

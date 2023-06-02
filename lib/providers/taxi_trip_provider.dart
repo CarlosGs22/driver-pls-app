@@ -1,4 +1,4 @@
-import 'package:driver_pls_flutter/models/taxi_trip.dart';
+import 'package:driver_please_flutter/models/taxi_trip.dart';
 import 'package:flutter/foundation.dart';
 
 class TaxiTripProvider with ChangeNotifier {

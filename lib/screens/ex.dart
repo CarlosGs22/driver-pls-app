@@ -1,9 +1,9 @@
-import 'package:driver_pls_flutter/models/taxi_trip.dart';
-import 'package:driver_pls_flutter/providers/taxi_trip_provider.dart';
-import 'package:driver_pls_flutter/screens/drawer/main_drawer.dart';
-import 'package:driver_pls_flutter/services/location_service.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/models/taxi_trip.dart';
+import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
+import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
+import 'package:driver_please_flutter/services/location_service.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';

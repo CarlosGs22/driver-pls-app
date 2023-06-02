@@ -1,9 +1,9 @@
-import 'package:driver_pls_flutter/models/viaje_model.dart';
-import 'package:driver_pls_flutter/screens/drawer/main_drawer.dart';
-import 'package:driver_pls_flutter/screens/map/google_map.dart';
-import 'package:driver_pls_flutter/services/viaje_service.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
+import 'package:driver_please_flutter/screens/map/google_map.dart';
+import 'package:driver_please_flutter/services/viaje_service.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';

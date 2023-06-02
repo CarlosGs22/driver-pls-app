@@ -1,7 +1,8 @@
-import 'package:driver_pls_flutter/screens/login_screen.dart';
-import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/screens/login_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/utils/shared_preference.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -78,11 +79,12 @@ class MainDrawer extends StatelessWidget {
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
                 selected: _selectedDestination == 1,
-                onTap: () => {
+                onTap: () {
+                  UserPreferences().removeUser();
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
                               builder: (context) => const LoginScreen()),
-                          (Route<dynamic> route) => false)
+                          (Route<dynamic> route) => false);
                     }),
           ),
           const Divider(

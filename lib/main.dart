@@ -1,12 +1,12 @@
-import 'package:driver_pls_flutter/models/user.dart';
-import 'package:driver_pls_flutter/providers/agent_provider.dart';
-import 'package:driver_pls_flutter/providers/taxi_trip_provider.dart';
-import 'package:driver_pls_flutter/screens/taximeter_screen.dart';
-import 'package:driver_pls_flutter/screens/login_screen.dart';
-import 'package:driver_pls_flutter/screens/trip_list_screen.dart';
-import 'package:driver_pls_flutter/utils/shared_preference.dart';
-import 'package:driver_pls_flutter/utils/strings.dart';
-import 'package:driver_pls_flutter/utils/widgets.dart';
+import 'package:driver_please_flutter/models/user.dart';
+import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
+import 'package:driver_please_flutter/screens/taximeter_screen.dart';
+import 'package:driver_please_flutter/screens/login_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/utils/shared_preference.dart';
+import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

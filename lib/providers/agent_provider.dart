@@ -1,4 +1,4 @@
-import 'package:driver_pls_flutter/models/user.dart';
+import 'package:driver_please_flutter/models/user.dart';
 import 'package:flutter/cupertino.dart';
 
 class UserProvider extends ChangeNotifier {

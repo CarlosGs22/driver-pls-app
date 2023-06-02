@@ -1,5 +1,5 @@
-import 'package:driver_pls_flutter/utils/utility.dart';
-import 'package:driver_pls_flutter/utils/validator.dart';
+import 'package:driver_please_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

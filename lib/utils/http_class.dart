@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:driver_pls_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
