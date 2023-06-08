@@ -23,8 +23,8 @@ class LocationService {
   void startLocationUpdates(Function(Position) callback) {
     _positionStream = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 10,
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 5,
     )
         // Actualiza cada 10 metros.
         ).listen((Position newPosition) {

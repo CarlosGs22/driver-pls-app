@@ -1,7 +1,7 @@
 import 'package:driver_please_flutter/utils/validator.dart';
 
 class ViajeModel {
-    int idViaje;
+    String idViaje;
     int ocupantes;
     String nombreEmpresa;
     int? idEmp;
@@ -11,6 +11,7 @@ class ViajeModel {
     String fechaViaje;
     String horaViaje;
     int totalPages;
+    int status;
 
   ViajeModel({
     required this.idViaje,
@@ -23,22 +24,24 @@ class ViajeModel {
     required this.fechaViaje,
     required this.horaViaje,
     required this.totalPages,
+    required this.status
   });
 
   factory ViajeModel.fromJson(Map<String, dynamic> json) {
 
 
     return ViajeModel(
-      idViaje: validateNullOrEmptyNumber(int.tryParse(json['id_viaje'])),
-      ocupantes: json['ocupantes'] != null ? int.parse(json['ocupantes']) : 0, //que no salga cuando no tiene pasajeros
+      idViaje: json['id_viaje'],
+      ocupantes: json['ocupantes'] != null ? int.parse(json['ocupantes']) : 0, 
       nombreEmpresa: json['nombre_emp'],
       idEmp: json['id_emp'] != null ? int.parse(json['id_emp']) : null,
       nombreSucursal: json['nombre'],
       idSuc: json['id_suc'] != null ? int.parse(json['id_suc']) : null,
       tipo: json['tipo'],
-      fechaViaje: json['fecha_viaje'],
-      horaViaje: json['hora_viaje'],
+      fechaViaje: json['fecha'],
+      horaViaje: json['hora'],
       totalPages: json['total_pages'] ?? 1,
+      status: json['estatus'] ?? 0,
     );
   }
 }

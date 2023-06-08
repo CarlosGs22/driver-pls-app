@@ -10,21 +10,25 @@ class HttpClass {
       Map<String, String> headers, var method) async {
     try {
       if (method == "GET") {
+        
         return await get(url, headers: headers)
             .timeout(const Duration(seconds: 10))
             .then((value) {
+              
           Utility.printWrapped("**************API-URL -> " + url.toString());
 
           Utility.printWrapped("************PARAMS -> " + params.toString());
 
-          Utility.printWrapped( "************RESPONSE -> " + value.toString());
+          Utility.printWrapped( "************RESPONSE -> " + value.statusCode.toString());
+
+          Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
 
           return {
             'status': true,
             'message': "OK",
             'data': value.body,
             'extra': null,
-            'code': 200
+            'code': value.statusCode
           };
         });
       } else {
@@ -42,7 +46,7 @@ class HttpClass {
             'message': "OK",
             'data': value.body,
             'extra': null,
-            'code': 200
+            'code': value.statusCode
           };
         });
       }

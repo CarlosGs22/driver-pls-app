@@ -1,6 +1,7 @@
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
-import 'package:driver_please_flutter/screens/map/google_map.dart';
+
+import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
 import 'package:driver_please_flutter/services/viaje_service.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
@@ -51,16 +52,27 @@ class _ViajesListState extends State<TripListScreen> {
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
         actions: <Widget>[
-          IconButton(
+          /*IconButton(
             icon: const Icon(Icons.filter_alt_sharp),
             onPressed: () {
-               Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                             WidgetGoogleMap()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TripDetailScreen(
+                            viaje: ViajeModel(
+                                idViaje: 1,
+                                ocupantes: 2,
+                                nombreEmpresa: "xx",
+                                idEmp: 1,
+                                nombreSucursal: "xxxx",
+                                idSuc: 1,
+                                tipo: "xxx",
+                                fechaViaje: "",
+                                horaViaje: "",
+                                totalPages: 1),
+                          )));
             },
-          )
+          )*/
         ],
       ),
       drawer: const MainDrawer(0),
@@ -80,12 +92,11 @@ class _ViajesListState extends State<TripListScreen> {
                     child: InkWell(
                         onTap: () {
                           Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  WidgetGoogleMap(),
-                            ),
-                          );
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TripDetailScreen(
+                                        viaje: viaje
+                                      )));
                         },
                         child: ListTile(
                             minLeadingWidth: 0,

@@ -1,12 +1,19 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/taxi_trip.dart';
+import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/map/google_map_single_route.dart';
+import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
 import 'package:driver_please_flutter/services/location_service.dart';
+import 'package:driver_please_flutter/services/ruta_viaje_service.dart';
+import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 
 import 'package:flutter/material.dart';
@@ -18,14 +25,14 @@ import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
-/// This widget helps us to draw multiple polylines on the google map
 class WidgetGoogleMap extends StatefulWidget {
+  final ViajeModel viaje;
+  const WidgetGoogleMap({Key? key, required this.viaje}) : super(key: key);
   @override
   _WidgetGoogleMapState createState() => _WidgetGoogleMapState();
 }
 
 class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
   Set<Marker> markers = {};
   List<WidgetMarker> widgetMarkers = [];
 
@@ -39,12 +46,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   final LocationService _locationService = LocationService();
 
-  List<LatLng> listLocations = [
-    const LatLng(20.585946, -100.385417),
-    const LatLng(20.571589, -100.406730),
-    const LatLng(20.533760, -100.452506)
-  ];
-
+  List<LatLng> listLocations = [];
 
   PolylinePoints polylinePoints = PolylinePoints();
   int inicialTrip = 0;
@@ -52,16 +54,56 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   CameraPosition _initialLocation =
       const CameraPosition(target: LatLng(0.0, 0.0));
 
+  List<Color> colorListLocal = [];
+
+  String incidencia = "OK";
+
+  final formIncidenceKey = GlobalKey<FormState>();
+
+  _getRutaViajes() async {
+    List<RutaViajeModel> rutaViajes =
+        await RutaViajeService.getViajes(context, widget.viaje.idViaje);
+
+    List<LatLng> auxListLocations = [];
+
+    for (var element in rutaViajes) {
+      auxListLocations.add(LatLng(element.latitud, element.longitud));
+    }
+
+    setState(() {
+      listLocations = auxListLocations;
+    });
+  }
+
   @override
   void initState() {
-
     _getCurrentLocationMap();
+    _getRutaViajes();
     super.initState();
     _determinePosition().then((value) {
       setState(() {
         source = LatLng(value.latitude, value.longitude);
       });
       sendRequest();
+    });
+    setColor();
+  }
+
+  _setStateColor(value, int indexColor) {
+    if (value != null && value.toString().trim().isNotEmpty) {
+      setState(() {
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorPrimary);
+      });
+    } else {
+      setState(() {
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorGrayLight);
+      });
+    }
+  }
+
+  setColor() {
+    colorListLocal = List.generate(1, (index) {
+      return _colorFromHex(Widgets.colorGrayLight);
     });
   }
 
@@ -72,10 +114,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   }
 
   void _startTrip() async {
-    if (inicialTrip == 0) {
-      return;
-    }
-
     TaxiTripProvider tripProvider =
         Provider.of<TaxiTripProvider>(context, listen: false);
     tripProvider.startTrip();
@@ -97,6 +135,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     });
 
     _locationService.startLocationUpdates((Position newLoc) async {
+
       double newDistance =
           _locationService.calculateDistanceInMeters(currentPosition, newLoc);
 
@@ -116,9 +155,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Utility.googleMapAPiKey,
-        PointLatLng(currentPosition.latitude.toDouble(),
-            currentPosition.longitude.toDouble()),
-        PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
+        PointLatLng(newLoc.latitude.toDouble(),
+            newLoc.longitude.toDouble()),
+        PointLatLng(currentPosition.latitude.toDouble(), currentPosition.longitude.toDouble()),
         travelMode: TravelMode.driving,
       );
 
@@ -128,6 +167,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               .add(LatLng(point.latitude, point.longitude));
         }
       } else {
+        print("ERROR EN POLYLINES");
         print(result.errorMessage);
       }
 
@@ -161,6 +201,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       context: context,
       type: AlertType.warning,
       title: "¡Atención!",
+      closeIcon: const SizedBox(),
+      closeFunction: () {},
       desc: "¿Estás seguro de cancelar el viaje?",
       buttons: [
         DialogButton(
@@ -186,34 +228,292 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     ).show();
   }
 
-  void _finishTrip(BuildContext context) {
+  _handleTripResponse(Map<String, dynamic> response, BuildContext context,
+      TaxiTrip currentTrip) {
+    if (response["status"] && response["code"] == 200) {
+    } else {
+      buidlDefaultFlushBar(
+          context, "Error", "Ocurrió un error al finalizar viaje", 4);
+    }
+
+    _closeTrip("FINISH");
+    _finishTrip(context, currentTrip);
+  }
+
+  void _finishTrip(BuildContext context, TaxiTrip currentTrip) {
+    int minutes = currentTrip != null ? currentTrip.timeInSeconds ~/ 60 : 0;
+    int seconds = currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
+
     Alert(
-      context: context,
-      type: AlertType.warning,
-      title: "¡Atención!",
-      desc: "¿Estás seguro de terminar el viaje?",
-      buttons: [
-        DialogButton(
-          child: const Text(
-            "Aceptar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            _closeTrip("FINISH");
-            Navigator.pop(context);
-          },
-          color: _colorFromHex(Widgets.colorPrimary),
-        ),
-        DialogButton(
-          child: const Text(
-            "Cancelar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () => Navigator.pop(context),
-          color: _colorFromHex(Widgets.colorSecundary),
-        )
-      ],
-    ).show();
+        onWillPopActive: true,
+        context: context,
+        type: AlertType.warning,
+        closeIcon: const SizedBox(),
+        closeFunction: () {},
+        padding: const EdgeInsets.all(0),
+        title: "Viaje cerrado",
+        desc: "",
+        style: AlertStyle(
+            titleStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 19),
+            descStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 15)),
+        content: Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Container(
+                decoration: BoxDecoration(
+                  color: _colorFromHex(Widgets.colorSecundayLight),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(20.0),
+                  ),
+                ),
+                //width: width * 0.9,
+                child: Form(
+                  key: formIncidenceKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        'Resumen',
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: _colorFromHex(Widgets.colorPrimary)),
+                      ),
+                      const SizedBox(height: 10),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("Distancia",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500)),
+                              Text(
+                                  currentTrip != null
+                                      ? '${currentTrip.distanceInKilometers.toStringAsFixed(2)} km'
+                                      : "0.00",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("Tiempo",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500)),
+                              Text(
+                                  currentTrip != null
+                                      ? '$minutes min $seconds s'
+                                      : "0 min 0 s",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500))
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text("Total",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 21,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500)),
+                              Text(
+                                  currentTrip != null
+                                      ? '\$${currentTrip.totalCharge.toStringAsFixed(2)}'
+                                      : "\$0.00",
+                                  style: GoogleFonts.poppins(
+                                      fontSize: 31,
+                                      color:
+                                          _colorFromHex((Widgets.colorPrimary)),
+                                      fontWeight: FontWeight.w500))
+                            ],
+                          ),
+                          SizedBox(
+                              //height: 48,
+                              child: TextFormField(
+                                  initialValue: "OK",
+                                  autofocus: false,
+                                  minLines: 6,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: null,
+                                  validator: (value) =>
+                                      validateField(value.toString()),
+                                  onChanged: (value) =>
+                                      _setStateColor(value, 0),
+                                  onSaved: (value) =>
+                                      incidencia = value.toString(),
+                                  decoration: InputDecoration(
+                                    prefixIcon: Icon(Icons.speaker_notes_sharp,
+                                        color: colorListLocal[0]),
+                                    hintText: Strings.hintIncidence,
+                                    hintStyle: GoogleFonts.poppins(
+                                        fontSize: 17, color: colorListLocal[0]),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(4.0),
+                                      borderSide: BorderSide(
+                                        color: colorListLocal[0],
+                                      ),
+                                    ),
+                                    border: const OutlineInputBorder(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(4.0))),
+                                    errorStyle:
+                                        GoogleFonts.poppins(color: Colors.red),
+                                  ),
+                                  style: GoogleFonts.poppins(
+                                      color: colorListLocal[0]))),
+                          Row(
+                            children: [
+                              Expanded(
+                                  flex: 10,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 3, right: 3),
+                                    child: longButtons("Guardar", () {
+                                      _handleSendIncidence(context);
+                                    },
+                                        color: _colorFromHex(
+                                            Widgets.colorPrimary)),
+                                  )),
+                              /*Expanded(
+                                  flex: 5,
+                                  child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 3, right: 3),
+                                      child: longButtons("Cerrar", () {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TripDetailScreen(
+                                                      viaje: ViajeModel(
+                                                          idViaje: 1,
+                                                          ocupantes: 2,
+                                                          nombreEmpresa: "xx",
+                                                          idEmp: 1,
+                                                          nombreSucursal:
+                                                              "xxxx",
+                                                          idSuc: 1,
+                                                          tipo: "xxx",
+                                                          fechaViaje: "",
+                                                          horaViaje: "",
+                                                          totalPages: 1))),
+                                          (Route<dynamic> route) => false,
+                                        );
+                                      },
+                                          color: _colorFromHex(
+                                              Widgets.colorSecundary))))*/
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ))),
+        buttons: []).show();
+  }
+
+  _handleFinishTrip(BuildContext context, TaxiTrip currentTrip) {
+    int minutes = currentTrip != null ? currentTrip.timeInSeconds ~/ 60 : 0;
+    int seconds = currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
+
+    String distancia = currentTrip.distanceInKilometers.toStringAsFixed(2);
+    String tiempo = "$minutes min $seconds s";
+    double bandera = currentTrip.initialCharge;
+    double km = currentTrip.timeRate;
+    double distanciaFija = currentTrip.distanceRate;
+
+    var formParams = json.encode({
+      "distancia": distancia,
+      "tiempo": tiempo,
+      "bandera": bandera,
+      "costo_distancia": (distanciaFija * double.parse(distancia)),
+      "costo_tiempo": (km * minutes),
+      "subtotal": (bandera + (km * minutes)),
+      "porcentaje_comision": 0.15,
+      "costo_comision": ((bandera + (km * minutes)) * 0.15),
+      "total_ganancia":
+          ((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)),
+      "iva_translado": 0.16,
+      "costo_iva_translado":
+          (((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)) *
+              0.16),
+      "total_ganancia_iva": (((bandera + (km * minutes)) -
+              ((bandera + (km * minutes)) * 0.15)) +
+          (((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)) *
+              0.16)),
+      "id_viaje": widget.viaje.idViaje
+    });
+
+    HttpClass.httpData(
+            context,
+            Uri.parse("https://www.driverplease.net/aplicacion/finishTrip.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+      _handleTripResponse(response, context, currentTrip);
+    });
+  }
+
+  _handleSendIncidence(BuildContext context) {
+    final form = formIncidenceKey.currentState;
+
+    if (form!.validate()) {
+      form.save();
+
+      var formIncidence = json.encode({
+        "id_viaje": widget.viaje.idViaje,
+        "incidencia": incidencia,
+      });
+
+      HttpClass.httpData(
+              context,
+              Uri.parse(
+                  "https://www.driverplease.net/aplicacion/saveIncidence.php"),
+              formIncidence,
+              {},
+              "POST")
+          .then((response) {
+        _handleIncidenceResponse(response, context);
+      });
+    }
+  }
+
+  _handleIncidenceResponse(
+      Map<String, dynamic> response, BuildContext context) {
+    Navigator.pop(context);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+          builder: (context) => TripDetailScreen(viaje: widget.viaje)),
+      (Route<dynamic> route) => false,
+    );
+
+    /*if (response["status"]) {
+    } else {
+      buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
+    }*/
   }
 
   _closeTrip(var option) {
@@ -256,7 +556,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       return;
     }
 
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((Position position) async {
       setState(() {
         mapController!.animateCamera(
@@ -379,13 +679,12 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                       ),
                     ),
                   ),
-                  // Show the place input fields & button for
-                  // showing the route
+
                   SafeArea(
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+                        padding: const EdgeInsets.all(10),
                         child: Container(
                           decoration: BoxDecoration(
                             color: _colorFromHex(Widgets.colorSecundayLight),
@@ -393,7 +692,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                               Radius.circular(20.0),
                             ),
                           ),
-                          width: width * 0.9,
+                          //width: width * 0.9,
                           child: Padding(
                             padding:
                                 const EdgeInsets.only(top: 4.0, bottom: 4.0),
@@ -456,30 +755,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                                 fontWeight: FontWeight.w500))
                                       ],
                                     ),
-
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text("Total",
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 18,
-                                                color: _colorFromHex(
-                                                    (Widgets.colorPrimary)),
-                                                fontWeight: FontWeight.w500)),
-                                        Text(
-                                            currentTrip != null
-                                                ? '\$${currentTrip.totalCharge.toStringAsFixed(2)}'
-                                                : "\$0.00",
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 18,
-                                                color: _colorFromHex(
-                                                    (Widgets.colorPrimary)),
-                                                fontWeight: FontWeight.w500))
-                                      ],
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
@@ -518,7 +793,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                 inicialTrip == 1
                                     ? ElevatedButton(
                                         onPressed: () {
-                                          _finishTrip(context);
+                                          _handleFinishTrip(
+                                              context, currentTrip!);
                                         },
                                         child: const Padding(
                                           padding: EdgeInsets.all(8.0),
@@ -683,8 +959,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       Utility.googleMapAPiKey,
       startPoint,
       finishPoint,
-       travelMode: TravelMode.driving,
-       optimizeWaypoints: true,
+      travelMode: TravelMode.driving,
+      optimizeWaypoints: true,
     );
 
     if (result.points.isNotEmpty) {
@@ -719,30 +995,34 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
     return polyline;
   }
-}
 
-Future<Position> _determinePosition() async {
-  bool serviceEnabled;
-  LocationPermission permission;
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    permission = await Geolocator.requestPermission();
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      permission = await Geolocator.requestPermission();
+        buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta desabilitado", 4);
 
-    return Future.error('Location services are disabled.');
-  }
-
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      return Future.error('Location permissions are denied');
+      return Future.error('Location services are disabled.');
     }
-  }
 
-  if (permission == LocationPermission.deniedForever) {
-    return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.');
-  }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta denegado", 4);
+    
+        return Future.error('Location permissions are denied');
+      }
+    }
 
-  return await Geolocator.getCurrentPosition();
+    if (permission == LocationPermission.deniedForever) {
+      buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app", 4);
+      return Future.error(
+          'El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app');
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
 }

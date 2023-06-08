@@ -2,6 +2,7 @@ import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class Widgets {
   static const String colorPrimary = "#1c4089";
@@ -228,13 +229,13 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(textTittle1.isNotEmpty ? textTittle1 :  "",
+                    Text(textTittle1.isNotEmpty ? textTittle1 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: Widgets._colorFromHex2(Widgets.colorSecundary),
                           fontWeight: FontWeight.w500,
                         )),
-                    Text(textValue1.isNotEmpty  ? textValue1 : "",
+                    Text(textValue1.isNotEmpty ? textValue1 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           color: Widgets._colorFromHex2(Widgets.colorGray),
@@ -254,13 +255,13 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(textTittle2.isNotEmpty  ? textTittle2 : "",
+                    Text(textTittle2.isNotEmpty ? textTittle2 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: Widgets._colorFromHex2(Widgets.colorSecundary),
                           fontWeight: FontWeight.w500,
                         )),
-                    Text(textValue2.isNotEmpty ?  textValue2 : "",
+                    Text(textValue2.isNotEmpty ? textValue2 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           color: Widgets._colorFromHex2(Widgets.colorGray),
@@ -271,5 +272,17 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
               ))
           : const SizedBox(height: 0),
     ],
+  );
+}
+
+staticbuildBottomSheet(BuildContext context, Widget widget) {
+  return showModalBottomSheet(
+   isScrollControlled: true,
+    context: context,
+    isDismissible: false,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return widget;
+    },
   );
 }

@@ -372,7 +372,7 @@ class _LoginState extends State<LoginScreen> {
             ],
           ),
         ) ??
-        false; //if showDialouge had returned null, then return false
+        false; 
   }
 
   @override

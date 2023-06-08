@@ -4,7 +4,6 @@ class Strings {
   static const String labelTaximetro = "Taximetro";
   static const String labelListTrip = "Listado de viajes";
   static const String labelDetailTrip = "Detalle de viaje";
-  
 
   static const String labelAppNameTitle = "Driver Please";
   static const String labelLoginCreateAccount = "Crear cuenta";
@@ -13,11 +12,14 @@ class Strings {
   static const String hintLoginEmail = "Correo eléctronico";
   static const String hintLoginPassword = "Contraseña";
   static const String labelTripDate = "Fecha";
-   static const String labelTripHour = "Hora";
+  static const String labelTripHour = "Hora";
   static const String labelTripCompany = "Empresa";
   static const String labelTripLocation = "Sucursal";
   static const String labelTripType = "Tipo";
-    static const String labelTripOccupants = "Ocupantes";
+  static const String labelTripOccupants = "Ocupantes";
+  static const String hintIncidence = "Escribe una incidencia";
+  static const String labelSendTripbtn = "Enviar";
+  static const String labelTripStatus = "Estado del viaje";
 
   static const String labelVersion = "Version 1.0.0";
 }
