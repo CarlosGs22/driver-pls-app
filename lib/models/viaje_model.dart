@@ -29,7 +29,6 @@ class ViajeModel {
 
   factory ViajeModel.fromJson(Map<String, dynamic> json) {
 
-
     return ViajeModel(
       idViaje: json['id_viaje'],
       ocupantes: json['ocupantes'] != null ? int.parse(json['ocupantes']) : 0, 
@@ -41,7 +40,7 @@ class ViajeModel {
       fechaViaje: json['fecha'],
       horaViaje: json['hora'],
       totalPages: json['total_pages'] ?? 1,
-      status: json['estatus'] ?? 0,
+      status: int.parse(json['estatus']),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:driver_please_flutter/utils/utility.dart';
@@ -23,12 +24,14 @@ class HttpClass {
 
           Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
 
+          var response = json.decode(value.body);
+
           return {
             'status': true,
             'message': "OK",
-            'data': value.body,
-            'extra': null,
-            'code': value.statusCode
+            'data': response["payload"],
+            'extra': response["extra"],
+            'code': response["code"]
           };
         });
       } else {
@@ -41,12 +44,14 @@ class HttpClass {
 
           Utility.printWrapped("************RESPONSE -> " + value.body);
 
+          var response = json.decode(value.body);
+
           return {
             'status': true,
             'message': "OK",
-            'data': value.body,
-            'extra': null,
-            'code': value.statusCode
+            'data': response["payload"],
+            'extra': response["extra"],
+            'code': response["code"]
           };
         });
       }
@@ -73,7 +78,7 @@ class HttpClass {
       return {
         'status': false,
         'message': 'Ocurrió un error',
-        'data': null,
+        'data': e.stackTrace,
         'extra': null,
         'code': 504
       };

@@ -215,8 +215,10 @@ Widget buildTextField(
 }
 
 buildDetailform(String textTittle1, String textValue1, String textTittle2,
-    String textValue2) {
+    String textValue2, String key) {
+  Key k = Key(key);
   return Row(
+    key: k,
     mainAxisAlignment: MainAxisAlignment.start,
     children: <Widget>[
       validateNullOrEmptyString(textValue1) != null
@@ -277,7 +279,7 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
 
 staticbuildBottomSheet(BuildContext context, Widget widget) {
   return showModalBottomSheet(
-   isScrollControlled: true,
+    isScrollControlled: true,
     context: context,
     isDismissible: false,
     backgroundColor: Colors.transparent,

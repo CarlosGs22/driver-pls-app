@@ -29,7 +29,7 @@ class _ViajesListState extends State<TripListScreen> {
   }
 
   _getViajes() async {
-    List<ViajeModel> viajes = await ViajeService.getViajes(
+    List<ViajeModel> viajes = await ViajeService.getViajes(context,
         pageNumber: _pageNumber, pageSize: _pageSize);
     setState(() {
       _viajes = viajes;
@@ -51,29 +51,6 @@ class _ViajesListState extends State<TripListScreen> {
         title: const Text(Strings.labelListTrip),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
-        actions: <Widget>[
-          /*IconButton(
-            icon: const Icon(Icons.filter_alt_sharp),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TripDetailScreen(
-                            viaje: ViajeModel(
-                                idViaje: 1,
-                                ocupantes: 2,
-                                nombreEmpresa: "xx",
-                                idEmp: 1,
-                                nombreSucursal: "xxxx",
-                                idSuc: 1,
-                                tipo: "xxx",
-                                fechaViaje: "",
-                                horaViaje: "",
-                                totalPages: 1),
-                          )));
-            },
-          )*/
-        ],
       ),
       drawer: const MainDrawer(0),
       body: Column(
@@ -94,9 +71,8 @@ class _ViajesListState extends State<TripListScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TripDetailScreen(
-                                        viaje: viaje
-                                      )));
+                                  builder: (context) =>
+                                      TripDetailScreen(viaje: viaje,redirect: null,)));
                         },
                         child: ListTile(
                             minLeadingWidth: 0,
@@ -115,12 +91,12 @@ class _ViajesListState extends State<TripListScreen> {
                                         fontSize: 15),
                                   ),
                                 ),
-                                buildBubblePadding(
+                                /*buildBubblePadding(
                                     Icons.circle,
                                     _colorFromHex(Widgets.colorPrimary),
                                     "Empresa: ${viaje.nombreEmpresa} - Sucursal: ${viaje.nombreSucursal}",
                                     _colorFromHex(Widgets.colorGrayLight),
-                                    11),
+                                    11),*/
                                 buildBubblePadding(
                                     Icons.circle,
                                     _colorFromHex(Widgets.colorPrimary),
@@ -175,7 +151,7 @@ class _ViajesListState extends State<TripListScreen> {
                             _pageNumber--;
                           });
                           List<ViajeModel> viajes =
-                              await ViajeService.getViajes(
+                              await ViajeService.getViajes(context,
                                   pageNumber: _pageNumber, pageSize: _pageSize);
                           setState(() {
                             _viajes = viajes;
@@ -192,7 +168,7 @@ class _ViajesListState extends State<TripListScreen> {
                             _pageNumber++;
                           });
                           List<ViajeModel> viajes =
-                              await ViajeService.getViajes(
+                              await ViajeService.getViajes(context,
                                   pageNumber: _pageNumber, pageSize: _pageSize);
                           setState(() {
                             _viajes = viajes;

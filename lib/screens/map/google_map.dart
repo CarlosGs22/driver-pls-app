@@ -66,7 +66,11 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
     List<LatLng> auxListLocations = [];
 
+
+    
+
     for (var element in rutaViajes) {
+     
       auxListLocations.add(LatLng(element.latitud, element.longitud));
     }
 
@@ -135,7 +139,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     });
 
     _locationService.startLocationUpdates((Position newLoc) async {
-
       double newDistance =
           _locationService.calculateDistanceInMeters(currentPosition, newLoc);
 
@@ -155,9 +158,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Utility.googleMapAPiKey,
-        PointLatLng(newLoc.latitude.toDouble(),
-            newLoc.longitude.toDouble()),
-        PointLatLng(currentPosition.latitude.toDouble(), currentPosition.longitude.toDouble()),
+        PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
+        PointLatLng(currentPosition.latitude.toDouble(),
+            currentPosition.longitude.toDouble()),
         travelMode: TravelMode.driving,
       );
 
@@ -231,13 +234,12 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   _handleTripResponse(Map<String, dynamic> response, BuildContext context,
       TaxiTrip currentTrip) {
     if (response["status"] && response["code"] == 200) {
+      _closeTrip("FINISH");
+      _finishTrip(context, currentTrip);
     } else {
       buidlDefaultFlushBar(
           context, "Error", "Ocurrió un error al finalizar viaje", 4);
     }
-
-    _closeTrip("FINISH");
-    _finishTrip(context, currentTrip);
   }
 
   void _finishTrip(BuildContext context, TaxiTrip currentTrip) {
@@ -394,34 +396,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                         color: _colorFromHex(
                                             Widgets.colorPrimary)),
                                   )),
-                              /*Expanded(
-                                  flex: 5,
-                                  child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 3, right: 3),
-                                      child: longButtons("Cerrar", () {
-                                        Navigator.pushAndRemoveUntil(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  TripDetailScreen(
-                                                      viaje: ViajeModel(
-                                                          idViaje: 1,
-                                                          ocupantes: 2,
-                                                          nombreEmpresa: "xx",
-                                                          idEmp: 1,
-                                                          nombreSucursal:
-                                                              "xxxx",
-                                                          idSuc: 1,
-                                                          tipo: "xxx",
-                                                          fechaViaje: "",
-                                                          horaViaje: "",
-                                                          totalPages: 1))),
-                                          (Route<dynamic> route) => false,
-                                        );
-                                      },
-                                          color: _colorFromHex(
-                                              Widgets.colorSecundary))))*/
                             ],
                           ),
                         ],
@@ -466,9 +440,11 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
     HttpClass.httpData(
             context,
-            Uri.parse("https://www.driverplease.net/aplicacion/finishTrip.php"),
+            Uri.parse("https://www.driverplease.net/aplicacion/insertviajes.php"),
             formParams,
-            {},
+            {
+              "content-type": "application/json"
+            },
             "POST")
         .then((response) {
       _handleTripResponse(response, context, currentTrip);
@@ -491,7 +467,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               Uri.parse(
                   "https://www.driverplease.net/aplicacion/saveIncidence.php"),
               formIncidence,
-              {},
+              {
+                 "content-type": "application/json"
+              },
               "POST")
           .then((response) {
         _handleIncidenceResponse(response, context);
@@ -503,17 +481,18 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       Map<String, dynamic> response, BuildContext context) {
     Navigator.pop(context);
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-          builder: (context) => TripDetailScreen(viaje: widget.viaje)),
-      (Route<dynamic> route) => false,
-    );
-
-    /*if (response["status"]) {
+    if (response["status"]&& response["code"] == 200) {
+      widget.viaje.status = 6;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => TripDetailScreen(viaje: widget.viaje,redirect: "MAIN",)),
+        (Route<dynamic> route) => false,
+      );
     } else {
-      buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
-    }*/
+      buidlDefaultFlushBar(
+          context, "Error", "Ocurrió un error al registrar incidencia", 4);
+    }
   }
 
   _closeTrip(var option) {
@@ -593,12 +572,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           title: const Text(Strings.labelTaximetro),
           elevation: 0.1,
           backgroundColor: _colorFromHex(Widgets.colorPrimary),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.filter_alt_sharp),
-              onPressed: () {},
-            )
-          ],
         ),
         drawer: const MainDrawer(0),
         body:
@@ -915,15 +888,10 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           draggable: false,
           position: LatLng(element.latitude, element.longitude),
           onTap: () {
-            /*HelperClass()
-                .onMarkerTapped(source!, element, context, mapController);*/
+      
           }));
 
-      /*widgetMarkers.add(createMarker(
-          LatLng(element.latitude, element.longitude),
-          element.toString(),
-          Colors.red,
-          (i + 1).toString()));*/
+  
     }
   }
 
@@ -964,8 +932,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     );
 
     if (result.points.isNotEmpty) {
-      // loop through all PointLatLng points and convert them
-      // to a list of LatLng, required by the Polyline
+  
       for (var point in result.points) {
         polylineCoordinates.add(
           LatLng(point.latitude, point.longitude),
@@ -1002,7 +969,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       permission = await Geolocator.requestPermission();
-        buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta desabilitado", 4);
+      buidlDefaultFlushBar(
+          context, "Error", "El permiso de ubicación esta desabilitado", 4);
 
       return Future.error('Location services are disabled.');
     }
@@ -1011,14 +979,19 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta denegado", 4);
-    
+        buidlDefaultFlushBar(
+            context, "Error", "El permiso de ubicación esta denegado", 4);
+
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      buidlDefaultFlushBar(context, "Error", "El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app", 4);
+      buidlDefaultFlushBar(
+          context,
+          "Error",
+          "El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app",
+          4);
       return Future.error(
           'El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app');
     }

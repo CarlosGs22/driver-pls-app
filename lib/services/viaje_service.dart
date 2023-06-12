@@ -1,20 +1,26 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:http/http.dart' as http;
-import '../models/viaje_model.dart';
+import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/utils/http_class.dart';
+import 'package:flutter/cupertino.dart';
 
 class ViajeService {
-  static Future<List<ViajeModel>> getViajes(
-      {required int pageNumber, required int pageSize}) async {
-    final response = await http.get(Uri.parse(
-        'https://www.driverplease.net/aplicacion/getviajesP.php?pageNumber=$pageNumber&pageSize=$pageSize'));
-    log(response
-        .body); // Agrega esta línea para ver la respuesta en la consola de depuración
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((viaje) => ViajeModel.fromJson(viaje)).toList();
-    } else {
-      throw Exception('Error al cargar los viajes');
-    }
-  }
+  static Future<List<ViajeModel>> getViajes(BuildContext context,
+          {required int pageNumber, required int pageSize}) async =>
+      HttpClass.httpData(
+              context,
+              Uri.parse(
+                  "https://www.driverplease.net/aplicacion/getviajesP.php?pageNumber=$pageNumber&pageSize=$pageSize"),
+              {},
+              {},
+              "GET")
+          .then((response) {
+        if (response["status"] && response["code"] == 200) {
+          List jsonResponse = json.decode(response["data"]);
+          return jsonResponse
+              .map((viaje) => ViajeModel.fromJson(viaje))
+              .toList();
+        } else {
+          return [];
+        }
+      });
 }
