@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:driver_please_flutter/main.dart';
 import 'package:driver_please_flutter/models/user.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
-import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/screens/dashboard_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -116,7 +118,7 @@ class _LoginState extends State<LoginScreen> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const TripListScreen()),
+      MaterialPageRoute(builder: (context) =>  Dashboard()),
       (Route<dynamic> route) => false,
     );
   }
@@ -327,7 +329,7 @@ class _LoginState extends State<LoginScreen> {
                             const SizedBox(
                               height: 5.0,
                             ),
-                            buildDivider(),
+                            //buildDivider(),
                             /*Column(
                               children: [
                                 Row(
@@ -340,8 +342,8 @@ class _LoginState extends State<LoginScreen> {
                                 )
                               ],
                             ),*/
-                            forgotLabel,
-                            registerLabel
+                            //forgotLabel,
+                            //registerLabel
                           ],
                         ),
                       ),

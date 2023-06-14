@@ -5,11 +5,11 @@ import 'package:flutter/cupertino.dart';
 
 class ViajeService {
   static Future<List<ViajeModel>> getViajes(BuildContext context,
-          {required int pageNumber, required int pageSize}) async =>
+          {required int pageNumber, required int pageSize, required String idUser,var status}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getviajesP.php?pageNumber=$pageNumber&pageSize=$pageSize"),
+                  "https://www.driverplease.net/aplicacion/getviajesP.php?pageNumber=$pageNumber&pageSize=$pageSize&idUser=$idUser&tripStatus=$status"),
               {},
               {},
               "GET")

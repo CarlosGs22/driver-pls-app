@@ -1,5 +1,5 @@
 class User {
-  String TAG = "Agent";
+  String TAG = "User";
   String id = "";
   String name = "";
   String lastName = "";
@@ -12,6 +12,7 @@ class User {
   String comission = "";
   String rateKm = "";
   String rateM = "";
+  String password = "";
 
   User(
       {required this.id,
@@ -25,7 +26,8 @@ class User {
       required this.status,
       required this.comission,
       required this.rateKm,
-      required this.rateM});
+      required this.rateM,
+      required this.password});
 
   factory User.fromJson(Map<String, dynamic> responseData) {
     return User(
@@ -41,6 +43,7 @@ class User {
       comission: responseData['comision'] ?? '',
       rateKm: responseData['tarifakm'] ?? '',
       rateM: responseData['tarifam'] ?? '',
+      password: responseData['pass'] ?? ''
     );
   }
 

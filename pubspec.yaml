@@ -55,6 +55,7 @@ dependencies:
   rflutter_alert: ^2.0.7
   shared_preferences: ^2.0.15
   modal_bottom_sheet: ^2.0.1
+  flutter_expanded_tile: ^0.3.7
 
   
 

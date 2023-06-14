@@ -288,3 +288,24 @@ staticbuildBottomSheet(BuildContext context, Widget widget) {
     },
   );
 }
+
+ setStatusTrip(int status) {
+  var res = "NA";
+  switch (status) {
+    case 1:
+      res = "INICIAR";
+      break;
+    case 2:
+      res = "CONTINUAR";
+      break;
+    case 3:
+      res = "FINALIZADO";
+      break;
+    case 6:
+      res = "CANCELADO";
+      break;
+    default:
+  }
+
+  return res;
+}

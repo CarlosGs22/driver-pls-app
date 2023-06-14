@@ -14,6 +14,7 @@ class RutaViajeModel {
   String horaBajada;
   double latitud;
   double longitud;
+  String direccion;
 
   RutaViajeModel(
       {required this.idRuta,
@@ -30,7 +31,8 @@ class RutaViajeModel {
       required this.horaReal,
       required this.horaBajada,
       required this.latitud,
-      required this.longitud,});
+      required this.longitud,
+      required this.direccion});
 
   factory RutaViajeModel.fromJson(Map<String, dynamic> json) {
     return RutaViajeModel(
@@ -49,7 +51,7 @@ class RutaViajeModel {
       horaBajada: json['hora_bajada'],
       latitud: double.tryParse(json['latitud']) ?? 0,
       longitud: double.tryParse(json['longitud']) ?? 0,
-
+      direccion: json['direccion']
     );
   }
 }

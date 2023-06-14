@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
-import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/services/ruta_viaje_service.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -14,6 +14,7 @@ import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -44,6 +45,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   GoogleMapController? mapController;
 
+  List<RutaViajeModel> rutaViajes = [];
+
+  ExpandedTileController? _controller;
+
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
@@ -56,21 +61,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       });
     } else {
       setState(() {
-        colorListLocal[indexColor] = _colorFromHex(Widgets.colorGrayLight);
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorSecundayLight);
       });
     }
   }
 
   setColor() {
     colorListLocal = List.generate(1, (index) {
-      return _colorFromHex(Widgets.colorGrayLight);
+      return _colorFromHex(Widgets.colorSecundayLight);
     });
   }
 
   _getMarkers() async {
-    List<RutaViajeModel> rutaViajes =
-        await RutaViajeService.getViajes(context, widget.viaje.idViaje);
-
     Set<Marker> auxMarkers = {};
 
     final Uint8List markerIcon =
@@ -91,13 +93,30 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  _getRutaViajes() async {
+    List<RutaViajeModel> auxRutaViajes =
+        await RutaViajeService.getViajes(context, widget.viaje.idViaje);
+
+    if (auxRutaViajes.isNotEmpty) {
+      setState(() {
+        rutaViajes = auxRutaViajes;
+      });
+    }
+  }
+
   @override
   void initState() {
-    // _getRutaViajes();
+    _controller = ExpandedTileController(isExpanded: false);
     super.initState();
-
+    _getRutaViajes();
     setColor();
   }
+
+   @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   _closeTripAlert() {
     return Alert(
@@ -199,6 +218,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       var formIncidence = json.encode({
         "id_viaje": widget.viaje.idViaje,
         "incidencia": incidencia,
+        "tripStatus": 6
       });
 
       HttpClass.httpData(
@@ -246,23 +266,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             }
           },
           appBar: AppBar(
-              title: const Text(Strings.labelDetailTrip),
-              elevation: 0.1,
-              backgroundColor: _colorFromHex(Widgets.colorPrimary),
-              actions: <Widget>[
-                widget.viaje.status != 6
-                    ? IconButton(
-                        icon: const Icon(Icons.location_pin),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      WidgetGoogleMap(viaje: widget.viaje)));
-                        },
-                      )
-                    : const SizedBox()
-              ]),
+            title: const Text(Strings.labelDetailTrip),
+            elevation: 0.1,
+            backgroundColor: _colorFromHex(Widgets.colorPrimary),
+          ),
           drawer: const MainDrawer(0),
           body: Container(
             padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
@@ -270,24 +277,53 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(
-                        width: 130,
-                        height: 119,
-                        child: CircleAvatar(
-                            backgroundColor:
-                                _colorFromHex(Widgets.colorPrimary),
-                            radius: 16,
-                            child: IconButton(
-                              iconSize: 66,
-                              // remove default padding here
-                              padding: EdgeInsets.zero,
-                              icon: const Icon(
-                                Icons.directions,
-                              ),
-                              color: Colors.white,
-                              onPressed: () {},
-                            ))),
+                      width: 130,
+                      height: 130,
+                      child: ClipOval(
+                        child: Material(
+                          color: _colorFromHex(
+                              Widgets.colorPrimary), // button color
+                          child: InkWell(
+                            splashColor:
+                                _colorFromHex(Widgets.colorSecundayLight),
+                            // splash color
+                            onTap: () {
+                              if (widget.viaje.status == 3 ||
+                                  widget.viaje.status == 6) {
+                                return;
+                              }
+                              
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => WidgetGoogleMap(
+                                            viaje: widget.viaje,
+                                            rutaViaje: rutaViajes,
+                                          )));
+                            },
+                            // button pressed
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.moving_sharp,
+                                  color: Colors.white,
+                                  size: 40,
+                                ), // icon
+                                Text(
+                                  setStatusTrip(widget.viaje.status),
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ), // text
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -307,11 +343,59 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     Strings.labelTripOccupants,
                     widget.viaje.ocupantes.toString(),
                     "3"),
-                const SizedBox(
-                  height: 32,
-                ),
                 buildDetailform(Strings.labelTripStatus,
                     widget.viaje.status.toString(), "", "", "4"),
+                const SizedBox(
+                  height: 13,
+                ),
+                ExpandedTile(
+                  theme: ExpandedTileThemeData(
+                    headerColor: _colorFromHex(Widgets.colorSecundayLight),
+                    headerRadius: 5.0,
+                    headerPadding: const EdgeInsets.all(10),
+                    headerSplashColor: _colorFromHex(Widgets.colorPrimary),
+                    contentBackgroundColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.all(0),
+                    contentRadius: 2.0,
+                  ),
+                  controller: _controller!,
+                  title: Text(
+                    "Direcciones",
+                    style: TextStyle(
+                      color: _colorFromHex(Widgets.colorPrimary),
+                      fontSize: 16,
+                    ),
+                  ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        ListView.builder(
+                          shrinkWrap: true, // -> Add this here -> And this one
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: ListTile(
+                                leading: Icon(Icons.room_outlined,
+                                    color: _colorFromHex(Widgets.colorPrimary)),
+                                title: Text(
+                                  rutaViajes[index].direccion,
+                                  style: TextStyle(
+                                      color:
+                                          _colorFromHex(Widgets.colorPrimary),
+                                      fontSize: 14),
+                                ),
+                              ),
+                            );
+                          },
+                          itemCount: rutaViajes.length,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 13,
+                ),
                 SizedBox(
                   height: 400,
                   child: GoogleMap(
@@ -341,10 +425,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 const SizedBox(
                   height: 32,
                 ),
-                widget.viaje.status != 6
+                widget.viaje.status == 1 || widget.viaje.status == 2
                     ? longButtons("Cancelar viaje", _closeTripAlert,
                         color: _colorFromHex(Widgets.colorPrimary))
-                    : const SizedBox()
+                    : const SizedBox(),
+                const SizedBox(
+                  height: 32,
+                ),
               ],
             ),
           ),
@@ -362,7 +449,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       if (widget.redirect == "MAIN") {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const TripListScreen()),
+          MaterialPageRoute(
+              builder: (context) => const TripListAssignedScreen()),
           (Route<dynamic> route) => false,
         );
         return true;

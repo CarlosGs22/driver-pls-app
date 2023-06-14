@@ -26,7 +26,7 @@ class LocationService {
       accuracy: LocationAccuracy.best,
       distanceFilter: 5,
     )
-        // Actualiza cada 10 metros.
+
         ).listen((Position newPosition) {
       callback(newPosition);
     });

@@ -14,11 +14,7 @@ class RutaViajeService {
               {},
               "GET")
           .then((response) {
-
-            print("11111111111111111111");
-            print(response);
-
-        if (response["status"] && response["code"] ==200) {
+        if (response["status"] && response["code"] == 200) {
           List jsonResponse = json.decode(response["data"]);
           return jsonResponse
               .map((viaje) => RutaViajeModel.fromJson(viaje))

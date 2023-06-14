@@ -8,19 +8,21 @@ import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class TripListScreen extends StatefulWidget {
-  const TripListScreen({Key? key}) : super(key: key);
+class TripListFinishedScreen extends StatefulWidget {
+  const TripListFinishedScreen({Key? key}) : super(key: key);
 
   @override
-  _ViajesListState createState() => _ViajesListState();
+  _TripListState createState() => _TripListState();
 }
 
-class _ViajesListState extends State<TripListScreen> {
-  final int _pageSize = 5;
+class _TripListState extends State<TripListFinishedScreen> {
+  final int _pageSize = 1;
   int _pageNumber = 1;
   int _totalPages = 1;
   List<ViajeModel> _viajes = [];
+  String idAgent = "";
 
   @override
   void initState() {
@@ -29,12 +31,19 @@ class _ViajesListState extends State<TripListScreen> {
   }
 
   _getViajes() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
     List<ViajeModel> viajes = await ViajeService.getViajes(context,
-        pageNumber: _pageNumber, pageSize: _pageSize);
-    setState(() {
-      _viajes = viajes;
-      _totalPages = viajes.first.totalPages;
-    });
+        pageNumber: _pageNumber,
+        pageSize: _pageSize,
+        idUser: prefs.getString('id_con').toString(),
+        status: 3);
+    if (viajes.isNotEmpty) {
+      setState(() {
+        _viajes = viajes;
+        _totalPages = viajes.first.totalPages;
+      });
+    }
   }
 
   Color _colorFromHex(String hexColor) {
@@ -48,11 +57,11 @@ class _ViajesListState extends State<TripListScreen> {
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
             fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
-        title: const Text(Strings.labelListTrip),
+        title: const Text(Strings.labelListTripFinished),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
       ),
-      drawer: const MainDrawer(0),
+      drawer: const MainDrawer(2),
       body: Column(
         children: [
           Expanded(
@@ -71,8 +80,10 @@ class _ViajesListState extends State<TripListScreen> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      TripDetailScreen(viaje: viaje,redirect: null,)));
+                                  builder: (context) => TripDetailScreen(
+                                        viaje: viaje,
+                                        redirect: null,
+                                      )));
                         },
                         child: ListTile(
                             minLeadingWidth: 0,
@@ -152,7 +163,10 @@ class _ViajesListState extends State<TripListScreen> {
                           });
                           List<ViajeModel> viajes =
                               await ViajeService.getViajes(context,
-                                  pageNumber: _pageNumber, pageSize: _pageSize);
+                                  pageNumber: _pageNumber,
+                                  pageSize: _pageSize,
+                                  idUser: idAgent,
+                                  status: 3);
                           setState(() {
                             _viajes = viajes;
                           });
@@ -169,7 +183,10 @@ class _ViajesListState extends State<TripListScreen> {
                           });
                           List<ViajeModel> viajes =
                               await ViajeService.getViajes(context,
-                                  pageNumber: _pageNumber, pageSize: _pageSize);
+                                  pageNumber: _pageNumber,
+                                  pageSize: _pageSize,
+                                  idUser: idAgent,
+                                  status: 3);
                           setState(() {
                             _viajes = viajes;
                           });

@@ -1,5 +1,7 @@
+import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/login_screen.dart';
-import 'package:driver_please_flutter/screens/trip_list_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
+import 'package:driver_please_flutter/screens/trip_list_finished_screen.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
@@ -20,8 +22,6 @@ class MainDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Drawer(
       child: ListView(
-        // Important: Remove any padding from the ListView.
-        //padding: EdgeInsets.zero,
         children: <Widget>[
           SizedBox(
             height: 55.0,
@@ -47,14 +47,14 @@ class MainDrawer extends StatelessWidget {
                 margin: const EdgeInsets.all(0.0),
                 padding: const EdgeInsets.only(top: 0, left: 0)),
           ),
-         
-          Ink(
+
+             Ink(
             color: _selectedDestination == 0
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.trending_up_rounded),
-                title: Text("Listado de viajes",
+                leading: const Icon(Icons.home),
+                title: Text("Dashboard",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
@@ -64,11 +64,51 @@ class MainDrawer extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const TripListScreen()))
+                              builder: (context) => Dashboard()))
+                    }),
+          ),
+         
+          Ink(
+            color: _selectedDestination == 1
+                ? _colorFromHex(Widgets.colorSecundayLight)
+                : Colors.transparent,
+            child: ListTile(
+                leading: const Icon(Icons.trending_up_rounded),
+                title: Text("Viajes asignados",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _colorFromHex(Widgets.colorGray),
+                        fontWeight: FontWeight.w500)),
+                selected: _selectedDestination == 1,
+                onTap: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const TripListAssignedScreen()))
+                    }),
+          ),
+
+          Ink(
+            color: _selectedDestination == 2
+                ? _colorFromHex(Widgets.colorSecundayLight)
+                : Colors.transparent,
+            child: ListTile(
+                leading: const Icon(Icons.trending_down_rounded),
+                title: Text("Viajes finalizados",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _colorFromHex(Widgets.colorGray),
+                        fontWeight: FontWeight.w500)),
+                selected: _selectedDestination == 2,
+                onTap: () => {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const TripListFinishedScreen()))
                     }),
           ),
           Ink(
-            color: _selectedDestination == 1
+            color: _selectedDestination == 3
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -78,7 +118,7 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 1,
+                selected: _selectedDestination == 3,
                 onTap: () {
                   UserPreferences().removeUser();
                       Navigator.of(context).pushAndRemoveUntil(

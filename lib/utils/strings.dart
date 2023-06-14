@@ -2,7 +2,9 @@ class Strings {
 //PAGES
 
   static const String labelTaximetro = "Taximetro";
-  static const String labelListTrip = "Listado de viajes";
+  static const String labelDashboard = "Dashboard";
+  static const String labelListTripAssigned = "Listado de viajes asignados";
+  static const String labelListTripFinished = "Listado de viajes finalizados";
   static const String labelDetailTrip = "Detalle de viaje";
 
   static const String labelAppNameTitle = "Driver Please";

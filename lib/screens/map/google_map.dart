@@ -27,7 +27,11 @@ import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
 class WidgetGoogleMap extends StatefulWidget {
   final ViajeModel viaje;
-  const WidgetGoogleMap({Key? key, required this.viaje}) : super(key: key);
+  final List<RutaViajeModel> rutaViaje;
+
+  const WidgetGoogleMap(
+      {Key? key, required this.viaje, required this.rutaViaje})
+      : super(key: key);
   @override
   _WidgetGoogleMapState createState() => _WidgetGoogleMapState();
 }
@@ -61,16 +65,10 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   final formIncidenceKey = GlobalKey<FormState>();
 
   _getRutaViajes() async {
-    List<RutaViajeModel> rutaViajes =
-        await RutaViajeService.getViajes(context, widget.viaje.idViaje);
-
+    
     List<LatLng> auxListLocations = [];
 
-
-    
-
-    for (var element in rutaViajes) {
-     
+    for (var element in widget.rutaViaje) {
       auxListLocations.add(LatLng(element.latitud, element.longitud));
     }
 
@@ -161,7 +159,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
         PointLatLng(currentPosition.latitude.toDouble(),
             currentPosition.longitude.toDouble()),
-        travelMode: TravelMode.driving,
+        travelMode: TravelMode.walking,
       );
 
       if (result.points.isNotEmpty) {
@@ -435,16 +433,16 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               ((bandera + (km * minutes)) * 0.15)) +
           (((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)) *
               0.16)),
-      "id_viaje": widget.viaje.idViaje
+      "id_viaje": widget.viaje.idViaje,
+      "tripStatus": 3
     });
 
     HttpClass.httpData(
             context,
-            Uri.parse("https://www.driverplease.net/aplicacion/insertviajes.php"),
+            Uri.parse(
+                "https://www.driverplease.net/aplicacion/insertviajes.php"),
             formParams,
-            {
-              "content-type": "application/json"
-            },
+            {"content-type": "application/json"},
             "POST")
         .then((response) {
       _handleTripResponse(response, context, currentTrip);
@@ -460,6 +458,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       var formIncidence = json.encode({
         "id_viaje": widget.viaje.idViaje,
         "incidencia": incidencia,
+        "tripStatus": 3
       });
 
       HttpClass.httpData(
@@ -467,9 +466,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               Uri.parse(
                   "https://www.driverplease.net/aplicacion/saveIncidence.php"),
               formIncidence,
-              {
-                 "content-type": "application/json"
-              },
+              {"content-type": "application/json"},
               "POST")
           .then((response) {
         _handleIncidenceResponse(response, context);
@@ -481,12 +478,15 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       Map<String, dynamic> response, BuildContext context) {
     Navigator.pop(context);
 
-    if (response["status"]&& response["code"] == 200) {
-      widget.viaje.status = 6;
+    if (response["status"] && response["code"] == 200) {
+      widget.viaje.status = 3;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-            builder: (context) => TripDetailScreen(viaje: widget.viaje,redirect: "MAIN",)),
+            builder: (context) => TripDetailScreen(
+                  viaje: widget.viaje,
+                  redirect: "MAIN",
+                )),
         (Route<dynamic> route) => false,
       );
     } else {
@@ -887,11 +887,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           icon: BitmapDescriptor.fromBytes(markerIcon),
           draggable: false,
           position: LatLng(element.latitude, element.longitude),
-          onTap: () {
-      
-          }));
-
-  
+          onTap: () {}));
     }
   }
 
@@ -932,7 +928,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     );
 
     if (result.points.isNotEmpty) {
-  
       for (var point in result.points) {
         polylineCoordinates.add(
           LatLng(point.latitude, point.longitude),
