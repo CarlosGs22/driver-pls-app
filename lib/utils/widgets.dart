@@ -153,7 +153,7 @@ buildTextFormField(Widget widget, double widht, double height,
 
 buidlDefaultFlushBar(
     BuildContext context, String tittle, String message, int duration) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  return ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(message),
     backgroundColor: Widgets._colorFromHex2(Widgets.colorPrimary),
     duration: Duration(seconds: duration),
@@ -289,7 +289,7 @@ staticbuildBottomSheet(BuildContext context, Widget widget) {
   );
 }
 
- setStatusTrip(int status) {
+setStatusTrip(int status) {
   var res = "NA";
   switch (status) {
     case 1:
@@ -308,4 +308,26 @@ staticbuildBottomSheet(BuildContext context, Widget widget) {
   }
 
   return res;
+}
+
+List<Widget> listWidget(Map<String, dynamic> mapData) {
+  List<Widget> chips = [];
+
+  mapData.removeWhere((key, value) => key == "id_con");
+
+  mapData.forEach((key, value) {
+    Widget wid = Text(key.replaceAll("_", " ") + " " + value,
+        style: TextStyle(
+          fontSize: 15,
+          color: Widgets._colorFromHex2(Widgets.colorPrimary),
+        ));
+
+    chips.add(wid);
+
+    chips.add(const SizedBox(
+      height: 12,
+    ));
+  });
+
+  return chips;
 }

@@ -214,7 +214,7 @@ class _LoginState extends State<LoginScreen> {
                             SizedBox(
                                 //height: 48,
                                 child: TextFormField(
-                                    initialValue: "joseph",
+                                    initialValue: "",
                                     autofocus: false,
                                     validator: (value) =>
                                         validateField(value.toString()),

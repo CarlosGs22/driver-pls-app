@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/taxi_trip.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
-import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/map/google_map_single_route.dart';
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
 import 'package:driver_please_flutter/services/location_service.dart';
-import 'package:driver_please_flutter/services/ruta_viaje_service.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
@@ -64,8 +63,12 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   final formIncidenceKey = GlobalKey<FormState>();
 
+  String inicialDate = "";
+  String endDate = "";
+
+  List<LatLng> polylineCoordinatesCurrent = [];
+
   _getRutaViajes() async {
-    
     List<LatLng> auxListLocations = [];
 
     for (var element in widget.rutaViaje) {
@@ -89,6 +92,19 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       sendRequest();
     });
     setColor();
+
+    /*bg.BackgroundGeolocation.ready(bg.Config(
+        desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
+        distanceFilter: 1.0,
+        stopOnTerminate: false,
+        startOnBoot: true,
+        debug: true,
+        logLevel: bg.Config.LOG_LEVEL_VERBOSE
+    )).then((bg.State state) {
+      if (!state.enabled) {
+        bg.BackgroundGeolocation.start();
+      }
+    });*/
   }
 
   _setStateColor(value, int indexColor) {
@@ -123,26 +139,30 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     final Uint8List markerIcon =
         await Utility.getBytesFromAsset('assets/images/pinAzul.png', 80);
 
-    Position initialPosition = await _locationService.getCurrentLocation();
-    Position currentPosition = initialPosition;
+    Position currentPosition = await _locationService.getCurrentLocation();
+
+    List<Position> listPosition = [];
 
     setState(() {
+      inicialDate = Utility.getCurrentDate();
+      listPosition.add(currentPosition);
+
       markers.add(Marker(
           markerId: const MarkerId("inicialLocation"),
           infoWindow: const InfoWindow(title: ("Inicio")),
           icon: BitmapDescriptor.fromBytes(markerIcon),
-          position: LatLng(currentPosition.latitude.toDouble(),
-              currentPosition.longitude.toDouble()),
+          position: LatLng(listPosition.last.latitude.toDouble(),
+              listPosition.last.longitude.toDouble()),
           onTap: () {}));
     });
 
     _locationService.startLocationUpdates((Position newLoc) async {
       double newDistance =
-          _locationService.calculateDistanceInMeters(currentPosition, newLoc);
+          _locationService.calculateDistanceInMeters(listPosition.last, newLoc);
 
       setState(() {
-        markers.removeWhere(
-            (element) => element.markerId == const MarkerId("currentLocation"));
+        /*markers.removeWhere(
+            (element) => element.markerId == const MarkerId("currentLocation"));*/
         markers.add(Marker(
             infoWindow: const InfoWindow(title: ("Estoy aqui")),
             markerId: const MarkerId("currentLocation"),
@@ -152,24 +172,25 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             onTap: () {}));
       });
 
-      List<LatLng> polylineCoordinatesCurrent = [];
-
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         Utility.googleMapAPiKey,
+        PointLatLng(listPosition.last.latitude.toDouble(),
+            listPosition.last.longitude.toDouble()),
         PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
-        PointLatLng(currentPosition.latitude.toDouble(),
-            currentPosition.longitude.toDouble()),
-        travelMode: TravelMode.walking,
+        travelMode: TravelMode.transit,
       );
+
+      List<LatLng> auxpolylineCoordinatesCurrent = [];
 
       if (result.points.isNotEmpty) {
         for (var point in result.points) {
-          polylineCoordinatesCurrent
+          auxpolylineCoordinatesCurrent
               .add(LatLng(point.latitude, point.longitude));
         }
-      } else {
-        print("ERROR EN POLYLINES");
-        print(result.errorMessage);
+
+        setState(() {
+          polylineCoordinatesCurrent.addAll(auxpolylineCoordinatesCurrent);
+        });
       }
 
       PolylineId id = const PolylineId("CurrentPoly");
@@ -179,11 +200,10 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         points: polylineCoordinatesCurrent,
         width: 8,
       );
-      polyLines[id] = polyline;
 
       tripProvider.updateTrip(
           tripProvider.currentTrip!.distanceInMeters + newDistance,
-          tripProvider.currentTrip!.timeInSeconds + 5);
+          tripProvider.currentTrip!.timeInSeconds + 1);
 
       mapController!.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -192,7 +212,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               zoom: 17)));
 
       setState(() {
+        polyLines[id] = polyline;
         inicialTrip = 1;
+        listPosition.add(newLoc);
       });
     });
   }
@@ -295,7 +317,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                               Text(
                                   currentTrip != null
                                       ? '${currentTrip.distanceInKilometers.toStringAsFixed(2)} km'
-                                      : "0.00",
+                                      : "0.00 Km",
                                   style: GoogleFonts.poppins(
                                       fontSize: 21,
                                       color:
@@ -348,7 +370,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                           SizedBox(
                               //height: 48,
                               child: TextFormField(
-                                  initialValue: "OK",
+                                  initialValue: "Escribe una incidencia",
                                   autofocus: false,
                                   minLines: 6,
                                   keyboardType: TextInputType.multiline,
@@ -416,25 +438,16 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
     var formParams = json.encode({
       "distancia": distancia,
-      "tiempo": tiempo,
+      "tiempo": currentTrip.timeInSeconds,
       "bandera": bandera,
-      "costo_distancia": (distanciaFija * double.parse(distancia)),
-      "costo_tiempo": (km * minutes),
-      "subtotal": (bandera + (km * minutes)),
+      "minutos": minutes,
+      "segundos": seconds,
       "porcentaje_comision": 0.15,
-      "costo_comision": ((bandera + (km * minutes)) * 0.15),
-      "total_ganancia":
-          ((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)),
       "iva_translado": 0.16,
-      "costo_iva_translado":
-          (((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)) *
-              0.16),
-      "total_ganancia_iva": (((bandera + (km * minutes)) -
-              ((bandera + (km * minutes)) * 0.15)) +
-          (((bandera + (km * minutes)) - ((bandera + (km * minutes)) * 0.15)) *
-              0.16)),
       "id_viaje": widget.viaje.idViaje,
-      "tripStatus": 3
+      "tripStatus": 3,
+      "fecha_inicio": inicialDate,
+      "fecha_fin": endDate
     });
 
     HttpClass.httpData(
@@ -486,6 +499,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             builder: (context) => TripDetailScreen(
                   viaje: widget.viaje,
                   redirect: "MAIN",
+                  panelVisible: true,
                 )),
         (Route<dynamic> route) => false,
       );
@@ -572,8 +586,30 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           title: const Text(Strings.labelTaximetro),
           elevation: 0.1,
           backgroundColor: _colorFromHex(Widgets.colorPrimary),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.alt_route_rounded),
+              onPressed: () {
+                showFlexibleBottomSheet(
+                  minHeight: 0,
+                  initHeight: 0.7,
+                  maxHeight: 1,
+                  context: context,
+                  builder: (context, scrollController, bottomSheetOffset) {
+                    return TripDetailScreen(
+                      viaje: widget.viaje,
+                      redirect: null,
+                      panelVisible: false,
+                    );
+                  },
+                  anchors: [0, 0.5, 1],
+                );
+              },
+            )
+          ],
         ),
-        drawer: const MainDrawer(0),
+
+        //drawer: const MainDrawer(0),
         body:
             Consumer<TaxiTripProvider>(builder: (context, tripProvider, child) {
           TaxiTrip? currentTrip = tripProvider.currentTrip;
@@ -657,7 +693,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                     child: Align(
                       alignment: Alignment.topCenter,
                       child: Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.only(
+                            top: 10, left: 27, right: 27, bottom: 10),
                         child: Container(
                           decoration: BoxDecoration(
                             color: _colorFromHex(Widgets.colorSecundayLight),
@@ -697,7 +734,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                         Text(
                                             currentTrip != null
                                                 ? '${currentTrip.distanceInKilometers.toStringAsFixed(2)} km'
-                                                : "0.00",
+                                                : "0.00 Km",
                                             style: GoogleFonts.poppins(
                                                 fontSize: 18,
                                                 color: _colorFromHex(
@@ -733,7 +770,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                 const SizedBox(height: 10),
                                 ElevatedButton(
                                   onPressed: () {
-                                    print(inicialTrip);
                                     switch (inicialTrip) {
                                       case 0:
                                         _startTrip();
@@ -748,7 +784,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                     child: Text(
                                       inicialTrip == 0
                                           ? 'INICIAR VIAJE'
-                                          : "DETENER VIAJE",
+                                          : "CANCELAR VIAJE",
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 20.0,
@@ -766,6 +802,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                 inicialTrip == 1
                                     ? ElevatedButton(
                                         onPressed: () {
+                                          setState(() {
+                                            endDate = Utility.getCurrentDate();
+                                          });
                                           _handleFinishTrip(
                                               context, currentTrip!);
                                         },

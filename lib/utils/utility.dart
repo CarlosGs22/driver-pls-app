@@ -2,15 +2,20 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_file.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:ui' as ui;
+
+import 'package:intl/intl.dart';  //for date format
+import 'package:intl/date_symbol_data_local.dart';
 
 class Utility {
   static const String googleMapAPiKey =
       "AIzaSyDp86KOchjHALKYuRNmEBVUXP0vMrOMf-o";
 
   static printWrapped(String text) {
-    final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
+    final pattern = RegExp('.{1,800}');
     pattern.allMatches(text).forEach((match) => print(match.group(0)));
   }
 
@@ -36,9 +41,48 @@ class Utility {
 
   static Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec =
-        await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
-   }
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
+  static getCurrentDate() {
+    return DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now());
+  }
+
+  static setStatusTrip(var status) {
+    print(status);
+    var res = "";
+    switch (status) {
+      case "1":
+        res = "Por realizar";
+        break;
+      case "2":
+        res = "Iniciado";
+        break;
+      case "3":
+        res = "Realizado";
+        break;
+      case "6":
+        res = "Cancelado";
+        break;
+      default:
+        res = "NA";
+    }
+
+    return res;
+  }
+}
+
+getFormattedDateFromFormattedString(var value) {
+  
+
+  try {
+    return DateFormat.yMMMEd().format(DateTime.parse(value));
+  } catch (e) {
+    return value;
+  }
 }

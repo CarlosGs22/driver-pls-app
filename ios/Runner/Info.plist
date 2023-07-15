@@ -50,5 +50,11 @@
 		<string>Your message goes here</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>Your message goes here</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Your message goes here</string>
+		<key>UIBackgroundModes</key>
+		<string>location</string>
 	</dict>
 </plist>

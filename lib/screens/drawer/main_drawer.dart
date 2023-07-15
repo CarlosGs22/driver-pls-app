@@ -1,4 +1,6 @@
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
+import 'package:driver_please_flutter/screens/gain_screen.dart';
+import 'package:driver_please_flutter/screens/help_screen.dart';
 import 'package:driver_please_flutter/screens/login_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_finished_screen.dart';
@@ -23,51 +25,38 @@ class MainDrawer extends StatelessWidget {
     return Drawer(
       child: ListView(
         children: <Widget>[
-          SizedBox(
-            height: 55.0,
-            child: DrawerHeader(
-                child: ListTile(
-                  contentPadding: const EdgeInsets.only(left: 0.0, right: 0.0),
-                  leading: Image.asset(
-                    "assets/images/logoApp.png",
-                    height: 39,
-                    alignment: Alignment.centerLeft,
-                  ),
-                  title: Text(
-                    Strings.labelAppNameTitle,
-                    style:
-                        GoogleFonts.poppins(fontSize: 24, color: Colors.white),
-                  ),
-                  //selected: _selectedDestination == 0,
-                  onTap: () {},
+          Container(
+            color: _colorFromHex(Widgets.colorPrimary),
+            height: 180,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/logoAppTransparente.png",
+                  width: 175,
+                  height: 175,
                 ),
-                decoration: BoxDecoration(
-                  color: _colorFromHex(Widgets.colorPrimary),
-                ),
-                margin: const EdgeInsets.all(0.0),
-                padding: const EdgeInsets.only(top: 0, left: 0)),
+              ],
+            ),
           ),
-
-             Ink(
+          Ink(
             color: _selectedDestination == 0
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
                 leading: const Icon(Icons.home),
-                title: Text("Dashboard",
+                title: Text("Inicio",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
                 selected: _selectedDestination == 0,
                 onTap: () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Dashboard()))
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Dashboard()))
                     }),
           ),
-         
           Ink(
             color: _selectedDestination == 1
                 ? _colorFromHex(Widgets.colorSecundayLight)
@@ -84,10 +73,10 @@ class MainDrawer extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const TripListAssignedScreen()))
+                              builder: (context) =>
+                                  const TripListAssignedScreen()))
                     }),
           ),
-
           Ink(
             color: _selectedDestination == 2
                 ? _colorFromHex(Widgets.colorSecundayLight)
@@ -104,11 +93,46 @@ class MainDrawer extends StatelessWidget {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const TripListFinishedScreen()))
+                              builder: (context) =>
+                                  const TripListFinishedScreen()))
                     }),
           ),
           Ink(
             color: _selectedDestination == 3
+                ? _colorFromHex(Widgets.colorSecundayLight)
+                : Colors.transparent,
+            child: ListTile(
+                leading: const Icon(Icons.contact_support_rounded),
+                title: Text("Contacto",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _colorFromHex(Widgets.colorGray),
+                        fontWeight: FontWeight.w500)),
+                selected: _selectedDestination == 3,
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => HelpScreen()));
+                }),
+          ),
+          Ink(
+            color: _selectedDestination == 4
+                ? _colorFromHex(Widgets.colorSecundayLight)
+                : Colors.transparent,
+            child: ListTile(
+                leading: const Icon(Icons.attach_money_outlined),
+                title: Text("Mis ganancias",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _colorFromHex(Widgets.colorGray),
+                        fontWeight: FontWeight.w500)),
+                selected: _selectedDestination == 4,
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => GainScreen(mapGanancias: const {})));
+                }),
+          ),
+          Ink(
+            color: _selectedDestination == 5
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -118,14 +142,14 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 3,
+                selected: _selectedDestination == 5,
                 onTap: () {
                   UserPreferences().removeUser();
-                      Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                              builder: (context) => const LoginScreen()),
-                          (Route<dynamic> route) => false);
-                    }),
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const LoginScreen()),
+                      (Route<dynamic> route) => false);
+                }),
           ),
           const Divider(
             height: 1,

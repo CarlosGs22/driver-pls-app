@@ -1,11 +1,18 @@
+import 'dart:io';
+
+import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
+import 'package:driver_please_flutter/screens/support_screen.dart';
 
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
 import 'package:driver_please_flutter/services/viaje_service.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
+import 'package:driver_please_flutter/utils/utility.dart';
+import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,11 +25,13 @@ class TripListFinishedScreen extends StatefulWidget {
 }
 
 class _TripListState extends State<TripListFinishedScreen> {
-  final int _pageSize = 1;
+  final int _pageSize = 10;
   int _pageNumber = 1;
   int _totalPages = 1;
   List<ViajeModel> _viajes = [];
   String idAgent = "";
+
+  bool openDrawer = false;
 
   @override
   void initState() {
@@ -53,152 +62,243 @@ class _TripListState extends State<TripListFinishedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
-        title: const Text(Strings.labelListTripFinished),
-        elevation: 0.1,
-        backgroundColor: _colorFromHex(Widgets.colorPrimary),
-      ),
-      drawer: const MainDrawer(2),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _viajes.length,
-              itemBuilder: (BuildContext context, int index) {
-                ViajeModel viaje = _viajes[index];
-
-                return ChatBubble(
-                    clipper: ChatBubbleClipper5(type: BubbleType.sendBubble),
-                    margin: const EdgeInsets.only(
-                        top: 10, bottom: 10, left: 10, right: 10),
-                    backGroundColor: Colors.white,
-                    child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TripDetailScreen(
-                                        viaje: viaje,
-                                        redirect: null,
-                                      )));
-                        },
-                        child: ListTile(
-                            minLeadingWidth: 0,
-                            minVerticalPadding: 0,
-                            subtitle: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(2),
-                                  alignment: Alignment.topRight,
-                                  child: Text(
-                                    "${viaje.fechaViaje} ${viaje.horaViaje}",
-                                    style: TextStyle(
-                                        fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(Widgets.colorGray),
-                                        fontSize: 15),
-                                  ),
-                                ),
-                                /*buildBubblePadding(
-                                    Icons.circle,
-                                    _colorFromHex(Widgets.colorPrimary),
-                                    "Empresa: ${viaje.nombreEmpresa} - Sucursal: ${viaje.nombreSucursal}",
-                                    _colorFromHex(Widgets.colorGrayLight),
-                                    11),*/
-                                buildBubblePadding(
-                                    Icons.circle,
-                                    _colorFromHex(Widgets.colorPrimary),
-                                    "Tipo: ${viaje.tipo}",
-                                    _colorFromHex(Widgets.colorGrayLight),
-                                    11),
-                                buildBubblePadding(
-                                    Icons.circle,
-                                    _colorFromHex(Widgets.colorPrimary),
-                                    "Pasajeros: ${viaje.ocupantes}",
-                                    _colorFromHex(Widgets.colorGrayLight),
-                                    11),
-                              ],
-                            ),
-                            leading: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  alignment: Alignment.center,
-                                  height: 40,
-                                  width: 40,
-                                  child: FloatingActionButton(
-                                    onPressed: null,
-                                    backgroundColor:
-                                        _colorFromHex(Widgets.colorPrimary),
-                                    child: Text(
-                                      viaje.idViaje.toString(),
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white,
-                                        overflow: TextOverflow.clip,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ))));
-              },
-            ),
+    return WillPopScope(
+        onWillPop: showExitPopup,
+        child: Scaffold(
+          onDrawerChanged: (isOpened) {
+            if (isOpened) {
+              setState(() {
+                openDrawer = true;
+              });
+            }
+          },
+          appBar: AppBar(
+            titleTextStyle: GoogleFonts.poppins(
+                fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            title: const Text(Strings.labelListTripFinished),
+            elevation: 0.1,
+            backgroundColor: _colorFromHex(Widgets.colorPrimary),
+            actions: [
+              IconButton(
+                  icon: const Icon(Icons.support_agent_rounded),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SupportScreen()));
+                  })
+            ],
           ),
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _pageNumber > 1
-                    ? IconButton(
-                        onPressed: () async {
-                          setState(() {
-                            _pageNumber--;
-                          });
-                          List<ViajeModel> viajes =
-                              await ViajeService.getViajes(context,
-                                  pageNumber: _pageNumber,
-                                  pageSize: _pageSize,
-                                  idUser: idAgent,
-                                  status: 3);
-                          setState(() {
-                            _viajes = viajes;
-                          });
-                        },
-                        icon: const Icon(Icons.arrow_left),
-                      )
-                    : const SizedBox.shrink(),
-                Text('Página $_pageNumber de $_totalPages'),
-                _pageNumber < _totalPages
-                    ? IconButton(
-                        onPressed: () async {
-                          setState(() {
-                            _pageNumber++;
-                          });
-                          List<ViajeModel> viajes =
-                              await ViajeService.getViajes(context,
-                                  pageNumber: _pageNumber,
-                                  pageSize: _pageSize,
-                                  idUser: idAgent,
-                                  status: 3);
-                          setState(() {
-                            _viajes = viajes;
-                          });
-                        },
-                        icon: const Icon(Icons.arrow_right),
-                      )
-                    : const SizedBox.shrink(),
+          drawer: const MainDrawer(2),
+          body: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _viajes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    ViajeModel viaje = _viajes[index];
+
+                    var horaViaje = viaje.horaViaje
+                        .substring(0, viaje.horaViaje.lastIndexOf(':') + 1);
+
+                    return ChatBubble(
+                        clipper:
+                            ChatBubbleClipper5(type: BubbleType.receiverBubble),
+                        margin: const EdgeInsets.only(
+                            top: 10, bottom: 10, left: 5, right: 5),
+                        backGroundColor: _colorFromHex(Widgets.colorPrimary),
+                        child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => TripDetailScreen(
+                                            viaje: viaje,
+                                            redirect: null,
+                                            panelVisible: true,
+                                          )));
+                            },
+                            child: ListTile(
+                                minLeadingWidth: 0,
+                                minVerticalPadding: 0,
+                                subtitle: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.only(
+                                              top: 2, bottom: 2),
+                                          alignment: Alignment.topRight,
+                                          child: Text(
+                                            viaje.idViaje,
+                                            style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                color: _colorFromHex(
+                                                    Widgets.colorSecundayLight),
+                                                fontSize: 13),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.only(
+                                              top: 2, bottom: 2),
+                                          alignment: Alignment.topRight,
+                                          child: Text(
+                                            getFormattedDateFromFormattedString(
+                                                    viaje.fechaViaje
+                                                        .replaceAll(" ", "")) +
+                                                " " +
+                                                viaje.horaViaje,
+                                            style: TextStyle(
+                                                fontStyle: FontStyle.italic,
+                                                color: _colorFromHex(
+                                                    Widgets.colorSecundayLight),
+                                                fontSize: 13),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    buildBubblePadding(
+                                        Icons.circle,
+                                        _colorFromHex(Widgets.colorPrimary),
+                                        "Tipo: ${viaje.tipo}",
+                                        _colorFromHex(
+                                            Widgets.colorSecundayLight),
+                                        8),
+                                    buildBubblePadding(
+                                        Icons.circle,
+                                        _colorFromHex(Widgets.colorPrimary),
+                                        "Hora: ${horaViaje} Hrs",
+                                        _colorFromHex(
+                                            Widgets.colorSecundayLight),
+                                        8),
+                                    if (validateNullOrEmptyString(
+                                            viaje.nombreSucursal) !=
+                                        null) ...[
+                                      buildBubblePadding(
+                                          Icons.circle,
+                                          _colorFromHex(Widgets.colorPrimary),
+                                          "Sucursal: ${viaje.nombreSucursal}",
+                                          _colorFromHex(
+                                              Widgets.colorSecundayLight),
+                                          8),
+                                    ],
+                                    if (validateNullOrEmptyString(
+                                            viaje.nombreEmpresa) !=
+                                        null) ...[
+                                      buildBubblePadding(
+                                          Icons.circle,
+                                          _colorFromHex(Widgets.colorPrimary),
+                                          "Empresa: ${viaje.nombreEmpresa}",
+                                          _colorFromHex(
+                                              Widgets.colorSecundayLight),
+                                          8),
+                                    ],
+                                  ],
+                                ),
+                                leading: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      color: Colors.transparent,
+                                      child: Icon(Icons.local_taxi_rounded,
+                                          size: 50,
+                                          color: _colorFromHex(
+                                              Widgets.colorSecundayLight)),
+                                    ),
+                                  ],
+                                ))));
+                  },
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _pageNumber > 1
+                        ? IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                _pageNumber--;
+                              });
+                              List<ViajeModel> viajes =
+                                  await ViajeService.getViajes(context,
+                                      pageNumber: _pageNumber,
+                                      pageSize: _pageSize,
+                                      idUser: idAgent,
+                                      status: 3);
+                              setState(() {
+                                _viajes = viajes;
+                              });
+                            },
+                            icon: const Icon(Icons.arrow_left),
+                          )
+                        : const SizedBox.shrink(),
+                    Text('Página $_pageNumber de $_totalPages'),
+                    _pageNumber < _totalPages
+                        ? IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                _pageNumber++;
+                              });
+                              List<ViajeModel> viajes =
+                                  await ViajeService.getViajes(context,
+                                      pageNumber: _pageNumber,
+                                      pageSize: _pageSize,
+                                      idUser: idAgent,
+                                      status: 3);
+                              setState(() {
+                                _viajes = viajes;
+                              });
+                            },
+                            icon: const Icon(Icons.arrow_right),
+                          )
+                        : const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  Future<bool> showExitPopup() async {
+    if (openDrawer) {
+      setState(() {
+        openDrawer = false;
+      });
+      Navigator.of(context).pop(false);
+      return false;
+    } else {
+      return await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Atención'),
+              content: const Text('Estas seguro que quieres salir?'),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text("No",
+                        style: TextStyle(
+                            color: _colorFromHex(Widgets.colorPrimary)))),
+                TextButton(
+                    onPressed: () {
+                      if (Platform.isIOS) {
+                        exit(0);
+                      } else {
+                        SystemNavigator.pop();
+                      }
+                    },
+                    child: Text("Si",
+                        style: TextStyle(
+                            color: _colorFromHex(Widgets.colorPrimary)))),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          ) ??
+          false;
+    }
   }
 }

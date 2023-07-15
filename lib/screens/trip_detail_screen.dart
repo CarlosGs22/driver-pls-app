@@ -3,9 +3,12 @@ import 'dart:typed_data';
 
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/models/viaje_resumen_model.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
+import 'package:driver_please_flutter/screens/recibo_viaje_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/services/ruta_viaje_service.dart';
+import 'package:driver_please_flutter/services/viaje_resumen_service.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
@@ -17,15 +20,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:motion_toast/motion_toast.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'drawer/main_drawer.dart';
 
 class TripDetailScreen extends StatefulWidget {
   ViajeModel viaje;
   var redirect;
+  bool panelVisible;
 
-  TripDetailScreen({Key? key, required this.viaje, required this.redirect})
+  TripDetailScreen({Key? key, required this.viaje, required this.redirect, required this.panelVisible})
       : super(key: key);
 
   @override
@@ -46,8 +54,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   GoogleMapController? mapController;
 
   List<RutaViajeModel> rutaViajes = [];
+  Map<String, dynamic> viajeResumen = {};
 
   ExpandedTileController? _controller;
+
+  ExpandedTileController? _controllerTarifa;
+
+  ExpandedTileController? _controllerRecibo;
 
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
@@ -104,19 +117,35 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  _getViajeResumen() async {
+    Map<String, dynamic> auxViajeResumen =
+        await ViajeResumenService.getViajeResumen(
+            context, widget.viaje.idViaje);
+
+    if (auxViajeResumen.isNotEmpty) {
+      setState(() {
+        viajeResumen = auxViajeResumen;
+      });
+    }
+  }
+
   @override
   void initState() {
     _controller = ExpandedTileController(isExpanded: false);
+    _controllerTarifa = ExpandedTileController(isExpanded: false);
+    _controllerRecibo = ExpandedTileController(isExpanded: false);
     super.initState();
     _getRutaViajes();
+    _getViajeResumen();
     setColor();
+    Intl.defaultLocale = "es_MX";
+    initializeDateFormatting();
   }
 
-   @override
+  @override
   void dispose() {
     super.dispose();
   }
-
 
   _closeTripAlert() {
     return Alert(
@@ -147,7 +176,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       SizedBox(
                           //height: 48,
                           child: TextFormField(
-                              initialValue: "",
+                              initialValue: "Escribe una incidencia",
                               autofocus: false,
                               minLines:
                                   6, // any number you need (It works as the rows for the textarea)
@@ -244,6 +273,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             builder: (context) => TripDetailScreen(
                   viaje: widget.viaje,
                   redirect: "MAIN",
+                  panelVisible: true,
                 )),
         (Route<dynamic> route) => false,
       );
@@ -270,11 +300,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             elevation: 0.1,
             backgroundColor: _colorFromHex(Widgets.colorPrimary),
           ),
-          drawer: const MainDrawer(0),
+          //drawer: const MainDrawer(0),
           body: Container(
             padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
             child: ListView(
               children: [
+                widget.panelVisible ? 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -284,18 +315,17 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       height: 130,
                       child: ClipOval(
                         child: Material(
-                          color: _colorFromHex(
-                              Widgets.colorPrimary), // button color
+                          color: _colorFromHex(Widgets.colorPrimary),
                           child: InkWell(
                             splashColor:
                                 _colorFromHex(Widgets.colorSecundayLight),
-                            // splash color
+
                             onTap: () {
                               if (widget.viaje.status == 3 ||
                                   widget.viaje.status == 6) {
                                 return;
                               }
-                              
+
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -324,13 +354,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(
+                  
+                  const SizedBox(
                   height: 31,
                 ),
-                buildDetailform(Strings.labelTripDate, widget.viaje.fechaViaje,
-                    Strings.labelTripHour, widget.viaje.horaViaje, "1"),
+                  ],
+                ) : SizedBox(),
+                
+                buildDetailform(
+                    Strings.labelTripDate,
+                    getFormattedDateFromFormattedString(
+                        widget.viaje.fechaViaje),
+                    Strings.labelTripHour,
+                    widget.viaje.horaViaje,
+                    "1"),
                 buildDetailform(
                     Strings.labelTripLocation,
                     widget.viaje.nombreSucursal,
@@ -343,8 +380,57 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     Strings.labelTripOccupants,
                     widget.viaje.ocupantes.toString(),
                     "3"),
-                buildDetailform(Strings.labelTripStatus,
-                    widget.viaje.status.toString(), "", "", "4"),
+                buildDetailform(
+                    Strings.labelTripStatus,
+                    Utility.setStatusTrip(widget.viaje.status.toString()),
+                    "",
+                    "",
+                    "4"),
+                const SizedBox(
+                  height: 13,
+                ),
+                buildDetailform(
+                    Strings.labelTripInicialDate,
+                    widget.viaje.fechaInicio,
+                    Strings.labelTripEndDate,
+                    widget.viaje.fechaFin,
+                    "5"),
+                const SizedBox(
+                  height: 13,
+                ),
+                viajeResumen["estatus"].toString() == "3" ||
+                        viajeResumen["estatus"].toString() == "6"
+                    ? ExpandedTile(
+                        theme: ExpandedTileThemeData(
+                          headerColor:
+                              _colorFromHex(Widgets.colorSecundayLight),
+                          headerRadius: 5.0,
+                          headerPadding: const EdgeInsets.all(10),
+                          headerSplashColor:
+                              _colorFromHex(Widgets.colorPrimary),
+                          contentBackgroundColor: Colors.transparent,
+                          contentPadding: const EdgeInsets.all(0),
+                          contentRadius: 2.0,
+                        ),
+                        controller: _controllerRecibo!,
+                        title: Text(
+                          "Recibo de pago",
+                          style: TextStyle(
+                            color: _colorFromHex(Widgets.colorPrimary),
+                            fontSize: 16,
+                          ),
+                        ),
+                        content: SizedBox(),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ReciboViajeScreen(
+                                        viajeResumen: viajeResumen,
+                                      )));
+                        },
+                      )
+                    : SizedBox(),
                 const SizedBox(
                   height: 13,
                 ),
@@ -360,29 +446,147 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   ),
                   controller: _controller!,
                   title: Text(
-                    "Direcciones",
+                    Strings.labelTripItinerario,
                     style: TextStyle(
                       color: _colorFromHex(Widgets.colorPrimary),
                       fontSize: 16,
                     ),
                   ),
                   content: SingleChildScrollView(
+                    physics: const ScrollPhysics(),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         ListView.builder(
-                          shrinkWrap: true, // -> Add this here -> And this one
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index) {
                             return Card(
                               child: ListTile(
-                                leading: Icon(Icons.room_outlined,
-                                    color: _colorFromHex(Widgets.colorPrimary)),
+                                leading: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Parada " + (index + 1).toString(),
+                                      style: TextStyle(
+                                          color: _colorFromHex(
+                                              Widgets.colorPrimary),
+                                          fontSize: 14),
+                                    ),
+                                    Icon(
+                                      Icons.room_outlined,
+                                      size: 16,
+                                      color:
+                                          _colorFromHex(Widgets.colorPrimary),
+                                    ),
+
+                                    if (validateNullOrEmptyString(
+                                            rutaViajes[index]
+                                                .hora) !=
+                                        null) ...[
+                                      Text(
+                                        "Hora " +
+                                            rutaViajes[index].hora,
+                                        style: TextStyle(
+                                            color: _colorFromHex(
+                                                Widgets.colorPrimary),
+                                            fontSize: 15),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                                 title: Text(
-                                  rutaViajes[index].direccion,
+                                  rutaViajes[index].personaNombre,
                                   style: TextStyle(
                                       color:
                                           _colorFromHex(Widgets.colorPrimary),
                                       fontSize: 14),
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.phone),
+                                  color: _colorFromHex(Widgets.colorPrimary),
+                                  onPressed: validateNullOrEmptyString(
+                                              rutaViajes[index]
+                                                  .personaTelefono) !=
+                                          null
+                                      ? () async {
+                                          Uri link = Uri(
+                                            scheme: 'tel',
+                                            path: rutaViajes[index]
+                                                .personaTelefono,
+                                          );
+
+                                          try {
+                                            if (await canLaunchUrl(link)) {
+                                              await launchUrl(link,
+                                                  mode: LaunchMode
+                                                      .externalApplication);
+                                            } else {
+                                              MotionToast.error(
+                                                      title:
+                                                          const Text("Error"),
+                                                      description: const Text(
+                                                          "No se puede abrir el enlace"))
+                                                  .show(context);
+                                            }
+                                          } catch (error) {
+                                            print("AKIII");
+                                            print(error);
+                                            MotionToast.error(
+                                                    title: const Text("Error"),
+                                                    description: const Text(
+                                                        "Error No se puede abrir el enlace"))
+                                                .show(context);
+                                          }
+                                        }
+                                      : null,
+                                ),
+                                subtitle: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const SizedBox(height: 5),
+                                    if (validateNullOrEmptyString(
+                                            rutaViajes[index].nombreSucursal) !=
+                                        null) ...[
+                                      Text(
+                                        "Pertenece " +
+                                            rutaViajes[index].nombreSucursal,
+                                        style: TextStyle(
+                                            color: _colorFromHex(
+                                                Widgets.colorPrimary),
+                                            fontSize: 12),
+                                      ),
+                                      const SizedBox(height: 5),
+                                    ] else ...[
+                                      const SizedBox(),
+                                    ],
+                                    Text(
+                                      "Domicilio " +
+                                          rutaViajes[index].direccion,
+                                      style: TextStyle(
+                                          color: _colorFromHex(
+                                              Widgets.colorPrimary),
+                                          fontSize: 12),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    if (validateNullOrEmptyString(
+                                            rutaViajes[index]
+                                                .personaTelefono) !=
+                                        null) ...[
+                                      Text(
+                                        "Contacto " +
+                                            rutaViajes[index].personaTelefono,
+                                        style: TextStyle(
+                                            color: _colorFromHex(
+                                                Widgets.colorPrimary),
+                                            fontSize: 12),
+                                      ),
+                                    ],
+                                    
+                                   
+                                  ],
                                 ),
                               ),
                             );
@@ -396,6 +600,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 const SizedBox(
                   height: 13,
                 ),
+                
+                widget.panelVisible ?
                 SizedBox(
                   height: 400,
                   child: GoogleMap(
@@ -421,11 +627,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         target: LatLng(28.643540, -106.061683), zoom: 14),
                     mapType: MapType.normal,
                   ),
-                ),
-                const SizedBox(
+                )
+                : SizedBox() ,
+                  widget.panelVisible ? const SizedBox(
                   height: 32,
-                ),
-                widget.viaje.status == 1 || widget.viaje.status == 2
+                ) : SizedBox(),
+                (widget.viaje.status == 1 || widget.viaje.status == 2) && widget.panelVisible  == true
                     ? longButtons("Cancelar viaje", _closeTripAlert,
                         color: _colorFromHex(Widgets.colorPrimary))
                     : const SizedBox(),
