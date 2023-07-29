@@ -8,11 +8,12 @@ class ViajeService {
           {required int pageNumber,
           required int pageSize,
           required String idUser,
-          var status}) async =>
+          var status,
+          required String order}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getViajesGeneral.php?pageNumber=$pageNumber&pageSize=$pageSize&idUser=$idUser&tripStatus=$status"),
+                  "https://www.driverplease.net/aplicacion/getViajesGeneral.php?pageNumber=$pageNumber&pageSize=$pageSize&idUser=$idUser&tripStatus=$status&order=$order"),
               {},
               {},
               "GET")

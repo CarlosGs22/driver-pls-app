@@ -7,6 +7,8 @@ class LocationService {
   StreamSubscription<loc.LocationData>? _locationStream;
   loc.Location location = loc.Location();
 
+  
+
   Future<Position> getCurrentLocation() async {
     log('getCurrentLocation');
 
@@ -63,7 +65,7 @@ class LocationService {
     location.enableBackgroundMode(enable: true);
 
     location.changeSettings(
-        accuracy: loc.LocationAccuracy.high, distanceFilter: 0, interval: 100);
+        accuracy: loc.LocationAccuracy.high, distanceFilter: 0, interval: 1000);
 
     _locationStream = location.onLocationChanged.listen((loc.LocationData currentLocation) {
       Position pos = Position(

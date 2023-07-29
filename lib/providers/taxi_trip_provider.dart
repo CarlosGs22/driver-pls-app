@@ -11,7 +11,7 @@ class TaxiTripProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTrip(double distanceInMeters, int timeInSeconds) {
+  void updateTrip(double distanceInMeters,int timeInSeconds) {
     _currentTrip?.distanceInMeters = distanceInMeters;
     _currentTrip?.timeInSeconds = timeInSeconds;
     notifyListeners();

@@ -49,7 +49,8 @@ class _TripListState extends State<TripListAssignedScreen> {
         pageNumber: _pageNumber,
         pageSize: _pageSize,
         idUser: prefs.getString('id_con').toString(),
-        status: 1);
+        status: 1,
+        order : "1");
     if (viajes.isNotEmpty) {
       setState(() {
         idAgent = prefs.getString("id_con").toString();
@@ -221,7 +222,8 @@ class _TripListState extends State<TripListAssignedScreen> {
                                       pageNumber: _pageNumber,
                                       pageSize: _pageSize,
                                       idUser: idAgent,
-                                      status: 1);
+                                      status: 1,
+                                      order: "1");
                               setState(() {
                                 _viajes = viajes;
                               });
@@ -241,7 +243,8 @@ class _TripListState extends State<TripListAssignedScreen> {
                                       pageNumber: _pageNumber,
                                       pageSize: _pageSize,
                                       idUser: idAgent,
-                                      status: 1);
+                                      status: 1,
+                                      order: "1");
                               setState(() {
                                 _viajes = viajes;
                               });

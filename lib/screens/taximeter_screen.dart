@@ -108,7 +108,7 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
       return;
     }
 
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
         .then((Position position) async {
       setState(() {
         _currentPosition = position;
