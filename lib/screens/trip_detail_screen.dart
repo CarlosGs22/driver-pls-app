@@ -74,14 +74,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       });
     } else {
       setState(() {
-        colorListLocal[indexColor] = _colorFromHex(Widgets.colorSecundayLight);
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorPrimary);
       });
     }
   }
 
   setColor() {
     colorListLocal = List.generate(1, (index) {
-      return _colorFromHex(Widgets.colorSecundayLight);
+      return _colorFromHex(Widgets.colorPrimary);
     });
   }
 
@@ -176,7 +176,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       SizedBox(
                           //height: 48,
                           child: TextFormField(
-                              initialValue: "Escribe una incidencia",
+                              initialValue: "",
                               autofocus: false,
                               minLines:
                                   6, // any number you need (It works as the rows for the textarea)

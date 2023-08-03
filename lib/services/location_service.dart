@@ -29,13 +29,13 @@ class LocationService {
         desiredAccuracy: LocationAccuracy.high);*/
   }
 
-  double calculateDistanceInMeters(Position position1, Position position2) {
+  double calculateDistanceInMeters(var position1Lat,var position1Long,var position2Lat, var position2Long) {
     
     return Geolocator.distanceBetween(
-      position1.latitude,
-      position1.longitude,
-      position2.latitude,
-      position2.longitude,
+      position1Lat,
+      position1Long,
+      position2Lat,
+      position2Long,
     );
   }
 

@@ -39,7 +39,8 @@ class ViajeService {
                 totalPages: mapData["total_pages"],
                 status: int.tryParse(element["estatus"]) ?? 0,
                 fechaInicio: element["fecha_inicio"] ?? "",
-                fechaFin: element["fecha_fin"] ?? ""
+                fechaFin: element["fecha_fin"] ?? "",
+                confirmado: element["confirmado"] ?? "",
               ));
           }
 

@@ -5,6 +5,7 @@ import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
 import 'package:driver_please_flutter/services/viaje_service.dart';
+import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TripListAssignedScreen extends StatefulWidget {
@@ -30,6 +32,7 @@ class _TripListState extends State<TripListAssignedScreen> {
   int _totalPages = 1;
   List<ViajeModel> _viajes = [];
   String idAgent = "";
+  List<IconData> iconList = [];
 
   bool openDrawer = false;
 
@@ -50,7 +53,7 @@ class _TripListState extends State<TripListAssignedScreen> {
         pageSize: _pageSize,
         idUser: prefs.getString('id_con').toString(),
         status: 1,
-        order : "1");
+        order: "1");
     if (viajes.isNotEmpty) {
       setState(() {
         idAgent = prefs.getString("id_con").toString();
@@ -63,6 +66,100 @@ class _TripListState extends State<TripListAssignedScreen> {
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
+  }
+
+  _sendRequestOnConfirm(var formParams, int index, var option) {
+    HttpClass.httpData(
+            context,
+            Uri.parse(
+                "https://www.driverplease.net/aplicacion/confirmViaje.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+      if (response["status"] && response["data"] != null) {
+        Navigator.pop(context);
+        setState(() {
+          _viajes[index].confirmado = option;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ocurrió un error'),
+          ),
+        );
+      }
+    });
+  }
+
+  _handleOnConfirmTrip(int index, var idViaje) {
+    return Alert(
+        context: context,
+        type: AlertType.warning,
+        padding: const EdgeInsets.all(0),
+        title: "¡Atención!",
+        desc: "¿Estás seguro de confirmar el viaje?",
+        style: AlertStyle(
+            titleStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 17),
+            descStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 15)),
+        content: Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _colorFromHex(Widgets.colorSecundayLight),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(20.0),
+                ),
+              ),
+              //width: width * 0.9,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 3, right: 3),
+                            child: longButtons("Confirmar", () {
+                              var option = "2";
+                              var formParams = {
+                                "id_viaje": idViaje,
+                                "opcion": option
+                              };
+                              _sendRequestOnConfirm(formParams, index, option);
+                            }, color: _colorFromHex(Widgets.colorPrimary)),
+                          )),
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                              padding: const EdgeInsets.only(left: 3, right: 3),
+                              child: longButtons("Rechazar", () {
+                                var option = "3";
+                                var formParams = {
+                                  "id_viaje": idViaje,
+                                  "opcion": option
+                                };
+                                _sendRequestOnConfirm(
+                                    formParams, index, option);
+                              }, color: _colorFromHex(Widgets.colorSecundary))))
+                    ],
+                  ),
+                ],
+              ),
+            )),
+        buttons: []).show();
+
+    /*
+    HttpClass.httpData(
+            context,
+            Uri.parse("https://www.driverplease.net/aplicacion/confirmViaje.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+    });*/
   }
 
   @override
@@ -102,101 +199,134 @@ class _TripListState extends State<TripListAssignedScreen> {
                         margin: const EdgeInsets.only(
                             top: 10, bottom: 10, left: 5, right: 5),
                         backGroundColor: _colorFromHex(Widgets.colorPrimary),
-                        child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => TripDetailScreen(
-                                            viaje: viaje,
-                                            redirect: null,
-                                            panelVisible: true,
-                                          )));
-                            },
-                            child: ListTile(
-                                minLeadingWidth: 0,
-                                minVerticalPadding: 0,
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.only(
-                                              top: 2, bottom: 2),
-                                          alignment: Alignment.topRight,
-                                          child: Text(
-                                            viaje.idViaje,
-                                            style: TextStyle(
-                                                fontStyle: FontStyle.italic,
-                                                color: _colorFromHex(
-                                                    Widgets.colorSecundayLight),
-                                                fontSize: 13),
-                                          ),
+                        child: ListTile(
+                            minLeadingWidth: 0,
+                            minVerticalPadding: 0,
+                            subtitle: InkWell(
+                              onTap: () {
+                                switch (viaje.confirmado) {
+                                  case "1":
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Primero debes confirmar el viaje'),
+                                      ),
+                                    );
+                                    break;
+                                  case "2":
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                TripDetailScreen(
+                                                  viaje: viaje,
+                                                  redirect: null,
+                                                  panelVisible: true,
+                                                )));
+                                    break;
+                                  case "3":
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('El viaje fue rechazado'),
+                                      ),
+                                    );
+                                    break;
+                                  default:
+                                }
+                              },
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.only(
+                                            top: 2, bottom: 2),
+                                        alignment: Alignment.topRight,
+                                        child: Text(
+                                          viaje.idViaje,
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: _colorFromHex(
+                                                  Widgets.colorSecundayLight),
+                                              fontSize: 13),
                                         ),
-                                        Container(
-                                          padding: const EdgeInsets.only(
-                                              top: 2, bottom: 2),
-                                          alignment: Alignment.topRight,
-                                          child: Text(
-                                            getFormattedDateFromFormattedString(
-                                                viaje.fechaViaje
-                                                    .replaceAll(" ", "")),
-                                            style: TextStyle(
-                                                fontStyle: FontStyle.italic,
-                                                color: _colorFromHex(
-                                                    Widgets.colorSecundayLight),
-                                                fontSize: 13),
-                                          ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.only(
+                                            top: 2, bottom: 2),
+                                        alignment: Alignment.topRight,
+                                        child: Text(
+                                          getFormattedDateFromFormattedString(
+                                              viaje.fechaViaje
+                                                  .replaceAll(" ", "")),
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: _colorFromHex(
+                                                  Widgets.colorSecundayLight),
+                                              fontSize: 13),
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
+                                  ),
+                                  buildBubblePadding(
+                                      Icons.circle,
+                                      _colorFromHex(Widgets.colorPrimary),
+                                      "Tipo: ${viaje.tipo}",
+                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      8),
+                                  buildBubblePadding(
+                                      Icons.circle,
+                                      _colorFromHex(Widgets.colorPrimary),
+                                      "Hora: ${horaViaje} Hrs",
+                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      8),
+                                  if (validateNullOrEmptyString(
+                                          viaje.nombreSucursal) !=
+                                      null) ...[
                                     buildBubblePadding(
                                         Icons.circle,
                                         _colorFromHex(Widgets.colorPrimary),
-                                        "Tipo: ${viaje.tipo}",
+                                        "Sucursal: ${viaje.nombreSucursal}",
                                         _colorFromHex(
                                             Widgets.colorSecundayLight),
                                         8),
-                                    buildBubblePadding(
-                                        Icons.circle,
-                                        _colorFromHex(Widgets.colorPrimary),
-                                        "Hora: ${horaViaje} Hrs",
-                                        _colorFromHex(
-                                            Widgets.colorSecundayLight),
-                                        8),
-                                    if (validateNullOrEmptyString(
-                                            viaje.nombreSucursal) !=
-                                        null) ...[
-                                      buildBubblePadding(
-                                          Icons.circle,
-                                          _colorFromHex(Widgets.colorPrimary),
-                                          "Sucursal: ${viaje.nombreSucursal}",
-                                          _colorFromHex(
-                                              Widgets.colorSecundayLight),
-                                          8),
-                                    ],
-                                    if (validateNullOrEmptyString(
-                                            viaje.nombreEmpresa) !=
-                                        null) ...[
-                                      buildBubblePadding(
-                                          Icons.circle,
-                                          _colorFromHex(Widgets.colorPrimary),
-                                          "Empresa: ${viaje.nombreEmpresa}",
-                                          _colorFromHex(
-                                              Widgets.colorSecundayLight),
-                                          8),
-                                    ],
                                   ],
-                                ),
-                                leading: Column(
+                                  if (validateNullOrEmptyString(
+                                          viaje.nombreEmpresa) !=
+                                      null) ...[
+                                    buildBubblePadding(
+                                        Icons.circle,
+                                        _colorFromHex(Widgets.colorPrimary),
+                                        "Empresa: ${viaje.nombreEmpresa}",
+                                        _colorFromHex(
+                                            Widgets.colorSecundayLight),
+                                        8),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            leading: InkWell(
+                                onTap: () {
+                                  if (validateNullOrEmptyString(
+                                          viaje.confirmado) ==
+                                      "1") {
+                                    _handleOnConfirmTrip(index, viaje.idViaje);
+                                  }
+                                },
+                                child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
                                       color: Colors.transparent,
-                                      child: Icon(Icons.local_taxi_rounded,
+                                      child: Icon(
+                                          viaje.confirmado == "1"
+                                              ? Icons.info
+                                              : viaje.confirmado == "2"
+                                                  ? Icons.check_circle
+                                                  : Icons.close,
                                           size: 50,
                                           color: _colorFromHex(
                                               Widgets.colorSecundayLight)),
