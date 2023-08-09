@@ -80,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                   MapScreen()));
+                                                   MapPage()));
 
                 }, icon: Icon(Icons.ac_unit))
               ],

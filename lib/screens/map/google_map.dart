@@ -30,6 +30,9 @@ import 'package:http/http.dart' as http;
 
 import 'package:location/location.dart' as loc;
 
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 StreamSubscription<LocationData>? _locationSubscription;
 
 class WidgetGoogleMap extends StatefulWidget {
@@ -90,9 +93,14 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   List<LatLng> _polylineCoordinates = [];
   Set<Polyline> _polylines = {};
   LatLng _initialCameraPosition = LatLng(0, 0);
-  LatLng? _currentLocation;
+  //LatLng? _currentLocation;
   LatLng? _previousLocation;
   Marker? _initialMarker;
+
+  LatLng? _startMarkerPosition;
+  LatLng? _endMarkerPosition;
+
+  LocationData? _currentLocation;
 
   _getRutaViajes() async {
     List<LatLng> auxListLocations = [];
@@ -108,6 +116,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   @override
   void initState() {
+    initializeDateFormatting();
     _getCurrentLocationMap();
     _getRutaViajes();
     super.initState();
@@ -400,6 +409,13 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     String distancia = currentTrip.distanceInKilometers.toStringAsFixed(2);
     double bandera = currentTrip.initialCharge;
 
+
+    print("4324234232343252");
+    print(endDate);
+    print(inicialDate);
+
+
+
     var formParams = json.encode({
       "distancia": distancia,
       "tiempo": currentTrip.timeInSeconds,
@@ -647,7 +663,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   //////////////////////////////////////////////////////////////
 
-  void _startTrip() async {
+  /*void _startTrip() async {
     bool serviceEnabled = await _locationServicex.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await _locationServicex.requestService();
@@ -685,7 +701,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           locationData.longitude!.toDouble(), tripProvider);
     });
   }
-
+*/
   void _updateCurrentLocationMarker(
       double latitude, double longitude, TaxiTripProvider tripProvider) async {
     if (_currentLocation == null) {
@@ -700,15 +716,15 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       });
     }
 
-    _previousLocation = _currentLocation;
-    _currentLocation = LatLng(latitude, longitude);
+    //_previousLocation = _currentLocation;
+    //_currentLocation = LatLng(latitude, longitude);
 
     if (_previousLocation != null) {
       // Actualizamos el Polyline para trazar la ruta entre el marcador anterior y el actual
-      await getRouteBetweenCoordinates(_previousLocation!, _currentLocation!);
+      //await getRouteBetweenCoordinates(_previousLocation!, _currentLocation!);
 
       // Movemos la cámara a la nueva ubicación del marcador
-      mapController!.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
+      //mapController!.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
 
       double newDistance = _locationService.calculateDistanceInMeters(
           _previousLocation!.latitude,
@@ -725,7 +741,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     setState(() {
       _currentMarker = Marker(
           markerId: MarkerId('current'),
-          position: _currentLocation!,
+          //position: _currentLocation!,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor
               .hueRed)); // Puedes usar un icono personalizado aquí
     });
@@ -757,7 +773,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         });
 
         setState(() {
-          _polylineCoordinates.addAll(points); // Agregamos las coordenadas al final de la lista existente
+          _polylineCoordinates.addAll(
+              points); // Agregamos las coordenadas al final de la lista existente
           _polylines.clear();
           _polylines.add(Polyline(
             polylineId: PolylineId('route'),
@@ -862,6 +879,88 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     }
   }*/
 
+  void _updateMarkers() {
+    if (_currentLocation != null) {
+      if (_startMarkerPosition == null) {
+        _startMarkerPosition =
+            LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+      }
+      _endMarkerPosition =
+          LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+    }
+  }
+
+  void _startTrip() async {
+    var locat = loc.Location();
+    _currentLocation = await locat.getLocation();
+
+    bool serviceEnabled = await _locationServicex.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationServicex.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    PermissionStatus permissionGranted =
+        await _locationServicex.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _locationServicex.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    TaxiTripProvider tripProvider =
+        Provider.of<TaxiTripProvider>(context, listen: false);
+    tripProvider.startTrip();
+    _sendRequestTrip();
+
+    setState(() {
+      inicialDate = Utility.getCurrentDate();
+      inicialTrip = 1;
+    });
+
+    locat.enableBackgroundMode(enable: true);
+    locat.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 0);
+
+    _locationSubscription =
+        locat.onLocationChanged.listen((LocationData locationData) {
+      setState(() {
+        _currentLocation = locationData;
+
+        if (_polylineCoordinates.isNotEmpty) {
+          double newDistance = _locationService.calculateDistanceInMeters(
+            _polylineCoordinates.last.latitude,
+            _polylineCoordinates.last.longitude,
+            _currentLocation!.latitude,
+            _currentLocation!.longitude,
+          );
+
+          tripProvider.updateTrip(
+              tripProvider.currentTrip!.distanceInMeters + newDistance,
+              secondsElapsed);
+        }
+
+        _polylineCoordinates.add(
+            LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!));
+
+        _updateMarkers();
+      });
+      _updateMapCamera();
+    });
+  }
+
+  void _updateMapCamera() {
+    if (mapController != null) {
+      mapController!.animateCamera(CameraUpdate.newLatLngZoom(
+        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+        15.0,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -919,10 +1018,22 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                 children: <Widget>[
                   GoogleMap(
                     markers: {
-                      if (_initialMarker != null) _initialMarker!,
-                      if (_currentMarker != null) _currentMarker!,
+                      if (_startMarkerPosition != null)
+                        Marker(
+                            markerId: MarkerId('start'),
+                            position: _startMarkerPosition!),
+                      if (_endMarkerPosition != null)
+                        Marker(
+                            markerId: MarkerId('end'),
+                            position: _endMarkerPosition!),
                     },
-                    polylines: _polylines,
+                    polylines: {
+                      Polyline(
+                        polylineId: PolylineId('route'),
+                        color: _colorFromHex(Widgets.colorPrimary),
+                        points: _polylineCoordinates,
+                      ),
+                    },
 
                     //widgetMarkers: widgetMarkers,
                     onMapCreated: (c) {
@@ -1242,9 +1353,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   getMultiplePolyLines() async {
     await Future.forEach(listLocations, (LatLng elem) async {
-      await 
-      
-      _getRoutePolyline(
+      await _getRoutePolyline(
         start: listLocations.first,
         finish: elem,
         color: Colors.green,

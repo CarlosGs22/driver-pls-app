@@ -68,99 +68,6 @@ class _TripListState extends State<TripListAssignedScreen> {
     return Color(int.parse('FF$hexCode', radix: 16));
   }
 
-  _sendRequestOnConfirm(var formParams, int index, var option) {
-    HttpClass.httpData(
-            context,
-            Uri.parse(
-                "https://www.driverplease.net/aplicacion/confirmViaje.php"),
-            formParams,
-            {},
-            "POST")
-        .then((response) {
-      if (response["status"] && response["data"] != null) {
-        Navigator.pop(context);
-        setState(() {
-          _viajes[index].confirmado = option;
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Ocurrió un error'),
-          ),
-        );
-      }
-    });
-  }
-
-  _handleOnConfirmTrip(int index, var idViaje) {
-    return Alert(
-        context: context,
-        type: AlertType.warning,
-        padding: const EdgeInsets.all(0),
-        title: "¡Atención!",
-        desc: "¿Estás seguro de confirmar el viaje?",
-        style: AlertStyle(
-            titleStyle: TextStyle(
-                color: _colorFromHex(Widgets.colorPrimary), fontSize: 17),
-            descStyle: TextStyle(
-                color: _colorFromHex(Widgets.colorPrimary), fontSize: 15)),
-        content: Padding(
-            padding: const EdgeInsets.only(top: 10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: _colorFromHex(Widgets.colorSecundayLight),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(20.0),
-                ),
-              ),
-              //width: width * 0.9,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                          flex: 5,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 3, right: 3),
-                            child: longButtons("Confirmar", () {
-                              var option = "2";
-                              var formParams = {
-                                "id_viaje": idViaje,
-                                "opcion": option
-                              };
-                              _sendRequestOnConfirm(formParams, index, option);
-                            }, color: _colorFromHex(Widgets.colorPrimary)),
-                          )),
-                      Expanded(
-                          flex: 5,
-                          child: Padding(
-                              padding: const EdgeInsets.only(left: 3, right: 3),
-                              child: longButtons("Rechazar", () {
-                                var option = "3";
-                                var formParams = {
-                                  "id_viaje": idViaje,
-                                  "opcion": option
-                                };
-                                _sendRequestOnConfirm(
-                                    formParams, index, option);
-                              }, color: _colorFromHex(Widgets.colorSecundary))))
-                    ],
-                  ),
-                ],
-              ),
-            )),
-        buttons: []).show();
-
-    /*
-    HttpClass.httpData(
-            context,
-            Uri.parse("https://www.driverplease.net/aplicacion/confirmViaje.php"),
-            formParams,
-            {},
-            "POST")
-        .then((response) {
-    });*/
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,17 +111,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                             minVerticalPadding: 0,
                             subtitle: InkWell(
                               onTap: () {
-                                switch (viaje.confirmado) {
-                                  case "1":
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                            'Primero debes confirmar el viaje'),
-                                      ),
-                                    );
-                                    break;
-                                  case "2":
-                                    Navigator.push(
+                                 Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
@@ -223,16 +120,6 @@ class _TripListState extends State<TripListAssignedScreen> {
                                                   redirect: null,
                                                   panelVisible: true,
                                                 )));
-                                    break;
-                                  case "3":
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('El viaje fue rechazado'),
-                                      ),
-                                    );
-                                    break;
-                                  default:
-                                }
                               },
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -310,18 +197,24 @@ class _TripListState extends State<TripListAssignedScreen> {
                             ),
                             leading: InkWell(
                                 onTap: () {
-                                  if (validateNullOrEmptyString(
+                                  /*if (validateNullOrEmptyString(
                                           viaje.confirmado) ==
                                       "1") {
-                                    _handleOnConfirmTrip(index, viaje.idViaje);
-                                  }
+                                    _handleOnConfirmTrip(
+                                        index, viaje.idViaje, viaje);
+                                  }*/
                                 },
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Container(
                                       color: Colors.transparent,
-                                      child: Icon(
+                                      child:Icon(
+                                           Icons.check_circle,
+                                          size: 50,
+                                          color: _colorFromHex(
+                                              Widgets.colorSecundayLight)),
+                                      /*Icon(
                                           viaje.confirmado == "1"
                                               ? Icons.info
                                               : viaje.confirmado == "2"
@@ -329,7 +222,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                                   : Icons.close,
                                           size: 50,
                                           color: _colorFromHex(
-                                              Widgets.colorSecundayLight)),
+                                              Widgets.colorSecundayLight)),*/
                                     ),
                                   ],
                                 ))));

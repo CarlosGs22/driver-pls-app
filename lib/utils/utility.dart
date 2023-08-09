@@ -10,6 +10,9 @@ import 'dart:ui' as ui;
 import 'package:intl/intl.dart'; //for date format
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 class Utility {
   static const String googleMapAPiKey =
       "AIzaSyDp86KOchjHALKYuRNmEBVUXP0vMrOMf-o";

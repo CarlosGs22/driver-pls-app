@@ -21,7 +21,8 @@ class RutaViajeModel {
   String personaTelefono;
   String fechaInicio;
   String fechaFin;
-   String nombreSucursal;
+  String nombreSucursal;
+   String nombreEmpresa;
 
   RutaViajeModel(
       {required this.idRuta,
@@ -44,7 +45,8 @@ class RutaViajeModel {
       required this.personaTelefono,
       required this.fechaInicio,
       required this.fechaFin,
-      required this.nombreSucursal});
+      required this.nombreSucursal,
+      required this.nombreEmpresa});
 
   factory RutaViajeModel.fromJson(Map<String, dynamic> json) {
     return RutaViajeModel(
@@ -68,7 +70,8 @@ class RutaViajeModel {
       personaTelefono: json['personaTelefono'] ?? "",
       fechaInicio: json['fecha_inicio'] ?? "",
       fechaFin: json['fecha_fin'] ?? "",
-      nombreSucursal: json['nombreSucursal'] ?? ""
+      nombreSucursal: json['nombreSucursal'] ?? "",
+      nombreEmpresa: json['nombreEmpresa'] ?? ""
     );
   }
 }
