@@ -23,7 +23,7 @@ class TaxiTrip {
   double get serviceFee => subTotal * serviceFeePercentage;
 
   double get totalCharge {
-    double total = subTotal - serviceFee;
+    double total = initialCharge + distanceCharge + timeCharge;
     return total < minimumCharge ? minimumCharge : total;
   }
 

@@ -310,6 +310,23 @@ setStatusTrip(int status) {
   return res;
 }
 
+setConfirmadoTrip(var confirmado) {
+  var res = "NA";
+  switch (confirmado) {
+    case "1":
+      res = "PENDIENTE";
+      break;
+    case "2":
+      res = "CONFIRMADO";
+      break;
+    case "3":
+      res = "RECHAZADO";
+      break;
+  }
+
+  return res;
+}
+
 List<Widget> listWidget(Map<String, dynamic> mapData) {
   List<Widget> chips = [];
 

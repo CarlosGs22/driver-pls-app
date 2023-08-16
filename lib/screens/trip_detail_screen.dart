@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
-import 'package:driver_please_flutter/models/viaje_resumen_model.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
 import 'package:driver_please_flutter/screens/recibo_viaje_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
@@ -26,14 +25,16 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'drawer/main_drawer.dart';
-
 class TripDetailScreen extends StatefulWidget {
   ViajeModel viaje;
   var redirect;
   bool panelVisible;
 
-  TripDetailScreen({Key? key, required this.viaje, required this.redirect, required this.panelVisible})
+  TripDetailScreen(
+      {Key? key,
+      required this.viaje,
+      required this.redirect,
+      required this.panelVisible})
       : super(key: key);
 
   @override
@@ -74,14 +75,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       });
     } else {
       setState(() {
-        colorListLocal[indexColor] = _colorFromHex(Widgets.colorSecundayLight);
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorPrimary);
       });
     }
   }
 
   setColor() {
     colorListLocal = List.generate(1, (index) {
-      return _colorFromHex(Widgets.colorSecundayLight);
+      return _colorFromHex(Widgets.colorPrimary);
     });
   }
 
@@ -176,7 +177,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       SizedBox(
                           //height: 48,
                           child: TextFormField(
-                              initialValue: "Escribe una incidencia",
+                              initialValue: "",
                               autofocus: false,
                               minLines:
                                   6, // any number you need (It works as the rows for the textarea)
@@ -283,6 +284,128 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  _sendRequestOnConfirm(
+      var formParams, var option, ViajeModel viaje, var redirec) {
+    HttpClass.httpData(
+            context,
+            Uri.parse(
+                "https://www.driverplease.net/aplicacion/confirmViaje.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+      if (response["status"] && response["data"] != null) {
+        Navigator.pop(context);
+
+        if (redirec == "1") {
+          widget.viaje.status = 1;
+           widget.viaje.confirmado = "2";
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => WidgetGoogleMap(
+                        viaje: widget.viaje,
+                        rutaViaje: rutaViajes,
+                      )));
+        } else {
+          widget.viaje.status = 6;
+          widget.viaje.confirmado = "3";
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TripDetailScreen(
+                      viaje: widget.viaje,
+                      redirect: "MAIN",
+                      panelVisible: true,
+                    )),
+            (Route<dynamic> route) => false,
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ocurrió un error'),
+          ),
+        );
+      }
+    });
+  }
+
+  _handleOnConfirmTrip(var idViaje, ViajeModel viaje) {
+    return Alert(
+        context: context,
+        type: AlertType.warning,
+        padding: const EdgeInsets.all(0),
+        title: "¡Atención!",
+        desc: "¿confirmar viaje?",
+        style: AlertStyle(
+            titleStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 17),
+            descStyle: TextStyle(
+                color: _colorFromHex(Widgets.colorPrimary), fontSize: 15)),
+        content: Padding(
+            padding: const EdgeInsets.only(top: 10.0),
+            child: Container(
+              decoration: BoxDecoration(
+                color: _colorFromHex(Widgets.colorSecundayLight),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(20.0),
+                ),
+              ),
+              //width: width * 0.9,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                              padding: const EdgeInsets.only(left: 3, right: 3),
+                              child: longButtons("Rechazar", () {
+                                var option = "3";
+                                var formParams = {
+                                  "id_viaje": idViaje,
+                                  "opcion": option
+                                };
+                                _sendRequestOnConfirm(
+                                    formParams, option, viaje, "2");
+                              },
+                                  color:
+                                      _colorFromHex(Widgets.colorSecundary)))),
+                      Expanded(
+                          flex: 5,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 3, right: 3),
+                            child: longButtons("Confirmar", () {
+                              var option = "2";
+                              var formParams = {
+                                "id_viaje": idViaje,
+                                "opcion": option
+                              };
+                              _sendRequestOnConfirm(
+                                  formParams, option, viaje, "1");
+                            }, color: _colorFromHex(Widgets.colorPrimary)),
+                          )),
+                    ],
+                  ),
+                ],
+              ),
+            )),
+        buttons: []).show();
+
+    /*
+    HttpClass.httpData(
+            context,
+            Uri.parse("https://www.driverplease.net/aplicacion/confirmViaje.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+    });*/
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -305,62 +428,56 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
             child: ListView(
               children: [
-                widget.panelVisible ? 
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 130,
-                      height: 130,
-                      child: ClipOval(
-                        child: Material(
-                          color: _colorFromHex(Widgets.colorPrimary),
-                          child: InkWell(
-                            splashColor:
-                                _colorFromHex(Widgets.colorSecundayLight),
+                widget.panelVisible
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 130,
+                            height: 130,
+                            child: ClipOval(
+                              child: Material(
+                                color: _colorFromHex(Widgets.colorPrimary),
+                                child: InkWell(
+                                  splashColor:
+                                      _colorFromHex(Widgets.colorSecundayLight),
 
-                            onTap: () {
-                              if (widget.viaje.status == 3 ||
-                                  widget.viaje.status == 6) {
-                                return;
-                              }
+                                  onTap: () {
+                                    if (widget.viaje.status == 3 ||
+                                        widget.viaje.status == 6) {
+                                      return;
+                                    }
 
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => WidgetGoogleMap(
-                                            viaje: widget.viaje,
-                                            rutaViaje: rutaViajes,
-                                          )));
-                            },
-                            // button pressed
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                const Icon(
-                                  Icons.moving_sharp,
-                                  color: Colors.white,
-                                  size: 40,
-                                ), // icon
-                                Text(
-                                  setStatusTrip(widget.viaje.status),
-                                  style: const TextStyle(
-                                      fontSize: 18, color: Colors.white),
-                                ), // text
-                              ],
+                                    _handleOnConfirmTrip(
+                                        widget.viaje.idViaje, widget.viaje);
+                                  },
+                                  // button pressed
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      const Icon(
+                                        Icons.moving_sharp,
+                                        color: Colors.white,
+                                        size: 40,
+                                      ), // icon
+                                      Text(
+                                        widget.viaje.confirmado == "3" ? setConfirmadoTrip(widget.viaje.confirmado) : setStatusTrip(widget.viaje.status),
+                                        style: const TextStyle(
+                                            fontSize: 18, color: Colors.white),
+                                      ), // text
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  
-                  const SizedBox(
-                  height: 31,
-                ),
-                  ],
-                ) : SizedBox(),
-                
+                          const SizedBox(
+                            height: 31,
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
                 buildDetailform(
                     Strings.labelTripDate,
                     getFormattedDateFromFormattedString(
@@ -480,14 +597,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                       color:
                                           _colorFromHex(Widgets.colorPrimary),
                                     ),
-
                                     if (validateNullOrEmptyString(
-                                            rutaViajes[index]
-                                                .hora) !=
+                                            rutaViajes[index].hora) !=
                                         null) ...[
                                       Text(
-                                        "Hora " +
-                                            rutaViajes[index].hora,
+                                        "Hora " + rutaViajes[index].hora,
                                         style: TextStyle(
                                             color: _colorFromHex(
                                                 Widgets.colorPrimary),
@@ -497,7 +611,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                   ],
                                 ),
                                 title: Text(
-                                  rutaViajes[index].personaNombre,
+                                  validateNullOrEmptyString(rutaViajes[index]
+                                              .nombreEmpresa) !=
+                                          null
+                                      ? rutaViajes[index].nombreEmpresa
+                                      : rutaViajes[index].personaNombre,
                                   style: TextStyle(
                                       color:
                                           _colorFromHex(Widgets.colorPrimary),
@@ -584,8 +702,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                             fontSize: 12),
                                       ),
                                     ],
-                                    
-                                   
                                   ],
                                 ),
                               ),
@@ -600,39 +716,42 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 const SizedBox(
                   height: 13,
                 ),
-                
-                widget.panelVisible ?
-                SizedBox(
-                  height: 400,
-                  child: GoogleMap(
-                    markers: markers,
-                    onMapCreated: (c) {
-                      _getMarkers();
-                      mapController = c;
-                    },
-                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                      Factory<PanGestureRecognizer>(
-                          () => PanGestureRecognizer()),
-                      Factory<ScaleGestureRecognizer>(
-                          () => ScaleGestureRecognizer()),
-                      Factory<TapGestureRecognizer>(
-                          () => TapGestureRecognizer()),
-                      Factory<EagerGestureRecognizer>(
-                          () => EagerGestureRecognizer()),
-                    },
-                    myLocationButtonEnabled: true,
-                    zoomControlsEnabled: true,
-                    myLocationEnabled: true,
-                    initialCameraPosition: const CameraPosition(
-                        target: LatLng(28.643540, -106.061683), zoom: 14),
-                    mapType: MapType.normal,
-                  ),
-                )
-                : SizedBox() ,
-                  widget.panelVisible ? const SizedBox(
-                  height: 32,
-                ) : SizedBox(),
-                (widget.viaje.status == 1 || widget.viaje.status == 2) && widget.panelVisible  == true
+                widget.panelVisible
+                    ? SizedBox(
+                        height: 400,
+                        child: GoogleMap(
+                          markers: markers,
+                          onMapCreated: (c) {
+                            _getMarkers();
+                            mapController = c;
+                          },
+                          gestureRecognizers: <
+                              Factory<OneSequenceGestureRecognizer>>{
+                            Factory<PanGestureRecognizer>(
+                                () => PanGestureRecognizer()),
+                            Factory<ScaleGestureRecognizer>(
+                                () => ScaleGestureRecognizer()),
+                            Factory<TapGestureRecognizer>(
+                                () => TapGestureRecognizer()),
+                            Factory<EagerGestureRecognizer>(
+                                () => EagerGestureRecognizer()),
+                          },
+                          myLocationButtonEnabled: true,
+                          zoomControlsEnabled: true,
+                          myLocationEnabled: true,
+                          initialCameraPosition: const CameraPosition(
+                              target: LatLng(28.643540, -106.061683), zoom: 14),
+                          mapType: MapType.normal,
+                        ),
+                      )
+                    : SizedBox(),
+                widget.panelVisible
+                    ? const SizedBox(
+                        height: 32,
+                      )
+                    : SizedBox(),
+                (widget.viaje.status == 1 || widget.viaje.status == 2) &&
+                        widget.panelVisible == true
                     ? longButtons("Cancelar viaje", _closeTripAlert,
                         color: _colorFromHex(Widgets.colorPrimary))
                     : const SizedBox(),

@@ -46,7 +46,8 @@ class _TripListState extends State<TripListFinishedScreen> {
         pageNumber: _pageNumber,
         pageSize: _pageSize,
         idUser: prefs.getString('id_con').toString(),
-        status: 3);
+        status: 3,
+        order: "2");
     if (viajes.isNotEmpty) {
       setState(() {
         _viajes = viajes;
@@ -229,7 +230,8 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       pageNumber: _pageNumber,
                                       pageSize: _pageSize,
                                       idUser: idAgent,
-                                      status: 3);
+                                      status: 3,
+                                      order: "2");
                               setState(() {
                                 _viajes = viajes;
                               });
@@ -249,7 +251,8 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       pageNumber: _pageNumber,
                                       pageSize: _pageSize,
                                       idUser: idAgent,
-                                      status: 3);
+                                      status: 3,
+                                      order: "2");
                               setState(() {
                                 _viajes = viajes;
                               });

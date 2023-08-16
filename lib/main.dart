@@ -12,6 +12,8 @@ import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/intl_standalone.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,7 +24,8 @@ class Main extends StatefulWidget {
   State<Main> createState() => _MainState();
 }
 
-void main() {
+Future<void> main() async {
+  Intl.systemLocale = await findSystemLocale();
   runApp(const Main());
 }
 

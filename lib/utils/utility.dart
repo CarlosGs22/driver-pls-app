@@ -7,7 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:ui' as ui;
 
-import 'package:intl/intl.dart';  //for date format
+import 'package:intl/intl.dart'; //for date format
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 class Utility {
@@ -78,11 +81,36 @@ class Utility {
 }
 
 getFormattedDateFromFormattedString(var value) {
-  
-
   try {
     return DateFormat.yMMMEd().format(DateTime.parse(value));
   } catch (e) {
     return value;
   }
 }
+
+String formatTimeSeconds(int seconds) {
+  int hours = seconds ~/ 3600;
+  int minutes = (seconds ~/ 60) % 60;
+  int remainingSeconds = seconds % 60;
+
+  String hoursStr = (hours < 10) ? '0$hours' : '$hours';
+  String minutesStr = (minutes < 10) ? '0$minutes' : '$minutes';
+  String secondsStr =
+      (remainingSeconds < 10) ? '0$remainingSeconds' : '$remainingSeconds';
+
+  return '$hoursStr:$minutesStr:$secondsStr';
+}
+
+ String formatTimeMinutes(double totalMinutes) {
+    print("34344" + totalMinutes.toString());
+
+    int horas = totalMinutes ~/ 60;
+    int minutos = (totalMinutes % 60).toInt();
+    int segundos = ((totalMinutes * 60) % 60).toInt();
+
+    String horasStr = (horas < 10) ? '0$horas' : '$horas';
+    String minutosStr = (minutos < 10) ? '0$minutos' : '$minutos';
+    String segundosStr = (segundos < 10) ? '0$segundos' : '$segundos';
+
+    return '$horasStr:$minutosStr:$segundosStr';
+  }

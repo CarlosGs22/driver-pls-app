@@ -7,6 +7,8 @@ class LocationService {
   StreamSubscription<loc.LocationData>? _locationStream;
   loc.Location location = loc.Location();
 
+  
+
   Future<Position> getCurrentLocation() async {
     log('getCurrentLocation');
 
@@ -27,13 +29,13 @@ class LocationService {
         desiredAccuracy: LocationAccuracy.high);*/
   }
 
-  double calculateDistanceInMeters(Position position1, Position position2) {
+  double calculateDistanceInMeters(var position1Lat,var position1Long,var position2Lat, var position2Long) {
     
     return Geolocator.distanceBetween(
-      position1.latitude,
-      position1.longitude,
-      position2.latitude,
-      position2.longitude,
+      position1Lat,
+      position1Long,
+      position2Lat,
+      position2Long,
     );
   }
 
@@ -63,7 +65,7 @@ class LocationService {
     location.enableBackgroundMode(enable: true);
 
     location.changeSettings(
-        accuracy: loc.LocationAccuracy.high, distanceFilter: 0, interval: 100);
+        accuracy: loc.LocationAccuracy.high, distanceFilter: 0, interval: 1000);
 
     _locationStream = location.onLocationChanged.listen((loc.LocationData currentLocation) {
       Position pos = Position(

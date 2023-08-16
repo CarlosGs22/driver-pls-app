@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -17,12 +18,22 @@ import 'package:driver_please_flutter/utils/widgets.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:widget_marker_google_map/widget_marker_google_map.dart';
+
+import 'package:http/http.dart' as http;
+
+import 'package:location/location.dart' as loc;
+
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+StreamSubscription<LocationData>? _locationSubscription;
 
 class WidgetGoogleMap extends StatefulWidget {
   final ViajeModel viaje;
@@ -54,6 +65,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   PolylinePoints polylinePoints = PolylinePoints();
   int inicialTrip = 0;
 
+  int bandFinishTrip = 0;
+
   CameraPosition _initialLocation =
       const CameraPosition(target: LatLng(0.0, 0.0));
 
@@ -67,6 +80,27 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   String endDate = "";
 
   List<LatLng> polylineCoordinatesCurrent = [];
+
+  Timer? _timer;
+  int secondsElapsed = 0;
+  Timer? timer;
+
+  Marker? _startMarker;
+  Marker? _currentMarker;
+  Polyline? _polyline;
+  loc.Location _locationServicex = loc.Location();
+
+  List<LatLng> _polylineCoordinates = [];
+  Set<Polyline> _polylines = {};
+  LatLng _initialCameraPosition = LatLng(0, 0);
+  //LatLng? _currentLocation;
+  LatLng? _previousLocation;
+  Marker? _initialMarker;
+
+  LatLng? _startMarkerPosition;
+  LatLng? _endMarkerPosition;
+
+  LocationData? _currentLocation;
 
   _getRutaViajes() async {
     List<LatLng> auxListLocations = [];
@@ -82,6 +116,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   @override
   void initState() {
+    initializeDateFormatting();
     _getCurrentLocationMap();
     _getRutaViajes();
     super.initState();
@@ -114,108 +149,48 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       });
     } else {
       setState(() {
-        colorListLocal[indexColor] = _colorFromHex(Widgets.colorGrayLight);
+        colorListLocal[indexColor] = _colorFromHex(Widgets.colorPrimary);
       });
     }
   }
 
   setColor() {
     colorListLocal = List.generate(1, (index) {
-      return _colorFromHex(Widgets.colorGrayLight);
+      return _colorFromHex(Widgets.colorPrimary);
     });
   }
 
   @override
   void dispose() {
-    _locationService.stopLocationUpdates();
+    _timer?.cancel();
+    secondsElapsed = 0;
+    //_closeTrip("CANCEL");
+    _locationSubscription!.cancel();
+
     super.dispose();
   }
 
-  void _startTrip() async {
-    TaxiTripProvider tripProvider =
-        Provider.of<TaxiTripProvider>(context, listen: false);
-    tripProvider.startTrip();
-
-    final Uint8List markerIcon =
-        await Utility.getBytesFromAsset('assets/images/pinAzul.png', 80);
-
-    Position currentPosition = await _locationService.getCurrentLocation();
-
-    List<Position> listPosition = [];
-
-    setState(() {
-      inicialDate = Utility.getCurrentDate();
-      listPosition.add(currentPosition);
-
-      markers.add(Marker(
-          markerId: const MarkerId("inicialLocation"),
-          infoWindow: const InfoWindow(title: ("Inicio")),
-          icon: BitmapDescriptor.fromBytes(markerIcon),
-          position: LatLng(listPosition.last.latitude.toDouble(),
-              listPosition.last.longitude.toDouble()),
-          onTap: () {}));
+  void startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+      setState(() {
+        secondsElapsed++;
+      });
     });
+  }
 
-    _locationService.startLocationUpdates((Position newLoc) async {
-      double newDistance =
-          _locationService.calculateDistanceInMeters(listPosition.last, newLoc);
-
-      setState(() {
-        /*markers.removeWhere(
-            (element) => element.markerId == const MarkerId("currentLocation"));*/
-        markers.add(Marker(
-            infoWindow: const InfoWindow(title: ("Estoy aqui")),
-            markerId: const MarkerId("currentLocation"),
-            icon: BitmapDescriptor.fromBytes(markerIcon),
-            position:
-                LatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
-            onTap: () {}));
-      });
-
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-        Utility.googleMapAPiKey,
-        PointLatLng(listPosition.last.latitude.toDouble(),
-            listPosition.last.longitude.toDouble()),
-        PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
-        travelMode: TravelMode.transit,
-      );
-
-      List<LatLng> auxpolylineCoordinatesCurrent = [];
-
-      if (result.points.isNotEmpty) {
-        for (var point in result.points) {
-          auxpolylineCoordinatesCurrent
-              .add(LatLng(point.latitude, point.longitude));
-        }
-
-        setState(() {
-          polylineCoordinatesCurrent.addAll(auxpolylineCoordinatesCurrent);
-        });
-      }
-
-      PolylineId id = const PolylineId("CurrentPoly");
-      Polyline polyline = Polyline(
-        polylineId: id,
-        color: Colors.deepPurpleAccent,
-        points: polylineCoordinatesCurrent,
-        width: 8,
-      );
-
-      tripProvider.updateTrip(
-          tripProvider.currentTrip!.distanceInMeters + newDistance,
-          tripProvider.currentTrip!.timeInSeconds + 1);
-
-      mapController!.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target: LatLng(
-                  newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
-              zoom: 17)));
-
-      setState(() {
-        polyLines[id] = polyline;
-        inicialTrip = 1;
-        listPosition.add(newLoc);
-      });
+  _sendRequestTrip() {
+    var formParams = {
+      "id_viaje": widget.viaje.idViaje,
+    };
+    HttpClass.httpData(
+            context,
+            Uri.parse("https://www.driverplease.net/aplicacion/startViaje.php"),
+            formParams,
+            {},
+            "POST")
+        .then((response) {
+      print("4423432");
+      print(response);
     });
   }
 
@@ -263,8 +238,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   }
 
   void _finishTrip(BuildContext context, TaxiTrip currentTrip) {
-    int minutes = currentTrip != null ? currentTrip.timeInSeconds ~/ 60 : 0;
-    int seconds = currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
+    //int minutes = currentTrip != null ? currentTrip.timeInSeconds ~/ 60 : 0;
+    //int seconds = currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
 
     Alert(
         onWillPopActive: true,
@@ -337,8 +312,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                       fontWeight: FontWeight.w500)),
                               Text(
                                   currentTrip != null
-                                      ? '$minutes min $seconds s'
-                                      : "0 min 0 s",
+                                      ? formatTimeSeconds(
+                                          currentTrip.timeInSeconds)
+                                      : "00:00:00",
                                   style: GoogleFonts.poppins(
                                       fontSize: 21,
                                       color:
@@ -370,7 +346,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                           SizedBox(
                               //height: 48,
                               child: TextFormField(
-                                  initialValue: "Escribe una incidencia",
+                                  initialValue: "",
                                   autofocus: false,
                                   minLines: 6,
                                   keyboardType: TextInputType.multiline,
@@ -431,10 +407,14 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     int seconds = currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
 
     String distancia = currentTrip.distanceInKilometers.toStringAsFixed(2);
-    String tiempo = "$minutes min $seconds s";
     double bandera = currentTrip.initialCharge;
-    double km = currentTrip.timeRate;
-    double distanciaFija = currentTrip.distanceRate;
+
+
+    print("4324234232343252");
+    print(endDate);
+    print(inicialDate);
+
+
 
     var formParams = json.encode({
       "distancia": distancia,
@@ -513,7 +493,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     TaxiTripProvider tripProvider =
         Provider.of<TaxiTripProvider>(context, listen: false);
     tripProvider.cancelTrip();
-    _locationService.stopLocationUpdates();
+    tripProvider.dispose();
+
+    //_locationService.stopLocationUpdates();
 
     if (option == "FINISH") {
       setState(() {
@@ -525,6 +507,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             value.polylineId != const PolylineId("CurrentPoly"));
 
         inicialTrip = 0;
+        bandFinishTrip = 0;
+
+        timer!.cancel();
       });
     }
 
@@ -538,6 +523,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             value.polylineId == const PolylineId("CurrentPoly"));
 
         inicialTrip = 0;
+        timer!.cancel();
       });
     }
   }
@@ -549,8 +535,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       return;
     }
 
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-        .then((Position position) async {
+    await geo.Geolocator.getCurrentPosition(
+            desiredAccuracy: geo.LocationAccuracy.best)
+        .then((geo.Position position) async {
       setState(() {
         mapController!.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -574,6 +561,406 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     return Color(int.parse('FF$hexCode', radix: 16));
   }
 
+  /*void _startTrip() async {
+    TaxiTripProvider tripProvider =
+        Provider.of<TaxiTripProvider>(context, listen: false);
+    tripProvider.startTrip();
+    _sendRequestTrip();
+
+    final Uint8List markerIcon =
+        await Utility.getBytesFromAsset('assets/images/pinAzul.png', 80);
+
+    geo.Position currentPosition = await _locationService.getCurrentLocation();
+
+    List<geo.Position> listPosition = [];
+
+    setState(() {
+      inicialDate = Utility.getCurrentDate();
+      listPosition.add(currentPosition);
+
+      markers.add(Marker(
+          markerId: const MarkerId("inicialLocation"),
+          infoWindow: const InfoWindow(title: ("Inicio")),
+          icon: BitmapDescriptor.fromBytes(markerIcon),
+          position: LatLng(listPosition.last.latitude.toDouble(),
+              listPosition.last.longitude.toDouble()),
+          onTap: () {}));
+
+      inicialTrip = 1;
+    });
+
+    _locationService.startLocationUpdates((geo.Position newLoc) async {
+      double newDistance = _locationService.calculateDistanceInMeters(
+          listPosition.last.latitude,
+          listPosition.last.longitude,
+          newLoc.altitude,
+          newLoc.longitude);
+
+      setState(() {
+        /*markers.removeWhere(
+            (element) => element.markerId == const MarkerId("currentLocation"));*/
+        markers.add(Marker(
+            infoWindow: const InfoWindow(title: ("Estoy aqui")),
+            markerId: const MarkerId("currentLocation"),
+            flat: true,
+            //anchor: const Offset(0.5, 0.5),
+            icon: BitmapDescriptor.fromBytes(markerIcon),
+            position:
+                LatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
+            onTap: () {}));
+      });
+
+      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        Utility.googleMapAPiKey,
+        PointLatLng(listPosition.last.latitude.toDouble(),
+            listPosition.last.longitude.toDouble()),
+        PointLatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
+        travelMode: TravelMode.driving,
+      );
+
+      List<LatLng> auxpolylineCoordinatesCurrent = [];
+
+      if (result.points.isNotEmpty) {
+        for (var point in result.points) {
+          auxpolylineCoordinatesCurrent
+              .add(LatLng(point.latitude, point.longitude));
+        }
+
+        setState(() {
+          polylineCoordinatesCurrent.addAll(auxpolylineCoordinatesCurrent);
+        });
+      }
+
+      PolylineId id = const PolylineId("CurrentPoly");
+      Polyline polyline = Polyline(
+        polylineId: id,
+        geodesic: true,
+        color: Colors.deepPurpleAccent,
+        points: polylineCoordinatesCurrent,
+        width: 4,
+      );
+
+      tripProvider.updateTrip(
+          tripProvider.currentTrip!.distanceInMeters + newDistance,
+          secondsElapsed);
+
+      setState(() {
+        polyLines[id] = polyline;
+        listPosition.add(newLoc);
+
+        mapController!.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(
+                target: LatLng(
+                    newLoc.latitude.toDouble(), newLoc.longitude.toDouble()),
+                zoom: 17)));
+
+        mapController!.animateCamera(CameraUpdate.newLatLng(
+            LatLng(newLoc.latitude.toDouble(), newLoc.longitude.toDouble())));
+      });
+    });
+  }
+*/
+
+  //////////////////////////////////////////////////////////////
+
+  /*void _startTrip() async {
+    bool serviceEnabled = await _locationServicex.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationServicex.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    PermissionStatus permissionGranted =
+        await _locationServicex.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _locationServicex.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    TaxiTripProvider tripProvider =
+        Provider.of<TaxiTripProvider>(context, listen: false);
+    tripProvider.startTrip();
+    _sendRequestTrip();
+
+    setState(() {
+      inicialDate = Utility.getCurrentDate();
+      inicialTrip = 1;
+    });
+
+    _locationServicex.enableBackgroundMode(enable: true);
+    _locationServicex.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 0);
+
+    _locationSubscription =
+        _locationServicex.onLocationChanged.listen((LocationData locationData) {
+      _updateCurrentLocationMarker(locationData.latitude!.toDouble(),
+          locationData.longitude!.toDouble(), tripProvider);
+    });
+  }
+*/
+  void _updateCurrentLocationMarker(
+      double latitude, double longitude, TaxiTripProvider tripProvider) async {
+    if (_currentLocation == null) {
+      // Crear el marcador inicial en la primera actualización de ubicación
+      setState(() {
+        _initialMarker = Marker(
+          markerId: MarkerId('initial'),
+          position: LatLng(latitude, longitude),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor
+              .hueGreen), // Puedes usar un icono personalizado aquí
+        );
+      });
+    }
+
+    //_previousLocation = _currentLocation;
+    //_currentLocation = LatLng(latitude, longitude);
+
+    if (_previousLocation != null) {
+      // Actualizamos el Polyline para trazar la ruta entre el marcador anterior y el actual
+      //await getRouteBetweenCoordinates(_previousLocation!, _currentLocation!);
+
+      // Movemos la cámara a la nueva ubicación del marcador
+      //mapController!.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
+
+      double newDistance = _locationService.calculateDistanceInMeters(
+          _previousLocation!.latitude,
+          _previousLocation!.longitude,
+          _currentLocation!.latitude,
+          _currentLocation!.longitude);
+
+      tripProvider.updateTrip(
+          tripProvider.currentTrip!.distanceInMeters + newDistance,
+          secondsElapsed);
+    }
+
+    // Actualizamos el marcador de ubicación actual
+    setState(() {
+      _currentMarker = Marker(
+          markerId: MarkerId('current'),
+          //position: _currentLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor
+              .hueRed)); // Puedes usar un icono personalizado aquí
+    });
+  }
+
+  Future<void> getRouteBetweenCoordinates(
+      LatLng origin, LatLng destination) async {
+    final apiKey = Utility
+        .googleMapAPiKey; // Reemplaza 'TU_API_KEY' con tu clave de API de Google Maps Directions
+
+    String url =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
+
+    var response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      if (data['status'] == 'OK') {
+        List<LatLng> points = [];
+        var routes = data['routes'][0]['legs'][0]['steps'];
+        routes.forEach((step) {
+          points.add(LatLng(
+            step['start_location']['lat'],
+            step['start_location']['lng'],
+          ));
+          points.add(LatLng(
+            step['end_location']['lat'],
+            step['end_location']['lng'],
+          ));
+        });
+
+        setState(() {
+          _polylineCoordinates.addAll(
+              points); // Agregamos las coordenadas al final de la lista existente
+          _polylines.clear();
+          _polylines.add(Polyline(
+            polylineId: PolylineId('route'),
+            color: Colors.blue,
+            points: _polylineCoordinates,
+            width: 3,
+          ));
+        });
+      }
+    }
+  }
+
+  /*void _updateStartMarker(double latitude, double longitude) {
+    setState(() {
+      _startMarker = Marker(
+        markerId: MarkerId('start'),
+        position: LatLng(latitude, longitude),
+        infoWindow: InfoWindow(title: 'Inicio'),
+      );
+    });
+  }*/
+
+  /*void _updateCurrentLocationMarker(
+      double latitude, double longitude, TaxiTripProvider tripProvider) {
+    // Si el marcador inicial aún no se ha creado, lo creamos
+    if (_startMarker == null) {
+      _updateStartMarker(latitude, longitude);
+    }
+
+
+    // Actualizamos el marcador de la ubicación actual
+    setState(() {
+      _currentMarker = Marker(
+        markerId: MarkerId('current'),
+        position: LatLng(latitude, longitude),
+        infoWindow: InfoWindow(title: 'Ubicación Actual'),
+      );
+    });
+
+    // Actualizamos el polyline
+    _updatePolyline(LatLng(latitude, longitude), tripProvider);
+
+    // Actualizamos el mapa
+    _updateMap();
+  }*/
+
+  /*void _updatePolyline(
+      LatLng newPosition, TaxiTripProvider tripProvider) async {
+    // Obtenemos la última posición del polyline
+    List<LatLng> polylineCoordinates =
+        _polyline != null ? _polyline!.points : [];
+    LatLng? lastPosition =
+        polylineCoordinates.isNotEmpty ? polylineCoordinates.last : null;
+
+    // Obtenemos la ruta detallada entre la última posición y la nueva posición
+    if (lastPosition != null) {
+      // Creamos la lista de puntos para el polyline
+
+      polylineCoordinates.add(newPosition);
+
+      double newDistance = _locationService.calculateDistanceInMeters(
+          lastPosition.latitude,
+          lastPosition.longitude,
+          newPosition.latitude,
+          newPosition.longitude);
+
+       
+      tripProvider.updateTrip(
+          tripProvider.currentTrip!.distanceInMeters + newDistance,
+          secondsElapsed);
+
+      // Actualizamos el polyline
+      setState(() {
+        _polyline = Polyline(
+          polylineId: PolylineId('ruta'),
+          color: _colorFromHex(Widgets.colorPrimary),
+          points: polylineCoordinates,
+          width: 4
+        );
+      });
+    } else {
+      // Si no hay última posición, simplemente agregamos la nueva posición
+      polylineCoordinates.add(newPosition);
+
+      // Actualizamos el polyline
+      setState(() {
+        _polyline = Polyline(
+          polylineId: PolylineId('ruta'),
+         color: _colorFromHex(Widgets.colorPrimary),
+          points: polylineCoordinates,
+          width: 4
+        );
+      });
+    }
+  }
+
+  void _updateMap() {
+    if (mapController != null && _currentMarker != null) {
+      mapController!.animateCamera(
+        CameraUpdate.newLatLng(_currentMarker!.position),
+      );
+    }
+  }*/
+
+  void _updateMarkers() {
+    if (_currentLocation != null) {
+      if (_startMarkerPosition == null) {
+        _startMarkerPosition =
+            LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+      }
+      _endMarkerPosition =
+          LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+    }
+  }
+
+  void _startTrip() async {
+    var locat = loc.Location();
+    _currentLocation = await locat.getLocation();
+
+    bool serviceEnabled = await _locationServicex.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _locationServicex.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    PermissionStatus permissionGranted =
+        await _locationServicex.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _locationServicex.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    TaxiTripProvider tripProvider =
+        Provider.of<TaxiTripProvider>(context, listen: false);
+    tripProvider.startTrip();
+    _sendRequestTrip();
+
+    setState(() {
+      inicialDate = Utility.getCurrentDate();
+      inicialTrip = 1;
+    });
+
+    locat.enableBackgroundMode(enable: true);
+    locat.changeSettings(
+        accuracy: LocationAccuracy.high, interval: 1000, distanceFilter: 0);
+
+    _locationSubscription =
+        locat.onLocationChanged.listen((LocationData locationData) {
+      setState(() {
+        _currentLocation = locationData;
+
+        if (_polylineCoordinates.isNotEmpty) {
+          double newDistance = _locationService.calculateDistanceInMeters(
+            _polylineCoordinates.last.latitude,
+            _polylineCoordinates.last.longitude,
+            _currentLocation!.latitude,
+            _currentLocation!.longitude,
+          );
+
+          tripProvider.updateTrip(
+              tripProvider.currentTrip!.distanceInMeters + newDistance,
+              secondsElapsed);
+        }
+
+        _polylineCoordinates.add(
+            LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!));
+
+        _updateMarkers();
+      });
+      _updateMapCamera();
+    });
+  }
+
+  void _updateMapCamera() {
+    if (mapController != null) {
+      mapController!.animateCamera(CameraUpdate.newLatLngZoom(
+        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+        15.0,
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -583,28 +970,38 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         appBar: AppBar(
           titleTextStyle: GoogleFonts.poppins(
               fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
-          title: const Text(Strings.labelTaximetro),
           elevation: 0.1,
           backgroundColor: _colorFromHex(Widgets.colorPrimary),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.alt_route_rounded),
-              onPressed: () {
-                showFlexibleBottomSheet(
-                  minHeight: 0,
-                  initHeight: 0.7,
-                  maxHeight: 1,
-                  context: context,
-                  builder: (context, scrollController, bottomSheetOffset) {
-                    return TripDetailScreen(
-                      viaje: widget.viaje,
-                      redirect: null,
-                      panelVisible: false,
+            Row(
+              children: [
+                Text(
+                  Strings.labelTripItinerario,
+                  style: GoogleFonts.poppins(
+                      fontSize: 19,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.alt_route_rounded),
+                  onPressed: () {
+                    showFlexibleBottomSheet(
+                      minHeight: 0,
+                      initHeight: 0.7,
+                      maxHeight: 1,
+                      context: context,
+                      builder: (context, scrollController, bottomSheetOffset) {
+                        return TripDetailScreen(
+                          viaje: widget.viaje,
+                          redirect: null,
+                          panelVisible: false,
+                        );
+                      },
+                      anchors: [0, 0.5, 1],
                     );
                   },
-                  anchors: [0, 0.5, 1],
-                );
-              },
+                )
+              ],
             )
           ],
         ),
@@ -614,19 +1011,30 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             Consumer<TaxiTripProvider>(builder: (context, tripProvider, child) {
           TaxiTrip? currentTrip = tripProvider.currentTrip;
 
-          int minutes =
-              currentTrip != null ? currentTrip.timeInSeconds ~/ 60 : 0;
-          int seconds =
-              currentTrip != null ? currentTrip.timeInSeconds % 60 : 0;
-
           return SizedBox(
               height: height,
               width: width,
               child: Stack(
                 children: <Widget>[
                   GoogleMap(
-                    polylines: Set<Polyline>.of(polyLines.values),
-                    markers: markers,
+                    markers: {
+                      if (_startMarkerPosition != null)
+                        Marker(
+                            markerId: MarkerId('start'),
+                            position: _startMarkerPosition!),
+                      if (_endMarkerPosition != null)
+                        Marker(
+                            markerId: MarkerId('end'),
+                            position: _endMarkerPosition!),
+                    },
+                    polylines: {
+                      Polyline(
+                        polylineId: PolylineId('route'),
+                        color: _colorFromHex(Widgets.colorPrimary),
+                        points: _polylineCoordinates,
+                      ),
+                    },
+
                     //widgetMarkers: widgetMarkers,
                     onMapCreated: (c) {
                       mapController = c;
@@ -756,8 +1164,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                                 fontWeight: FontWeight.w500)),
                                         Text(
                                             currentTrip != null
-                                                ? '$minutes min $seconds s'
-                                                : "0 min 0 s",
+                                                ? formatTimeSeconds(
+                                                    currentTrip.timeInSeconds)
+                                                : "00:00:00",
                                             style: GoogleFonts.poppins(
                                                 fontSize: 18,
                                                 color: _colorFromHex(
@@ -772,6 +1181,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                   onPressed: () {
                                     switch (inicialTrip) {
                                       case 0:
+                                        startTimer();
                                         _startTrip();
                                         break;
                                       case 1:
@@ -799,35 +1209,46 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                     ),
                                   ),
                                 ),
-                                inicialTrip == 1
-                                    ? ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            endDate = Utility.getCurrentDate();
-                                          });
-                                          _handleFinishTrip(
-                                              context, currentTrip!);
-                                        },
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Text(
-                                            "Finalizar Viaje",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 20.0,
+                                bandFinishTrip == 0
+                                    ? inicialTrip == 1
+                                        ? ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                endDate =
+                                                    Utility.getCurrentDate();
+                                                bandFinishTrip = 1;
+                                              });
+
+                                              TaxiTrip? auxcurrentTrip =
+                                                  tripProvider.currentTrip;
+
+                                              tripProvider.stopTrip();
+                                              _timer?.cancel();
+                                              _locationSubscription!.cancel();
+                                              _handleFinishTrip(
+                                                  context, auxcurrentTrip!);
+                                            },
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text(
+                                                "Finalizar Viaje",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 20.0,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          primary: _colorFromHex(
-                                              Widgets.colorPrimary),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20.0),
-                                          ),
-                                        ),
-                                      )
-                                    : const SizedBox(),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: _colorFromHex(
+                                                  Widgets.colorPrimary),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ),
+                                            ),
+                                          )
+                                        : const SizedBox()
+                                    : buildCircularProgress(context),
                               ],
                             ),
                           ),
@@ -949,22 +1370,20 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       required LatLng finish,
       required Color color,
       required String id,
-      int width = 6}) async {
-    // Generates every polyline between start and finish
+      int width = 4}) async {
     final polylinePoints = PolylinePoints();
-    // Holds each polyline coordinate as Lat and Lng pairs
     final List<LatLng> polylineCoordinates = [];
 
     final startPoint = PointLatLng(start.latitude, start.longitude);
     final finishPoint = PointLatLng(finish.latitude, finish.longitude);
 
     final result = await polylinePoints.getRouteBetweenCoordinates(
-      Utility.googleMapAPiKey,
-      startPoint,
-      finishPoint,
-      travelMode: TravelMode.driving,
-      optimizeWaypoints: true,
-    );
+        Utility.googleMapAPiKey, startPoint, finishPoint,
+        travelMode: TravelMode.driving,
+        optimizeWaypoints: false,
+        avoidHighways: false,
+        avoidTolls: false,
+        avoidFerries: true);
 
     if (result.points.isNotEmpty) {
       for (var point in result.points) {
@@ -981,6 +1400,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         consumeTapEvents: true,
         points: polylineCoordinates,
         color: Colors.red,
+        geodesic: true,
         width: 4,
         onTap: () {
           _handlePolylineTap(
@@ -997,22 +1417,22 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     return polyline;
   }
 
-  Future<Position> _determinePosition() async {
+  Future<geo.Position> _determinePosition() async {
     bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    geo.LocationPermission permission;
+    serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      permission = await Geolocator.requestPermission();
+      permission = await geo.Geolocator.requestPermission();
       buidlDefaultFlushBar(
           context, "Error", "El permiso de ubicación esta desabilitado", 4);
 
       return Future.error('Location services are disabled.');
     }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    permission = await geo.Geolocator.checkPermission();
+    if (permission == geo.LocationPermission.denied) {
+      permission = await geo.Geolocator.requestPermission();
+      if (permission == geo.LocationPermission.denied) {
         buidlDefaultFlushBar(
             context, "Error", "El permiso de ubicación esta denegado", 4);
 
@@ -1020,7 +1440,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
+    if (permission == geo.LocationPermission.deniedForever) {
       buidlDefaultFlushBar(
           context,
           "Error",
@@ -1030,6 +1450,6 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           'El permiso de ubicación esta permanentemente denegado\n Debe de permitirlo desde la configuración de la app');
     }
 
-    return await Geolocator.getCurrentPosition();
+    return await geo.Geolocator.getCurrentPosition();
   }
 }

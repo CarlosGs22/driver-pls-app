@@ -98,15 +98,21 @@ class _LoginState extends State<LoginScreen> {
   }
 
   _handleLoginResponse(Map<String, dynamic> response, BuildContext context) {
-    List<dynamic> datauser = json.decode(response["data"]);
+    try {
+      List<dynamic> datauser = json.decode(response["data"]);
+      setState(() {
+        isLoading = false;
+      });
 
-    setState(() {
-      isLoading = false;
-    });
-
-    if (response["status"] && datauser.isNotEmpty) {
-      _loginSuccess(context, json.decode(response["data"]));
-    } else {
+      if (response["status"] && datauser.isNotEmpty) {
+        _loginSuccess(context, json.decode(response["data"]));
+      } else {
+        buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
     }
   }
@@ -118,7 +124,7 @@ class _LoginState extends State<LoginScreen> {
 
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) =>  Dashboard()),
+      MaterialPageRoute(builder: (context) => Dashboard()),
       (Route<dynamic> route) => false,
     );
   }
@@ -374,7 +380,7 @@ class _LoginState extends State<LoginScreen> {
             ],
           ),
         ) ??
-        false; 
+        false;
   }
 
   @override
