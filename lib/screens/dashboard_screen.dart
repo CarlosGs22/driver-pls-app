@@ -1,10 +1,12 @@
-import 'package:driver_please_flutter/screens/MapPage.dart';
+import 'package:driver_please_flutter/providers/agent_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/support_screen.dart';
+import 'package:driver_please_flutter/screens/update_profile.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
   Dashboard({Key? key}) : super(key: key);
@@ -21,41 +23,16 @@ class _DashboardState extends State<Dashboard> {
     return Color(int.parse('FF$hexCode', radix: 16));
   }
 
-  Future<bool> showExitPopup() async {
-    if (openDrawer) {
-      setState(() {
-        openDrawer = false;
-      });
-      Navigator.of(context).pop(false);
-      return false;
-    } else {
-      return await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Atención'),
-              content: const Text('Estas seguro que quieres salir?'),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text("No",
-                        style: TextStyle(
-                            color: _colorFromHex(Widgets.colorPrimary)))),
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text("Si",
-                        style: TextStyle(
-                            color: _colorFromHex(Widgets.colorPrimary)))),
-              ],
-            ),
-          ) ??
-          false;
-    }
+  @override
+  void initState() {
+    super.initState();
+    openDrawer = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<UserProvider>(context);
+
     return WillPopScope(
         onWillPop: showExitPopup,
         child: Scaffold(
@@ -63,6 +40,10 @@ class _DashboardState extends State<Dashboard> {
               if (isOpened) {
                 setState(() {
                   openDrawer = true;
+                });
+              }else{
+                  setState(() {
+                  openDrawer = false;
                 });
               }
             },
@@ -75,111 +56,159 @@ class _DashboardState extends State<Dashboard> {
               elevation: 0.1,
               backgroundColor: _colorFromHex(Widgets.colorPrimary),
               actions: [
-                IconButton(onPressed: (){
-                  Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                   MapPage()));
-
-                }, icon: Icon(Icons.ac_unit))
+                // IconButton(
+                //     onPressed: () {
+                //       Navigator.push(context,
+                //           MaterialPageRoute(builder: (context) => MapPage()));
+                //     },
+                //     icon: Icon(Icons.ac_unit))
               ],
-             
             ),
-            drawer: const MainDrawer(0),
-            body: Center(
-              /** Card Widget **/
-              child: Card(
-                elevation: 50,
-                shadowColor: Colors.black,
-                color: _colorFromHex(Widgets.colorSecundayLight),
-                child: SizedBox(
-                    width: 350,
-                    height: 500,
-                    child: Center(
-                      child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  "assets/images/logoApp.png",
-                                  width: 170,
-                                  height: 170,
-                                ), //CircleAvatar
-                                const SizedBox(
-                                  height: 10,
-                                ), //SizedBox
-                                Text(
-                                  Strings.labelAppNameTitle,
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    color: Colors.green[900],
-                                    fontWeight: FontWeight.w500,
-                                  ), //Textstyle
-                                ), //Text
-                                const SizedBox(
-                                  height: 10,
-                                ), //SizedBox
-                                Text(
-                                  'Si tienes dudas y/o aclaraciones no dudes en usar la opción de soporte',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: _colorFromHex(Widgets.colorPrimary),
-                                  ), //Textstyle
-                                ), //Text
-                                const SizedBox(
-                                  height: 10,
-                                ), //SizedBox
-                                SizedBox(
-                                  width: 115,
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const SupportScreen()));
-                                    },
-                                    style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all(
-                                                _colorFromHex(
-                                                    Widgets.colorPrimary))),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(7),
-                                      child: Row(
-                                        children: const [
-                                          Icon(Icons.touch_app),
-                                          Text('Visitar')
-                                        ],
+            drawer: MainDrawer(0),
+            body: Container(
+                color: Colors.black12,
+                child: Column(children: [
+                  SizedBox(height: 20),
+                  Card(
+                    elevation: 50,
+                    shadowColor: Colors.black,
+                    //color: _colorFromHex(Widgets.colorSecundayLight),
+                    child: SizedBox(
+                        width: 350,
+                        height: 299,
+                        child: Center(
+                          child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      color: Colors.transparent,
+                                      height: 115,
+                                      width: 115,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.transparent,
+                                        backgroundImage: AssetImage(
+                                            "assets/images/user.png"),
                                       ),
                                     ),
-                                  ),
-                                  // RaisedButton is deprecated and should not be used
-                                  // Use ElevatedButton instead
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      "Driver",
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        color: Colors.green[900],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      user.user.name + " " + user.user.lastName,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.green[900],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    SizedBox(
+                                      width: 200,
+                                      child: ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        UpdateProfile()));
+                                          },
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStateProperty.all(
+                                                      _colorFromHex(Widgets
+                                                          .colorPrimary))),
+                                          child: const Text('Mis datos')),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        )),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: FlatButton(
+                      padding: EdgeInsets.all(20),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      color: Color(0xFFF5F6F9),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SupportScreen()));
+                      },
+                      child: Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Expanded(
+                              child: Text(
+                            "Dudas y aclaraciones",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: _colorFromHex(Widgets.colorPrimary),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            color: _colorFromHex(Widgets.colorPrimary),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ]))));
+  }
 
-                                  // child: RaisedButton(
-                                  //   onPressed: () => null,
-                                  //   color: Colors.green,
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.all(4.0),
-                                  //     child: Row(
-                                  //       children: const [
-                                  //         Icon(Icons.touch_app),
-                                  //         Text('Visit'),
-                                  //       ],
-                                  //     ), //Row
-                                  //   ), //Padding
-                                  // ), //RaisedButton
-                                ) //SizedBox
-                              ],
-                            ), //Column
-                          )), //Padding
-                    )), //SizedBox
-              ), //Card
-            )));
+  Future<bool> showExitPopup() async {
+  
+    if (openDrawer) {
+      setState(() {
+        openDrawer = false;
+      });
+
+      Navigator.pop(context);
+
+      return false;
+    }
+    return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Atención'),
+            content: const Text('Estas seguro que quieres salir?'),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text("No",
+                      style: TextStyle(
+                          color: _colorFromHex(Widgets.colorPrimary)))),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Text("Si",
+                      style: TextStyle(
+                          color: _colorFromHex(Widgets.colorPrimary)))),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

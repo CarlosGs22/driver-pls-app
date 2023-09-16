@@ -1,16 +1,15 @@
 import 'dart:convert';
-import 'package:driver_please_flutter/models/categoria_soporte_model.dart';
-import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
+import 'package:driver_please_flutter/models/carro_model.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:flutter/cupertino.dart';
 
-class CategoriaSoporteService {
-  static Future<List<CategoriaSoporteModel>> getCategoriaSoporte(
+class CarroService {
+  static Future<List<CarroModel>> getCarroConductor(
           BuildContext context,var idCon) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getCategoriaSoporte.php?idCon=$idCon"),
+                  "https://www.driverplease.net/aplicacion/getCarroConductor.php?idCon=$idCon"),
               {},
               {},
               "GET")
@@ -18,9 +17,7 @@ class CategoriaSoporteService {
         if (response["status"] && response["code"] == 200) {
           List jsonResponse = json.decode(response["data"]);
 
-          return jsonResponse
-              .map((viaje) => CategoriaSoporteModel.fromJson(viaje))
-              .toList();
+          return jsonResponse.map((carro) => CarroModel.fromJson(carro)).toList();
         } else {
           return [];
         }

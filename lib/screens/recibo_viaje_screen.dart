@@ -34,23 +34,12 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
 
   @override
   Widget build(BuildContext context) {
-    double total_viaje = (
-      double.parse((validateNullOrEmptyNumber(
-                widget.viajeResumen["costo_distancia"]) ??
-            0)
-          .toString()) +
-        double.parse((validateNullOrEmptyNumber(
-                    widget.viajeResumen["costo_tiempo"].toString()) ??
-                0)
-            .toString()) +
-        double.parse((validateNullOrEmptyNumber(
-                    widget.viajeResumen["bandera"].toString()) ??
-                0)
-            .toString()));
+    double total_viaje = (double.parse(
+        (validateNullOrEmptyNumber(widget.viajeResumen["subtotal"]) ?? 0)));
 
     double totalGanancia = (total_viaje -
         ((validateNullOrEmptyString(double.parse(
-                    widget.viajeResumen["costo_comision"].toString()) ) ??
+                widget.viajeResumen["costo_comision"].toString())) ??
             0)));
 
     return Scaffold(
@@ -371,8 +360,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                                   fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              "\$ " +
-                                  (totalGanancia.toStringAsFixed(2)),
+                              "\$ " + (totalGanancia.toStringAsFixed(2)),
                               style: TextStyle(
                                   fontFamily: 'Open Sans',
                                   fontSize: 15,
@@ -397,7 +385,8 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                             ),
                             Text(
                               "\$ " +
-                                  (validateNullOrEmptyString(total_viaje.toStringAsFixed(2)) ??
+                                  (validateNullOrEmptyString(
+                                              total_viaje.toStringAsFixed(2)) ??
                                           "NA")
                                       .toString(),
                               style: TextStyle(

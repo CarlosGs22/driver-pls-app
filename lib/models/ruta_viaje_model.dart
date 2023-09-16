@@ -1,3 +1,4 @@
+import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:flutter/material.dart';
 
 class RutaViajeModel {
@@ -23,6 +24,7 @@ class RutaViajeModel {
   String fechaFin;
   String nombreSucursal;
    String nombreEmpresa;
+  String parada1;
 
   RutaViajeModel(
       {required this.idRuta,
@@ -46,9 +48,12 @@ class RutaViajeModel {
       required this.fechaInicio,
       required this.fechaFin,
       required this.nombreSucursal,
-      required this.nombreEmpresa});
+      required this.nombreEmpresa,
+      required this.parada1});
 
   factory RutaViajeModel.fromJson(Map<String, dynamic> json) {
+
+    Utility.printWrapped(json.toString());
     return RutaViajeModel(
       idRuta: json['id_ruta'],
       idViaje: json['id_viaje'],
@@ -71,7 +76,10 @@ class RutaViajeModel {
       fechaInicio: json['fecha_inicio'] ?? "",
       fechaFin: json['fecha_fin'] ?? "",
       nombreSucursal: json['nombreSucursal'] ?? "",
-      nombreEmpresa: json['nombreEmpresa'] ?? ""
+      nombreEmpresa: json['nombreEmpresa'] ?? "",
+      parada1: json['parada1'] ?? ""
     );
+
+    
   }
 }

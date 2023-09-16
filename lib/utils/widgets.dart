@@ -289,14 +289,31 @@ staticbuildBottomSheet(BuildContext context, Widget widget) {
   );
 }
 
-setStatusTrip(int status) {
+setStatusTrip(String stat, String confirm) {
+  print("DATOS");
+
+  int status = int.parse(stat);
+  int confirmado = int.parse(confirm);
+
   var res = "NA";
   switch (status) {
     case 1:
-      res = "INICIAR";
+      if (confirmado == 1) {
+           res = "CONTINUAR";
+      } else {
+        if (confirmado == 2) {
+          res = "EMPEZAR";
+        }
+      }
       break;
     case 2:
-      res = "CONTINUAR";
+      if (confirmado == 1) {
+        res = "CONTINUAR";
+      } else {
+        if (confirmado == 2) {
+          res = "EMPEZAR";
+        }
+      }
       break;
     case 3:
       res = "FINALIZADO";
@@ -304,7 +321,6 @@ setStatusTrip(int status) {
     case 6:
       res = "CANCELADO";
       break;
-    default:
   }
 
   return res;

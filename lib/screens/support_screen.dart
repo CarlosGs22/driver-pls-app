@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:driver_please_flutter/models/categoria_soporte_model.dart';
+import 'package:driver_please_flutter/providers/agent_provider.dart';
 import 'package:driver_please_flutter/services/categoria_soporte_service.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
@@ -9,6 +10,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:motion_toast/motion_toast.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SupportScreen extends StatefulWidget {
@@ -31,8 +33,10 @@ class _SupportState extends State<SupportScreen> {
   List<String> listaCategoriaSoporte = [];
 
   _getCategoriaSoporte() async {
+     final user = Provider.of<UserProvider>(context, listen: false).user;
+
     List<CategoriaSoporteModel> auxCategoriaSoporte =
-        await CategoriaSoporteService.getCategoriaSoporte(context);
+        await CategoriaSoporteService.getCategoriaSoporte(context,user.id);
 
     List<String> auxLista = [];
 
@@ -125,7 +129,7 @@ class _SupportState extends State<SupportScreen> {
 
       msj += "\n \n $description";
 
-      _setWhatsAppMessage("6142501172", msj, context);
+      _setWhatsAppMessage("6143136361", msj, context);
     }
   }
 

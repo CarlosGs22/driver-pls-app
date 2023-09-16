@@ -15,6 +15,10 @@ class ViajeModel {
   String fechaInicio;
   String fechaFin;
   String confirmado;
+  String poligono;
+  String incidencias;
+  double subtotal;
+  String descripcion;
 
   ViajeModel(
       {required this.idViaje,
@@ -30,7 +34,11 @@ class ViajeModel {
       required this.status,
       required this.fechaInicio,
       required this.fechaFin,
-      required this.confirmado});
+      required this.confirmado,
+      required this.incidencias,
+      required this.poligono,
+      required this.subtotal,
+      required this.descripcion});
 
   factory ViajeModel.fromJson(Map<String, dynamic> json) {
     return ViajeModel(
@@ -47,7 +55,11 @@ class ViajeModel {
       status: int.parse(json['estatus']),
       fechaInicio: json["fecha_inicio"] ?? "-",
       fechaFin: json['fecha_fin'] ?? "-",
-      confirmado: json['confirmado']
+      confirmado: json['confirmado'],
+      incidencias: json['percances'],
+      poligono: json['poligono'],
+      subtotal: double.tryParse(json['subtotal']) ?? 0,
+      descripcion: json["descripcion"] ?? "",
     );
   }
 }

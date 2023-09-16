@@ -82,9 +82,30 @@ class Utility {
 
 getFormattedDateFromFormattedString(var value) {
   try {
-    return DateFormat.yMMMEd().format(DateTime.parse(value));
+    return DateFormat.yMMMMEEEEd().format(DateTime.parse(value));
   } catch (e) {
     return value;
+  }
+}
+
+setFormatDatetime(String originalDateTime) {
+  try {
+    DateTime dateTime = DateTime.parse(originalDateTime);
+    String formattedDate = DateFormat('dd MMMM y HH:mm:ss').format(dateTime);
+
+    return formattedDate;
+  } catch (e) {
+    return originalDateTime;
+  }
+}
+
+setFormatDate(String originalDate) {
+  try {
+    DateTime date = DateTime.parse(originalDate);
+    String formattedDate = DateFormat('dd MMMM y', 'es').format(date);
+    return formattedDate;
+  } catch (e) {
+    return originalDate;
   }
 }
 
@@ -101,16 +122,20 @@ String formatTimeSeconds(int seconds) {
   return '$hoursStr:$minutesStr:$secondsStr';
 }
 
- String formatTimeMinutes(double totalMinutes) {
-    print("34344" + totalMinutes.toString());
+String formatTimeMinutes(double totalMinutes) {
+  print("34344" + totalMinutes.toString());
 
-    int horas = totalMinutes ~/ 60;
-    int minutos = (totalMinutes % 60).toInt();
-    int segundos = ((totalMinutes * 60) % 60).toInt();
+  int horas = totalMinutes ~/ 60;
+  int minutos = (totalMinutes % 60).toInt();
+  int segundos = ((totalMinutes * 60) % 60).toInt();
 
-    String horasStr = (horas < 10) ? '0$horas' : '$horas';
-    String minutosStr = (minutos < 10) ? '0$minutos' : '$minutos';
-    String segundosStr = (segundos < 10) ? '0$segundos' : '$segundos';
+  String horasStr = (horas < 10) ? '0$horas' : '$horas';
+  String minutosStr = (minutos < 10) ? '0$minutos' : '$minutos';
+  String segundosStr = (segundos < 10) ? '0$segundos' : '$segundos';
 
-    return '$horasStr:$minutosStr:$segundosStr';
-  }
+  return '$horasStr:$minutosStr:$segundosStr';
+}
+
+_setBelongTo(var option){
+
+}

@@ -1,7 +1,9 @@
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/gain_screen.dart';
 import 'package:driver_please_flutter/screens/help_screen.dart';
+import 'package:driver_please_flutter/screens/historial_trip_list_screen.dart';
 import 'package:driver_please_flutter/screens/login_screen.dart';
+import 'package:driver_please_flutter/screens/my_car_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_finished_screen.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
@@ -10,11 +12,15 @@ import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class MainDrawer extends StatelessWidget {
-  const MainDrawer(this._selectedDestination, {Key? key}) : super(key: key);
+class MainDrawer extends StatefulWidget {
+  int _selectedDestination = 0;
+  MainDrawer(this._selectedDestination, {Key? key}) : super(key: key);
 
-  final int _selectedDestination;
+  @override
+  State<MainDrawer> createState() => _MainDrawerState();
+}
 
+class _MainDrawerState extends State<MainDrawer> {
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
@@ -41,7 +47,7 @@ class MainDrawer extends StatelessWidget {
             ),
           ),
           Ink(
-            color: _selectedDestination == 0
+            color: widget._selectedDestination == 0
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -51,14 +57,15 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 0,
-                onTap: () => {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Dashboard()))
-                    }),
+                selected: widget._selectedDestination == 0,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Dashboard()));
+                }),
           ),
           Ink(
-            color: _selectedDestination == 1
+            color: widget._selectedDestination == 1
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -68,17 +75,18 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 1,
-                onTap: () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const TripListAssignedScreen()))
-                    }),
+                selected: widget._selectedDestination == 1,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const TripListAssignedScreen()));
+                }),
           ),
           Ink(
-            color: _selectedDestination == 2
+            color: widget._selectedDestination == 2
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -88,34 +96,56 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 2,
-                onTap: () => {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const TripListFinishedScreen()))
-                    }),
+                selected: widget._selectedDestination == 2,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const TripListFinishedScreen()));
+                }),
           ),
+          // Ink(
+          //   color: widget._selectedDestination == 3
+          //       ? _colorFromHex(Widgets.colorSecundayLight)
+          //       : Colors.transparent,
+          //   child: ListTile(
+          //       leading: const Icon(Icons.contact_support_rounded),
+          //       title: Text("Contacto",
+          //           style: GoogleFonts.poppins(
+          //               fontSize: 15,
+          //               color: _colorFromHex(Widgets.colorGray),
+          //               fontWeight: FontWeight.w500)),
+          //       selected: widget._selectedDestination == 3,
+          //       onTap: () {
+          //         Navigator.push(context,
+          //             MaterialPageRoute(builder: (context) => HelpScreen()));
+          //       }),
+          // ),
+
           Ink(
-            color: _selectedDestination == 3
+            color: widget._selectedDestination == 5
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.contact_support_rounded),
-                title: Text("Contacto",
+                leading: const Icon(Icons.history),
+                title: Text("Historial de viajes",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 3,
+                selected: widget._selectedDestination == 5,
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => HelpScreen()));
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HistorialTripListScreen()));
                 }),
           ),
           Ink(
-            color: _selectedDestination == 4
+            color: widget._selectedDestination == 4
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -125,14 +155,38 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 4,
+                selected: widget._selectedDestination == 4,
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => GainScreen(mapGanancias: const {})));
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              GainScreen(mapGanancias: const {})));
                 }),
           ),
+
           Ink(
-            color: _selectedDestination == 5
+            color: widget._selectedDestination == 7
+                ? _colorFromHex(Widgets.colorSecundayLight)
+                : Colors.transparent,
+            child: ListTile(
+                leading: const Icon(Icons.car_repair),
+                title: Text("Mis autos",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: _colorFromHex(Widgets.colorGray),
+                        fontWeight: FontWeight.w500)),
+                selected: widget._selectedDestination == 7,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MyCarScreen()));
+                }),
+          ),
+
+          Ink(
+            color: widget._selectedDestination == 6
                 ? _colorFromHex(Widgets.colorSecundayLight)
                 : Colors.transparent,
             child: ListTile(
@@ -142,8 +196,9 @@ class MainDrawer extends StatelessWidget {
                         fontSize: 15,
                         color: _colorFromHex(Widgets.colorGray),
                         fontWeight: FontWeight.w500)),
-                selected: _selectedDestination == 5,
+                selected: widget._selectedDestination == 5,
                 onTap: () {
+                  Navigator.pop(context);
                   UserPreferences().removeUser();
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(

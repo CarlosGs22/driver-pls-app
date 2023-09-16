@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:driver_please_flutter/providers/agent_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:motion_toast/motion_toast.dart';
+import 'package:provider/provider.dart';
 
 class GainScreen extends StatefulWidget {
   Map<String, dynamic> mapGanancias = {};
@@ -37,24 +39,46 @@ class _GainScreenState extends State<GainScreen> {
 
   bool isLoading = false;
 
+  bool loadData = false;
+
   @override
   void initState() {
-    dateInicialController.text = "";
-    dateFinalController.text = "";
+     final DateTime now = DateTime.now();
+  final DateFormat formatter = DateFormat('yyyy-MM-dd');
+
+
+    dateInicialController.text =  formatter.format(now);
+    dateFinalController.text =  formatter.format(now);
+    
     super.initState();
+
+    if (validateNullOrEmptyString(widget.mapGanancias["fecha_inicial"]) !=
+        null) {
+      dateInicialController.text = widget.mapGanancias["fecha_inicial"];
+    }
+
+    if (validateNullOrEmptyString(widget.mapGanancias["fecha_final"]) != null) {
+      dateFinalController.text = widget.mapGanancias["fecha_final"];
+    }
+
+    if (widget.mapGanancias["option"] == null) {
+      _handleInicial(context);
+    }
   }
 
-  _filterResponse(
-    BuildContext context,
-  ) async {
-    var txtFechaInicial = dateInicialController.text;
-    var txtFechaFinal = dateFinalController.text;
-    var idConductor = 4;
+  _handleInicial(BuildContext context) {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    var idConductor = user.id;
+    setState(() {
+      isLoading = true;
+       loadData = true;
+    });
 
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=&fecha_final=&id_conductor=$idConductor"),
             {},
             {},
             "POST")
@@ -62,6 +86,47 @@ class _GainScreenState extends State<GainScreen> {
       Utility.printWrapped(response.toString());
       setState(() {
         isLoading = false;
+       
+      });
+
+      if (!response["status"] ||
+          response["data"] == null ||
+          (response["data"] as List).isEmpty) {
+        MotionToast.error(
+                title: const Text("Error"),
+                description: const Text("No hay datos que mostrar"))
+            .show(context);
+        return;
+      }
+
+      Map<String, dynamic> mapGanancias =
+          json.decode(json.encode(response["data"][0]));
+
+      if (mapGanancias.isNotEmpty) {
+        widget.mapGanancias = mapGanancias;
+      }
+    });
+  }
+
+  _filterResponse(BuildContext context, var option) {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    var txtFechaInicial = dateInicialController.text;
+    var txtFechaFinal = dateFinalController.text;
+    var idConductor = user.id;
+
+    HttpClass.httpData(
+            context,
+            Uri.parse(
+                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+            {},
+            {},
+            "GET")
+        .then((response) {
+      Utility.printWrapped(response.toString());
+      setState(() {
+        isLoading = false;
+        loadData = true;
       });
 
       if (!response["status"] ||
@@ -81,14 +146,19 @@ class _GainScreenState extends State<GainScreen> {
           json.decode(json.encode(response["data"][0]));
 
       if (mapGanancias.isNotEmpty) {
-        mapGanancias.addAll({"fecha_inicial": dateInicialController.text});
-        mapGanancias.addAll({"fecha_final": dateFinalController.text});
-
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => GainScreen(mapGanancias: mapGanancias)));
-      } else {}
+        if (option == "INICIAL") {
+          widget.mapGanancias = mapGanancias;
+        } else {
+          mapGanancias.addAll({"option" : "SEARCH"});
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      GainScreen(mapGanancias: mapGanancias)));
+        }
+      } else {
+        widget.mapGanancias = {};
+      }
     });
   }
 
@@ -115,7 +185,7 @@ class _GainScreenState extends State<GainScreen> {
 
     if (form!.validate()) {
       form.save();
-      _filterResponse(context);
+      _filterResponse(context, "FORM");
     }
   }
 
@@ -234,18 +304,9 @@ class _GainScreenState extends State<GainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (validateNullOrEmptyString(widget.mapGanancias["fecha_inicial"]) !=
-        null) {
-      dateInicialController.text = widget.mapGanancias["fecha_inicial"];
-    }
-
-    if (validateNullOrEmptyString(widget.mapGanancias["fecha_final"]) != null) {
-      dateFinalController.text = widget.mapGanancias["fecha_final"];
-    }
-
-    return WillPopScope(
-        onWillPop: showExitPopup,
-        child: Scaffold(
+    // return WillPopScope(
+    //     onWillPop: showExitPopup,
+        return Scaffold(
             resizeToAvoidBottomInset: false,
             onDrawerChanged: (isOpened) {
               if (isOpened) {
@@ -263,7 +324,7 @@ class _GainScreenState extends State<GainScreen> {
               elevation: 0.1,
               backgroundColor: _colorFromHex(Widgets.colorPrimary),
             ),
-            drawer: const MainDrawer(4),
+            drawer:  MainDrawer(4),
             body: isLoading
                 ? buildCircularProgress(context)
                 : Column(
@@ -280,6 +341,7 @@ class _GainScreenState extends State<GainScreen> {
                                     leading: const Icon(
                                         Icons.calendar_today_outlined),
                                     title: TextFormField(
+                                      readOnly: true,
                                       controller: dateInicialController,
                                       decoration: const InputDecoration(
                                         hintText: 'Selecciona fecha inicial',
@@ -290,11 +352,12 @@ class _GainScreenState extends State<GainScreen> {
                                       onTap: () async {
                                         DateTime? pickedDate =
                                             await showDatePicker(
+                                               locale:  const Locale('es', 'MX'),
                                                 context: context,
                                                 initialDate: DateTime
-                                                    .now(), //get today's date
+                                                    .now(), 
                                                 firstDate: DateTime(
-                                                    2000), //DateTime.now() - not to allow to choose before today.
+                                                    2000), 
                                                 lastDate: DateTime(2101));
 
                                         if (pickedDate != null) {
@@ -315,6 +378,7 @@ class _GainScreenState extends State<GainScreen> {
                                     leading: const Icon(
                                         Icons.calendar_today_outlined),
                                     title: TextFormField(
+                                         readOnly: true,
                                       controller: dateFinalController,
                                       decoration: const InputDecoration(
                                         hintText: 'Selecciona fecha final',
@@ -325,11 +389,13 @@ class _GainScreenState extends State<GainScreen> {
                                       onTap: () async {
                                         DateTime? pickedDate =
                                             await showDatePicker(
+                                              locale:  const Locale('es', 'MX'),
+                                              
                                                 context: context,
                                                 initialDate: DateTime
-                                                    .now(), //get today's date
+                                                    .now(), 
                                                 firstDate: DateTime(
-                                                    2000), //DateTime.now() - not to allow to choose before today.
+                                                    2000), 
                                                 lastDate: DateTime(2101));
 
                                         if (pickedDate != null) {
@@ -382,11 +448,7 @@ class _GainScreenState extends State<GainScreen> {
                                               widget
                                                   .mapGanancias["total_viajes"],
                                               "Periodo",
-                                              (widget.mapGanancias[
-                                                      "fecha_inicial"] +
-                                                  " / " +
-                                                  widget.mapGanancias[
-                                                      "fecha_final"]),
+                                              (widget.mapGanancias["periodo"]),
                                               23),
                                         ],
                                       ),
@@ -397,7 +459,7 @@ class _GainScreenState extends State<GainScreen> {
                             )
                           : const SizedBox()
                     ],
-                  )));
+                  ));
   }
 
   Future<bool> showExitPopup() async {

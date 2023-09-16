@@ -63,6 +63,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   ExpandedTileController? _controllerRecibo;
 
+  ExpandedTileController? _controllerIncidencia;
+
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
@@ -135,6 +137,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     _controller = ExpandedTileController(isExpanded: false);
     _controllerTarifa = ExpandedTileController(isExpanded: false);
     _controllerRecibo = ExpandedTileController(isExpanded: false);
+    _controllerIncidencia = ExpandedTileController(isExpanded: false);
+
     super.initState();
     _getRutaViajes();
     _getViajeResumen();
@@ -162,55 +166,65 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 color: _colorFromHex(Widgets.colorPrimary), fontSize: 15)),
         content: Padding(
             padding: const EdgeInsets.only(top: 10.0),
-            child: Container(
-                decoration: BoxDecoration(
-                  color: _colorFromHex(Widgets.colorSecundayLight),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(20.0),
-                  ),
-                ),
-                //width: width * 0.9,
-                child: Form(
+            child: Form(
                   key: formIncidenceKey,
                   child: Column(
                     children: [
                       SizedBox(
                           //height: 48,
-                          child: TextFormField(
-                              initialValue: "",
-                              autofocus: false,
-                              minLines:
-                                  6, // any number you need (It works as the rows for the textarea)
-                              keyboardType: TextInputType.multiline,
-                              maxLines: null,
-                              validator: (value) =>
-                                  validateField(value.toString()),
-                              onChanged: (value) => _setStateColor(value, 0),
-                              onSaved: (value) => incidencia = value.toString(),
-                              decoration: InputDecoration(
-                                prefixIcon: Icon(Icons.speaker_notes_sharp,
-                                    color: colorListLocal[0]),
-                                hintText: Strings.hintIncidence,
-                                hintStyle: GoogleFonts.poppins(
-                                    fontSize: 17, color: colorListLocal[0]),
-                                filled: true,
-                                fillColor: Colors.white,
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                  borderSide: BorderSide(
-                                    color: colorListLocal[0],
-                                  ),
-                                ),
-                                border: const OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(4.0))),
-                                errorStyle:
-                                    GoogleFonts.poppins(color: Colors.red),
-                              ),
-                              style: GoogleFonts.poppins(
-                                  color: colorListLocal[0]))),
+                          child: //height: 48,
+                              Padding(
+                                  padding: EdgeInsets.only(top: 13, bottom: 13),
+                                  child: TextFormField(
+                                      initialValue: "",
+                                      autofocus: false,
+                                      minLines:
+                                          6, // any number you need (It works as the rows for the textarea)
+                                      keyboardType: TextInputType.multiline,
+                                      maxLines: null,
+                                      validator: (value) =>
+                                          validateField(value.toString()),
+                                      onChanged: (value) =>
+                                          _setStateColor(value, 0),
+                                      onSaved: (value) =>
+                                          incidencia = value.toString(),
+                                      decoration: InputDecoration(
+                                        prefixIcon: Icon(
+                                            Icons.speaker_notes_sharp,
+                                            color: colorListLocal[0]),
+                                        hintText: Strings.hintIncidence,
+                                        hintStyle: GoogleFonts.poppins(
+                                            fontSize: 17,
+                                            color: colorListLocal[0]),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(4.0),
+                                          borderSide: BorderSide(
+                                            color: colorListLocal[0],
+                                          ),
+                                        ),
+                                        border: const OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(4.0))),
+                                        errorStyle: GoogleFonts.poppins(
+                                            color: Colors.red),
+                                      ),
+                                      style: GoogleFonts.poppins(
+                                          color: colorListLocal[0])))),
                       Row(
                         children: [
+                          Expanded(
+                              flex: 5,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 3, right: 3),
+                                  child: longButtons("Cancelar", () {
+                                    Navigator.pop(context);
+                                  },
+                                      color: _colorFromHex(
+                                          Widgets.colorSecundary)))),
                           Expanded(
                               flex: 5,
                               child: Padding(
@@ -221,21 +235,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                   _handleCloseTrip();
                                 }, color: _colorFromHex(Widgets.colorPrimary)),
                               )),
-                          Expanded(
-                              flex: 5,
-                              child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 3, right: 3),
-                                  child: longButtons("Cancelar", () {
-                                    Navigator.pop(context);
-                                  },
-                                      color: _colorFromHex(
-                                          Widgets.colorSecundary))))
                         ],
                       ),
                     ],
                   ),
-                ))),
+                )),
         buttons: []).show();
   }
 
@@ -268,6 +272,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
       Map<String, dynamic> response, BuildContext context) {
     Navigator.pop(context);
     if (response["status"]) {
+      widget.viaje.status = 6;
+      widget.viaje.confirmado = "2";
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -299,14 +305,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
         if (redirec == "1") {
           widget.viaje.status = 1;
-           widget.viaje.confirmado = "2";
+          widget.viaje.confirmado = "2";
 
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => WidgetGoogleMap(
+                  builder: (context) => TripDetailScreen(
+                        panelVisible: true,
                         viaje: widget.viaje,
-                        rutaViaje: rutaViajes,
+                        redirect: "MAIN",
                       )));
         } else {
           widget.viaje.status = 6;
@@ -339,7 +346,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         type: AlertType.warning,
         padding: const EdgeInsets.all(0),
         title: "¡Atención!",
-        desc: "¿confirmar viaje?",
+        desc: "¿Aceptar viaje?",
         style: AlertStyle(
             titleStyle: TextStyle(
                 color: _colorFromHex(Widgets.colorPrimary), fontSize: 17),
@@ -378,7 +385,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           flex: 5,
                           child: Padding(
                             padding: const EdgeInsets.only(left: 3, right: 3),
-                            child: longButtons("Confirmar", () {
+                            child: longButtons("Aceptar", () {
                               var option = "2";
                               var formParams = {
                                 "id_viaje": idViaje,
@@ -408,322 +415,549 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: showExitPopup,
-        child: Scaffold(
-          onDrawerChanged: (isOpened) {
-            if (isOpened) {
-              setState(() {
-                openDrawer = true;
-              });
-            }
-          },
-          appBar: AppBar(
-            title: const Text(Strings.labelDetailTrip),
-            elevation: 0.1,
-            backgroundColor: _colorFromHex(Widgets.colorPrimary),
-          ),
-          //drawer: const MainDrawer(0),
-          body: Container(
-            padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
-            child: ListView(
-              children: [
-                widget.panelVisible
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 130,
-                            height: 130,
-                            child: ClipOval(
-                              child: Material(
-                                color: _colorFromHex(Widgets.colorPrimary),
-                                child: InkWell(
-                                  splashColor:
-                                      _colorFromHex(Widgets.colorSecundayLight),
+    List<LatLng> listaLatLong = [];
 
-                                  onTap: () {
-                                    if (widget.viaje.status == 3 ||
-                                        widget.viaje.status == 6) {
-                                      return;
-                                    }
+    if (validateNullOrEmptyString(widget.viaje.poligono) != null) {
+      listaLatLong = (json.decode(widget.viaje.poligono) as List<dynamic>)
+          .map<LatLng>((dynamic coords) => LatLng(coords[0], coords[1]))
+          .toList();
+    }
 
-                                    _handleOnConfirmTrip(
-                                        widget.viaje.idViaje, widget.viaje);
-                                  },
-                                  // button pressed
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      const Icon(
-                                        Icons.moving_sharp,
-                                        color: Colors.white,
-                                        size: 40,
-                                      ), // icon
-                                      Text(
-                                        widget.viaje.confirmado == "3" ? setConfirmadoTrip(widget.viaje.confirmado) : setStatusTrip(widget.viaje.status),
-                                        style: const TextStyle(
-                                            fontSize: 18, color: Colors.white),
-                                      ), // text
-                                    ],
-                                  ),
-                                ),
+    // return WillPopScope(
+    //     onWillPop: showExitPopup,
+    //     child:
+    return Scaffold(
+      onDrawerChanged: (isOpened) {
+        if (isOpened) {
+          setState(() {
+            openDrawer = true;
+          });
+        }
+      },
+      appBar: AppBar(
+        title: const Text(Strings.labelDetailTrip),
+        elevation: 0.1,
+        backgroundColor: _colorFromHex(Widgets.colorPrimary),
+      ),
+      //drawer: const MainDrawer(0),
+      body: Container(
+        padding: const EdgeInsets.only(left: 16, top: 25, right: 16),
+        child: ListView(
+          children: [
+            widget.panelVisible
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 130,
+                        height: 130,
+                        child: ClipOval(
+                          child: Material(
+                            color: _colorFromHex(Widgets.colorPrimary),
+                            child: InkWell(
+                              splashColor:
+                                  _colorFromHex(Widgets.colorSecundayLight),
+
+                              onTap: () {
+                                if (widget.viaje.status == 3 ||
+                                    widget.viaje.status == 6) {
+                                  return;
+                                }
+
+                                if (widget.viaje.status == 1 &&
+                                    widget.viaje.confirmado == "2") {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => WidgetGoogleMap(
+                                                viaje: widget.viaje,
+                                                rutaViaje: rutaViajes,
+                                              )));
+                                } else {
+                                  _handleOnConfirmTrip(
+                                      widget.viaje.idViaje, widget.viaje);
+                                }
+                              },
+                              // button pressed
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  const Icon(
+                                    Icons.moving_sharp,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ), // icon
+                                  Text(
+                                    setStatusTrip(
+                                        widget.viaje.status.toString(),
+                                        widget.viaje.confirmado.toString()),
+                                    style: const TextStyle(
+                                        fontSize: 18, color: Colors.white),
+                                  ), // text
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(
-                            height: 31,
-                          ),
-                        ],
-                      )
-                    : SizedBox(),
-                buildDetailform(
-                    Strings.labelTripDate,
-                    getFormattedDateFromFormattedString(
-                        widget.viaje.fechaViaje),
-                    Strings.labelTripHour,
-                    widget.viaje.horaViaje,
-                    "1"),
-                buildDetailform(
-                    Strings.labelTripLocation,
-                    widget.viaje.nombreSucursal,
-                    Strings.labelTripCompany,
-                    widget.viaje.nombreEmpresa,
-                    "2"),
-                buildDetailform(
-                    Strings.labelTripType,
-                    widget.viaje.tipo,
-                    Strings.labelTripOccupants,
-                    widget.viaje.ocupantes.toString(),
-                    "3"),
-                buildDetailform(
-                    Strings.labelTripStatus,
-                    Utility.setStatusTrip(widget.viaje.status.toString()),
-                    "",
-                    "",
-                    "4"),
-                const SizedBox(
-                  height: 13,
-                ),
-                buildDetailform(
-                    Strings.labelTripInicialDate,
-                    widget.viaje.fechaInicio,
-                    Strings.labelTripEndDate,
-                    widget.viaje.fechaFin,
-                    "5"),
-                const SizedBox(
-                  height: 13,
-                ),
-                viajeResumen["estatus"].toString() == "3" ||
-                        viajeResumen["estatus"].toString() == "6"
-                    ? ExpandedTile(
-                        theme: ExpandedTileThemeData(
-                          headerColor:
-                              _colorFromHex(Widgets.colorSecundayLight),
-                          headerRadius: 5.0,
-                          headerPadding: const EdgeInsets.all(10),
-                          headerSplashColor:
-                              _colorFromHex(Widgets.colorPrimary),
-                          contentBackgroundColor: Colors.transparent,
-                          contentPadding: const EdgeInsets.all(0),
-                          contentRadius: 2.0,
                         ),
-                        controller: _controllerRecibo!,
-                        title: Text(
-                          "Recibo de pago",
-                          style: TextStyle(
-                            color: _colorFromHex(Widgets.colorPrimary),
-                            fontSize: 16,
-                          ),
-                        ),
-                        content: SizedBox(),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ReciboViajeScreen(
-                                        viajeResumen: viajeResumen,
-                                      )));
-                        },
-                      )
-                    : SizedBox(),
-                const SizedBox(
-                  height: 13,
-                ),
-                ExpandedTile(
-                  theme: ExpandedTileThemeData(
-                    headerColor: _colorFromHex(Widgets.colorSecundayLight),
-                    headerRadius: 5.0,
-                    headerPadding: const EdgeInsets.all(10),
-                    headerSplashColor: _colorFromHex(Widgets.colorPrimary),
-                    contentBackgroundColor: Colors.transparent,
-                    contentPadding: const EdgeInsets.all(0),
-                    contentRadius: 2.0,
-                  ),
-                  controller: _controller!,
-                  title: Text(
-                    Strings.labelTripItinerario,
-                    style: TextStyle(
-                      color: _colorFromHex(Widgets.colorPrimary),
-                      fontSize: 16,
+                      ),
+                      const SizedBox(
+                        height: 31,
+                      ),
+                    ],
+                  )
+                : SizedBox(),
+            buildDetailform(
+                Strings.labelTripDate,
+                getFormattedDateFromFormattedString(widget.viaje.fechaViaje),
+                Strings.labelTripHour,
+                widget.viaje.horaViaje,
+                "1"),
+            buildDetailform(
+                Strings.labelTripLocation,
+                widget.viaje.nombreSucursal,
+                Strings.labelTripCompany,
+                widget.viaje.nombreEmpresa,
+                "2"),
+            buildDetailform(
+                Strings.labelTripType,
+                widget.viaje.tipo,
+                Strings.labelTripOccupants,
+                widget.viaje.ocupantes.toString(),
+                "3"),
+            buildDetailform(
+                Strings.labelTripId,
+                widget.viaje.idViaje,
+                Strings.labelTripStatus,
+                setStatusTrip(widget.viaje.status.toString(),
+                    widget.viaje.confirmado.toString()),
+                "4"),
+            const SizedBox(
+              height: 13,
+            ),
+            buildDetailform(
+                Strings.labelTripInicialDate,
+                widget.viaje.fechaInicio,
+                Strings.labelTripEndDate,
+                widget.viaje.fechaFin,
+                "5"),
+            const SizedBox(
+              height: 13,
+            ),
+            viajeResumen["estatus"].toString() == "3" ||
+                    viajeResumen["estatus"].toString() == "6"
+                ? ExpandedTile(
+                    theme: ExpandedTileThemeData(
+                      headerColor: _colorFromHex(Widgets.colorSecundayLight),
+                      headerRadius: 5.0,
+                      headerPadding: const EdgeInsets.all(10),
+                      headerSplashColor: _colorFromHex(Widgets.colorPrimary),
+                      contentBackgroundColor: Colors.transparent,
+                      contentPadding: const EdgeInsets.all(0),
+                      contentRadius: 2.0,
                     ),
-                  ),
-                  content: SingleChildScrollView(
-                    physics: const ScrollPhysics(),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return Card(
-                              child: ListTile(
-                                leading: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Parada " + (index + 1).toString(),
-                                      style: TextStyle(
-                                          color: _colorFromHex(
-                                              Widgets.colorPrimary),
-                                          fontSize: 14),
-                                    ),
-                                    Icon(
-                                      Icons.room_outlined,
-                                      size: 16,
-                                      color:
-                                          _colorFromHex(Widgets.colorPrimary),
-                                    ),
-                                    if (validateNullOrEmptyString(
-                                            rutaViajes[index].hora) !=
-                                        null) ...[
-                                      Text(
-                                        "Hora " + rutaViajes[index].hora,
-                                        style: TextStyle(
-                                            color: _colorFromHex(
-                                                Widgets.colorPrimary),
-                                            fontSize: 15),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                title: Text(
-                                  validateNullOrEmptyString(rutaViajes[index]
-                                              .nombreEmpresa) !=
-                                          null
-                                      ? rutaViajes[index].nombreEmpresa
-                                      : rutaViajes[index].personaNombre,
+                    controller: _controllerRecibo!,
+                    title: Text(
+                      "Recibo de pago",
+                      style: TextStyle(
+                        color: _colorFromHex(Widgets.colorPrimary),
+                        fontSize: 16,
+                      ),
+                    ),
+                    content: SizedBox(),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReciboViajeScreen(
+                                    viajeResumen: viajeResumen,
+                                  )));
+                    },
+                  )
+                : SizedBox(),
+            const SizedBox(
+              height: 13,
+            ),
+
+            ExpandedTile(
+              theme: ExpandedTileThemeData(
+                headerColor: _colorFromHex(Widgets.colorSecundayLight),
+                headerRadius: 5.0,
+                headerPadding: const EdgeInsets.all(10),
+                headerSplashColor: _colorFromHex(Widgets.colorPrimary),
+                contentBackgroundColor: Colors.transparent,
+                contentPadding: const EdgeInsets.all(0),
+                contentRadius: 2.0,
+              ),
+              controller: _controller!,
+              title: Text(
+                Strings.labelTripItinerario,
+                style: TextStyle(
+                  color: _colorFromHex(Widgets.colorPrimary),
+                  fontSize: 16,
+                ),
+              ),
+              content: SingleChildScrollView(
+                physics: const ScrollPhysics(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            leading: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Parada " + (index + 1).toString(),
                                   style: TextStyle(
                                       color:
                                           _colorFromHex(Widgets.colorPrimary),
                                       fontSize: 14),
                                 ),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.phone),
+                                Icon(
+                                  Icons.room_outlined,
+                                  size: 16,
                                   color: _colorFromHex(Widgets.colorPrimary),
-                                  onPressed: validateNullOrEmptyString(
-                                              rutaViajes[index]
-                                                  .personaTelefono) !=
-                                          null
-                                      ? () async {
-                                          Uri link = Uri(
-                                            scheme: 'tel',
-                                            path: rutaViajes[index]
-                                                .personaTelefono,
-                                          );
-
-                                          try {
-                                            if (await canLaunchUrl(link)) {
-                                              await launchUrl(link,
-                                                  mode: LaunchMode
-                                                      .externalApplication);
-                                            } else {
-                                              MotionToast.error(
-                                                      title:
-                                                          const Text("Error"),
-                                                      description: const Text(
-                                                          "No se puede abrir el enlace"))
-                                                  .show(context);
-                                            }
-                                          } catch (error) {
-                                            print("AKIII");
-                                            print(error);
-                                            MotionToast.error(
-                                                    title: const Text("Error"),
-                                                    description: const Text(
-                                                        "Error No se puede abrir el enlace"))
-                                                .show(context);
-                                          }
-                                        }
-                                      : null,
                                 ),
-                                subtitle: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                if (validateNullOrEmptyString(
+                                        rutaViajes[index].hora) !=
+                                    null) ...[
+                                  Text(
+                                    "Hora " + rutaViajes[index].hora,
+                                    style: TextStyle(
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
+                                        fontSize: 15),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            title: validateNullOrEmptyString(
+                                            rutaViajes[index].parada1) !=
+                                        null &&
+                                    index == 0
+                                ? Text(
+                                    rutaViajes[index].parada1,
+                                    style: TextStyle(
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
+                                        fontSize: 12),
+                                  )
+                                : validateNullOrEmptyString(
+                                            rutaViajes[index].personaNombre) !=
+                                        null
+                                    ? Text(
+                                        rutaViajes[index].personaNombre,
+                                        style: TextStyle(
+                                            color: _colorFromHex(
+                                                Widgets.colorPrimary),
+                                            fontSize: 12),
+                                      )
+                                    : Text(
+                                        "NA",
+                                        style: TextStyle(
+                                            color: _colorFromHex(
+                                                Widgets.colorPrimary),
+                                            fontSize: 12),
+                                      ),
+                            subtitle: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 5),
+                                if (validateNullOrEmptyString(
+                                            rutaViajes[index].parada1) !=
+                                        null &&
+                                    index == 0) ...[
+                                  Text(
+                                    "Pertenece " +
+                                        rutaViajes[index].nombreEmpresa,
+                                    style: TextStyle(
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
+                                        fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 5),
+                                ] else ...[
+                                  Text(
+                                    "Pertenece " +
+                                        rutaViajes[index].nombreSucursal,
+                                    style: TextStyle(
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
+                                        fontSize: 12),
+                                  ),
+                                  const SizedBox(),
+                                ],
+                                Text(
+                                  "Domicilio " + rutaViajes[index].direccion,
+                                  style: TextStyle(
+                                      color:
+                                          _colorFromHex(Widgets.colorPrimary),
+                                      fontSize: 12),
+                                ),
+                                const SizedBox(height: 5),
+                                if (validateNullOrEmptyString(
+                                        rutaViajes[index].personaTelefono) !=
+                                    null) ...[
+                                  Text(
+                                    "Contacto " +
+                                        rutaViajes[index].personaTelefono,
+                                    style: TextStyle(
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
+                                        fontSize: 12),
+                                  ),
+                                ],
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const SizedBox(height: 5),
-                                    if (validateNullOrEmptyString(
-                                            rutaViajes[index].nombreSucursal) !=
-                                        null) ...[
-                                      Text(
-                                        "Pertenece " +
-                                            rutaViajes[index].nombreSucursal,
-                                        style: TextStyle(
-                                            color: _colorFromHex(
-                                                Widgets.colorPrimary),
-                                            fontSize: 12),
-                                      ),
-                                      const SizedBox(height: 5),
-                                    ] else ...[
-                                      const SizedBox(),
-                                    ],
-                                    Text(
-                                      "Domicilio " +
-                                          rutaViajes[index].direccion,
-                                      style: TextStyle(
-                                          color: _colorFromHex(
-                                              Widgets.colorPrimary),
-                                          fontSize: 12),
+                                    IconButton(
+                                      icon: const Icon(Icons.phone),
+                                      color:
+                                          _colorFromHex(Widgets.colorPrimary),
+                                      onPressed: validateNullOrEmptyString(
+                                                  rutaViajes[index]
+                                                      .personaTelefono) !=
+                                              null
+                                          ? () async {
+                                              Uri link = Uri(
+                                                scheme: 'tel',
+                                                path: rutaViajes[index]
+                                                    .personaTelefono,
+                                              );
+
+                                              try {
+                                                if (await canLaunchUrl(link)) {
+                                                  await launchUrl(link,
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                } else {
+                                                  MotionToast.error(
+                                                          title: const Text(
+                                                              "Error"),
+                                                          description: const Text(
+                                                              "No se puede abrir el enlace"))
+                                                      .show(context);
+                                                }
+                                              } catch (error) {
+                                                print("AKIII");
+                                                print(error);
+                                                MotionToast.error(
+                                                        title:
+                                                            const Text("Error"),
+                                                        description: const Text(
+                                                            "Error No se puede abrir el enlace"))
+                                                    .show(context);
+                                              }
+                                            }
+                                          : null,
                                     ),
-                                    const SizedBox(height: 5),
-                                    if (validateNullOrEmptyString(
-                                            rutaViajes[index]
-                                                .personaTelefono) !=
-                                        null) ...[
-                                      Text(
-                                        "Contacto " +
-                                            rutaViajes[index].personaTelefono,
-                                        style: TextStyle(
-                                            color: _colorFromHex(
-                                                Widgets.colorPrimary),
-                                            fontSize: 12),
-                                      ),
-                                    ],
+                                    IconButton(
+                                      icon:
+                                          const Icon(Icons.alt_route_outlined),
+                                      color:
+                                          _colorFromHex(Widgets.colorPrimary),
+                                      onPressed: validateNullOrEmptyString(
+                                                      rutaViajes[index]
+                                                          .latitud) !=
+                                                  null &&
+                                              validateNullOrEmptyString(
+                                                      rutaViajes[index]
+                                                          .longitud) !=
+                                                  null
+                                          ? () async {
+                                              double lat =
+                                                  rutaViajes[index].latitud;
+                                              double lng =
+                                                  rutaViajes[index].longitud;
+
+                                              Uri url = Uri.parse(
+                                                  'geo:${lat},${lng}?q=${lat},${lng}');
+
+                                              try {
+                                                if (await canLaunchUrl(url)) {
+                                                  await launchUrl(url,
+                                                      mode: LaunchMode
+                                                          .externalApplication);
+                                                } else {
+                                                  MotionToast.error(
+                                                          title: const Text(
+                                                              "Error"),
+                                                          description: const Text(
+                                                              "No se puede abrir el enlace"))
+                                                      .show(context);
+                                                }
+                                              } catch (error) {
+                                                print("AKIII");
+                                                print(error);
+                                                MotionToast.error(
+                                                        title:
+                                                            const Text("Error"),
+                                                        description: const Text(
+                                                            "Error No se puede abrir el enlace"))
+                                                    .show(context);
+                                              }
+                                            }
+                                          : null,
+                                    ),
                                   ],
                                 ),
-                              ),
-                            );
-                          },
-                          itemCount: rutaViajes.length,
-                        ),
-                      ],
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: rutaViajes.length,
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 13,
-                ),
-                widget.panelVisible
-                    ? SizedBox(
+              ),
+            ),
+            const SizedBox(
+              height: 13,
+            ),
+
+            //INCIDENCIAS
+            widget.viaje.status == 3 || widget.viaje.status == 6
+                ? ExpandedTile(
+                    theme: ExpandedTileThemeData(
+                      headerColor: _colorFromHex(Widgets.colorSecundayLight),
+                      headerRadius: 5.0,
+                      headerPadding: const EdgeInsets.all(10),
+                      headerSplashColor: _colorFromHex(Widgets.colorPrimary),
+                      contentBackgroundColor: Colors.transparent,
+                      contentPadding: const EdgeInsets.all(0),
+                      contentRadius: 2.0,
+                    ),
+                    controller: _controllerIncidencia!,
+                    title: Text(
+                      "Incidencias",
+                      style: TextStyle(
+                        color: _colorFromHex(Widgets.colorPrimary),
+                        fontSize: 16,
+                      ),
+                    ),
+                    content: SingleChildScrollView(
+                        physics: const ScrollPhysics(),
+                        child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Card(
+                                    child: validateNullOrEmptyString(
+                                                widget.viaje.incidencias) !=
+                                            null
+                                        ? Text(
+                                            widget.viaje.incidencias,
+                                            style: TextStyle(
+                                                color: _colorFromHex(
+                                                    Widgets.colorPrimary),
+                                                fontSize: 16),
+                                          )
+                                        : SizedBox())
+                              ],
+                            ))),
+                  )
+                : SizedBox(),
+
+            const SizedBox(
+              height: 13,
+            ),
+
+            validateNullOrEmptyString(widget.viaje.descripcion) != null
+                ? ExpandedTile(
+                    theme: ExpandedTileThemeData(
+                      headerColor: _colorFromHex(Widgets.colorSecundayLight),
+                      headerRadius: 5.0,
+                      headerPadding: const EdgeInsets.all(10),
+                      headerSplashColor: _colorFromHex(Widgets.colorPrimary),
+                      contentBackgroundColor: Colors.transparent,
+                      contentPadding: const EdgeInsets.all(0),
+                      contentRadius: 2.0,
+                    ),
+                    controller: _controllerIncidencia!,
+                    title: Text(
+                      "Nota",
+                      style: TextStyle(
+                        color: _colorFromHex(Widgets.colorPrimary),
+                        fontSize: 16,
+                      ),
+                    ),
+                    content: SingleChildScrollView(
+                        physics: const ScrollPhysics(),
+                        child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Card(
+                                    child: validateNullOrEmptyString(
+                                                widget.viaje.descripcion) !=
+                                            null
+                                        ? Text(
+                                            widget.viaje.descripcion,
+                                            style: TextStyle(
+                                                color: _colorFromHex(
+                                                    Widgets.colorPrimary),
+                                                fontSize: 16),
+                                          )
+                                        : SizedBox())
+                              ],
+                            ))),
+                  )
+                : SizedBox(),
+
+            SizedBox(height: 13),
+
+            (widget.viaje.status == 1 || widget.viaje.status == 2) &&
+                    widget.panelVisible == true
+                ? longButtons("RECHAZAR ASIGNACIÓN", _closeTripAlert,
+                    color: _colorFromHex(Widgets.colorPrimary),
+                    textColor: Colors.white)
+                : const SizedBox(),
+            const SizedBox(
+              height: 13,
+            ),
+
+            widget.panelVisible
+                ? listaLatLong.isEmpty
+                    ? const SizedBox()
+                    : SizedBox(
                         height: 400,
                         child: GoogleMap(
-                          markers: markers,
+                          markers: {
+                            Marker(
+                                markerId: const MarkerId("INICIO"),
+                                infoWindow: const InfoWindow(title: ("Inicio")),
+                                //icon: BitmapDescriptor.fromBytes(Bit),
+                                position: listaLatLong.first,
+                                onTap: () {}),
+                            Marker(
+                                markerId: const MarkerId("FIN"),
+                                infoWindow: const InfoWindow(title: ("FIN")),
+                                //icon: BitmapDescriptor.fromBytes(Bit),
+                                position: listaLatLong.last,
+                                onTap: () {})
+                          },
                           onMapCreated: (c) {
-                            _getMarkers();
                             mapController = c;
+                          },
+                          polylines: {
+                            Polyline(
+                              polylineId: const PolylineId('Ruta'),
+                              color: _colorFromHex(Widgets.colorPrimary),
+                              points: listaLatLong,
+                            ),
                           },
                           gestureRecognizers: <
                               Factory<OneSequenceGestureRecognizer>>{
@@ -739,29 +973,25 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           myLocationButtonEnabled: true,
                           zoomControlsEnabled: true,
                           myLocationEnabled: true,
-                          initialCameraPosition: const CameraPosition(
-                              target: LatLng(28.643540, -106.061683), zoom: 14),
+                          initialCameraPosition: CameraPosition(
+                              target: listaLatLong.last, zoom: 12),
                           mapType: MapType.normal,
                         ),
                       )
-                    : SizedBox(),
-                widget.panelVisible
-                    ? const SizedBox(
-                        height: 32,
-                      )
-                    : SizedBox(),
-                (widget.viaje.status == 1 || widget.viaje.status == 2) &&
-                        widget.panelVisible == true
-                    ? longButtons("Cancelar viaje", _closeTripAlert,
-                        color: _colorFromHex(Widgets.colorPrimary))
-                    : const SizedBox(),
-                const SizedBox(
-                  height: 32,
-                ),
-              ],
+                : SizedBox(),
+            widget.panelVisible
+                ? const SizedBox(
+                    height: 32,
+                  )
+                : SizedBox(),
+
+            const SizedBox(
+              height: 32,
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    );
   }
 
   Future<bool> showExitPopup() async {

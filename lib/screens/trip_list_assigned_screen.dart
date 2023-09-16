@@ -71,9 +71,10 @@ class _TripListState extends State<TripListAssignedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: showExitPopup,
-        child: Scaffold(
+    // return WillPopScope(
+    //     onWillPop: showExitPopup,
+    //     child: 
+    return Scaffold(
           onDrawerChanged: (isOpened) {
             if (isOpened) {
               setState(() {
@@ -88,7 +89,7 @@ class _TripListState extends State<TripListAssignedScreen> {
             elevation: 0.1,
             backgroundColor: _colorFromHex(Widgets.colorPrimary),
           ),
-          drawer: const MainDrawer(1),
+          drawer:  MainDrawer(1),
           body: Column(
             children: [
               Expanded(
@@ -124,63 +125,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                            top: 2, bottom: 2),
-                                        alignment: Alignment.topRight,
-                                        child: Text(
-                                          viaje.idViaje,
-                                          style: TextStyle(
-                                              fontStyle: FontStyle.italic,
-                                              color: _colorFromHex(
-                                                  Widgets.colorSecundayLight),
-                                              fontSize: 13),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                            top: 2, bottom: 2),
-                                        alignment: Alignment.topRight,
-                                        child: Text(
-                                          getFormattedDateFromFormattedString(
-                                              viaje.fechaViaje
-                                                  .replaceAll(" ", "")),
-                                          style: TextStyle(
-                                              fontStyle: FontStyle.italic,
-                                              color: _colorFromHex(
-                                                  Widgets.colorSecundayLight),
-                                              fontSize: 13),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  buildBubblePadding(
-                                      Icons.circle,
-                                      _colorFromHex(Widgets.colorPrimary),
-                                      "Tipo: ${viaje.tipo}",
-                                      _colorFromHex(Widgets.colorSecundayLight),
-                                      8),
-                                  buildBubblePadding(
-                                      Icons.circle,
-                                      _colorFromHex(Widgets.colorPrimary),
-                                      "Hora: ${horaViaje} Hrs",
-                                      _colorFromHex(Widgets.colorSecundayLight),
-                                      8),
-                                  if (validateNullOrEmptyString(
-                                          viaje.nombreSucursal) !=
-                                      null) ...[
-                                    buildBubblePadding(
-                                        Icons.circle,
-                                        _colorFromHex(Widgets.colorPrimary),
-                                        "Sucursal: ${viaje.nombreSucursal}",
-                                        _colorFromHex(
-                                            Widgets.colorSecundayLight),
-                                        8),
-                                  ],
+
                                   if (validateNullOrEmptyString(
                                           viaje.nombreEmpresa) !=
                                       null) ...[
@@ -192,6 +137,47 @@ class _TripListState extends State<TripListAssignedScreen> {
                                             Widgets.colorSecundayLight),
                                         8),
                                   ],
+
+                                   if (validateNullOrEmptyString(
+                                          viaje.nombreSucursal) !=
+                                      null) ...[
+                                    buildBubblePadding(
+                                        Icons.circle,
+                                        _colorFromHex(Widgets.colorPrimary),
+                                        "Sucursal: ${viaje.nombreSucursal}",
+                                        _colorFromHex(
+                                            Widgets.colorSecundayLight),
+                                        8),
+                                  ],
+
+                                    if (validateNullOrEmptyString(
+                                          viaje.fechaViaje) !=
+                                      null) ...[
+                                    buildBubblePadding(
+                                        Icons.circle,
+                                        _colorFromHex(Widgets.colorPrimary),
+                                        "Fecha: " + setFormatDatetime(setFormatDate(viaje.fechaViaje.replaceAll(" ", ""))),
+                                        _colorFromHex(
+                                            Widgets.colorSecundayLight),
+                                        8),
+                                  ],
+
+                                    buildBubblePadding(
+                                      Icons.circle,
+                                      _colorFromHex(Widgets.colorPrimary),
+                                      "Hora: ${horaViaje} Hrs",
+                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      8),
+                                 
+                                
+                                  buildBubblePadding(
+                                      Icons.circle,
+                                      _colorFromHex(Widgets.colorPrimary),
+                                      "Tipo: ${viaje.tipo}",
+                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      8),
+                                
+                                 
                                 ],
                               ),
                             ),
@@ -207,22 +193,29 @@ class _TripListState extends State<TripListAssignedScreen> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                      Container(
+                                      color: Colors.transparent,
+                                      child:Text(
+                                          "ID",
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: _colorFromHex(
+                                                  Widgets.colorSecundayLight),
+                                              fontSize: 20),
+                                        ),
+                                     
+                                    ),
                                     Container(
                                       color: Colors.transparent,
-                                      child:Icon(
-                                           Icons.check_circle,
-                                          size: 50,
-                                          color: _colorFromHex(
-                                              Widgets.colorSecundayLight)),
-                                      /*Icon(
-                                          viaje.confirmado == "1"
-                                              ? Icons.info
-                                              : viaje.confirmado == "2"
-                                                  ? Icons.check_circle
-                                                  : Icons.close,
-                                          size: 50,
-                                          color: _colorFromHex(
-                                              Widgets.colorSecundayLight)),*/
+                                      child:Text(
+                                          viaje.idViaje,
+                                          style: TextStyle(
+                                              fontStyle: FontStyle.italic,
+                                              color: _colorFromHex(
+                                                  Widgets.colorSecundayLight),
+                                              fontSize: 20),
+                                        ),
+                                     
                                     ),
                                   ],
                                 ))));
@@ -280,7 +273,7 @@ class _TripListState extends State<TripListAssignedScreen> {
               ),
             ],
           ),
-        ));
+        );
   }
 
   Future<bool> showExitPopup() async {

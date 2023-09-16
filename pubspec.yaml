@@ -62,6 +62,10 @@ dependencies:
   bottom_sheet: ^1.0.5
   dropdown_search: ^3.0.1
   location: ^4.3.0
+  email_validator: ^2.1.17
+  cached_network_image: ^3.2.0
+  localization: ^2.1.0
+  flutter_localization: ^0.1.9
 
 
 

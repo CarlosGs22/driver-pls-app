@@ -18,6 +18,12 @@ class UserPreferences {
     prefs.setString('ratekm', user.rateKm);
     prefs.setString('rateM', user.rateM);
     prefs.setString('password', user.password);
+    prefs.setString('pass', user.pass);
+    prefs.setString('marca', user.marca);
+    prefs.setString('tipo', user.tipo);
+    prefs.setString('modelo', user.modelo);
+    prefs.setString('color', user.color);
+    prefs.setString('placas', user.placas);
 
     return prefs.commit();
   }
@@ -38,6 +44,12 @@ class UserPreferences {
     String ratekm = prefs.getString("ratekm").toString();
     String rateM = prefs.getString("rateM").toString();
     String password = prefs.getString("password").toString();
+    String pass = prefs.getString("pass").toString();
+    String marca = prefs.getString("marca").toString();
+    String tipo = prefs.getString("tipo").toString();
+    String modelo = prefs.getString("modelo").toString();
+    String color = prefs.getString("color").toString();
+    String placas = prefs.getString("placas").toString();
 
     var agent = User(
       id: userId,
@@ -53,6 +65,12 @@ class UserPreferences {
       rateKm: ratekm,
       rateM: rateM,
       password: password,
+      pass: pass,
+      marca: marca,
+      tipo: tipo,
+      modelo: modelo,
+      color: color,
+      placas: placas
     );
     return agent;
   }
@@ -65,6 +83,18 @@ class UserPreferences {
   Future<bool> saveValueUser(var key, var value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(key, "");
+    return prefs.commit();
+  }
+
+  Future<bool> saveUserUpdate(User user) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    prefs.setString('id_con', user.id);
+    prefs.setString('name', user.name);
+    prefs.setString('lastName', user.lastName);
+    prefs.setString('email', user.email);
+    prefs.setString('mobile', user.mobile);
+
     return prefs.commit();
   }
 }

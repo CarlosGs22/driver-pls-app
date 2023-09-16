@@ -16,6 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class Main extends StatefulWidget {
   const Main({Key? key}) : super(key: key);
@@ -24,8 +25,7 @@ class Main extends StatefulWidget {
   State<Main> createState() => _MainState();
 }
 
-Future<void> main() async {
-  Intl.systemLocale = await findSystemLocale();
+void main() {
   runApp(const Main());
 }
 
@@ -42,7 +42,7 @@ class _MainState extends State<Main> with ChangeNotifier {
       "username": prefs.getString("email"),
       "password": prefs.getString("password")
     };
-    
+
     HttpClass.httpData(
             context,
             Uri.parse("https://www.driverplease.net/aplicacion/login.php"),
@@ -50,14 +50,18 @@ class _MainState extends State<Main> with ChangeNotifier {
             {},
             "POST")
         .then((response) {
-  
       if (response["status"] && response["code"] == 200) {
         List<dynamic> datauser = json.decode(response["data"]);
-        User authUser = User.fromJson(datauser[0]);
+
+        Map<String, dynamic> dataInsert = {};
+        dataInsert.addAll(datauser[0]);
+        dataInsert.addAll(params);
+
+        User authUser = User.fromJson(dataInsert);
         Provider.of<UserProvider>(context, listen: false).setUser(authUser);
         UserPreferences().saveUser(authUser);
-        notifyListeners();
-      }else{
+        //notifyListeners();
+      } else {
         print("USUARIO NO ENCONTRADO");
       }
     });
@@ -92,7 +96,7 @@ class _MainState extends State<Main> with ChangeNotifier {
                 } else if (userId == "null" || userId == "") {
                   return const LoginScreen();
                 } else if (snapshot.connectionState == ConnectionState.done) {
-                  //getUserSessionData(context);
+                  getUserSessionData(context);
                   return Dashboard();
                 }
             }
@@ -106,6 +110,13 @@ class _MainState extends State<Main> with ChangeNotifier {
           '/main': (context) => const Main(),
           '/dashboard': (context) => Dashboard(),
         },
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('es', 'MX'),
+        ],
       ),
     );
   }

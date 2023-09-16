@@ -345,7 +345,7 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
             )
           ],
         ),
-        drawer: const MainDrawer(0),
+        drawer:  MainDrawer(0),
         body: SizedBox(
           height: height,
           width: width,

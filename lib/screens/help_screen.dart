@@ -179,9 +179,10 @@ class _HelpScreentState extends State<HelpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: showExitPopup,
-        child: Scaffold(
+    // return WillPopScope(
+    //     onWillPop: showExitPopup,
+    //     child: 
+    return Scaffold(
             onDrawerChanged: (isOpened) {
               if (isOpened) {
                 setState(() {
@@ -198,7 +199,7 @@ class _HelpScreentState extends State<HelpScreen> {
               elevation: 0.1,
               backgroundColor: _colorFromHex(Widgets.colorPrimary),
             ),
-            drawer: const MainDrawer(3),
+            drawer:  MainDrawer(3),
             backgroundColor: Colors.white,
             body: Center(
                 child: SingleChildScrollView(
@@ -222,7 +223,7 @@ class _HelpScreentState extends State<HelpScreen> {
                   Wrap(direction: Axis.vertical, children: setPaddingCard())
                 ],
               ),
-            ))));
+            )));
   }
 
   Future<bool> showExitPopup() async {
