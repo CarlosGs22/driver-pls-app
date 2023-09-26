@@ -93,11 +93,12 @@ class _LoginState extends State<LoginScreen> {
             {},
             "POST")
         .then((response) {
-      _handleLoginResponse(response, context,params);
+      _handleLoginResponse(response, context, params);
     });
   }
 
-  _handleLoginResponse(Map<String, dynamic> response, BuildContext context,Map<String, dynamic> params) {
+  _handleLoginResponse(Map<String, dynamic> response, BuildContext context,
+      Map<String, dynamic> params) {
     try {
       List<dynamic> datauser = json.decode(response["data"]);
       setState(() {
@@ -105,7 +106,7 @@ class _LoginState extends State<LoginScreen> {
       });
 
       if (response["status"] && datauser.isNotEmpty) {
-        _loginSuccess(context, json.decode(response["data"]),params);
+        _loginSuccess(context, json.decode(response["data"]), params);
       } else {
         buidlDefaultFlushBar(context, "Error", "Claves inválidas", 4);
       }
@@ -117,15 +118,15 @@ class _LoginState extends State<LoginScreen> {
     }
   }
 
-  _loginSuccess(BuildContext context, List<dynamic> data,Map<String, dynamic> params) {
-
+  _loginSuccess(
+      BuildContext context, List<dynamic> data, Map<String, dynamic> params) {
     Map<String, dynamic> dataInsert = {};
     dataInsert.addAll(data[0]);
     dataInsert.addAll(params);
 
     print("DATOS SESION");
     print(dataInsert);
-    
+
     User authUser = User.fromJson(dataInsert);
     Provider.of<UserProvider>(context, listen: false).setUser(authUser);
     UserPreferences().saveUser(authUser);
@@ -182,10 +183,10 @@ class _LoginState extends State<LoginScreen> {
       ],
     );
 
-    // return WillPopScope(
-    //     onWillPop: showExitPopup,
-    //     child: Scaffold(
-            return Container(
+    return WillPopScope(
+        onWillPop: showExitPopup,
+        child: Scaffold(
+            body: Container(
                 decoration: BoxDecoration(
                     gradient: LinearGradient(
                   begin: Alignment.topRight,
@@ -363,7 +364,7 @@ class _LoginState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                ));
+                ))));
   }
 
   Future<bool> showExitPopup() async {

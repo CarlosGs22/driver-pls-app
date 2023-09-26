@@ -261,7 +261,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                     maxHeight:
                         MediaQuery.of(context).size.height - keyboardHeight),
                 child: SingleChildScrollView(
-                  child: Column(
+                  child: Form(
+                    key: formIncidenceKey,
+                    child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
@@ -417,7 +419,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                       ),
                     ],
                   ),
-                ),
+                )),
               ),
             ));
       },
@@ -718,7 +720,15 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+         if(inicialTrip == 1){
+          return false;
+         }else{
+          return true;
+         }
+      },
+      child: Scaffold(
         appBar: AppBar(
           titleTextStyle: GoogleFonts.poppins(
               fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
@@ -1065,7 +1075,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                   ),
                 ],
               ));
-        }));
+        })));
   }
 
   void sendRequest() {

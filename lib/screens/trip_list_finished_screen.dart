@@ -131,7 +131,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       alignment: Alignment.topLeft,
                                       child: Text(
                                         setFormatDatetime(
-                                            viaje.fechaInicio.toString()),
+                                            viaje.fechaFin.toString()),
                                         style: TextStyle(
                                             fontStyle: FontStyle.italic,
                                             color: _colorFromHex(
