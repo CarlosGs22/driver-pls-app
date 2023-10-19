@@ -19,6 +19,7 @@ class ViajeModel {
   String incidencias;
   double subtotal;
   String descripcion;
+   String idRuta;
 
   ViajeModel(
       {required this.idViaje,
@@ -38,7 +39,8 @@ class ViajeModel {
       required this.incidencias,
       required this.poligono,
       required this.subtotal,
-      required this.descripcion});
+      required this.descripcion,
+      required this.idRuta});
 
   factory ViajeModel.fromJson(Map<String, dynamic> json) {
     return ViajeModel(
@@ -60,6 +62,7 @@ class ViajeModel {
       poligono: json['poligono'],
       subtotal: double.tryParse(json['subtotal']) ?? 0,
       descripcion: json["descripcion"] ?? "",
+      idRuta: json["id_ruta"] ?? "",
     );
   }
 }

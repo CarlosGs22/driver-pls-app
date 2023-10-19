@@ -48,6 +48,7 @@ class ViajeService {
                 poligono: element["poligono"] ?? "",
                 subtotal: double.tryParse((validateNullOrEmptyString(element["subtotal"].toString()) ?? 0.0).toString()) ?? 0.0,
                 descripcion: element["descripcion"] ?? "",
+                idRuta: element["id_ruta"] ?? "",
               ));
           }
 
@@ -103,7 +104,9 @@ class ViajeService {
                 poligono: element["poligono"] ?? "",
                 subtotal: double.tryParse((validateNullOrEmptyNumber(element["subtotal"].toString()) ?? "0").toString()) ?? 0.0,
                 descripcion: element["descripcion"] ?? "",
+                idRuta: element["id_ruta"] ?? "",
               ));
+
           }
 
           return auxViajeList;

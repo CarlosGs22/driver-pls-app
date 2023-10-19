@@ -12,6 +12,7 @@ import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/intl_standalone.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,10 @@ class Main extends StatefulWidget {
 }
 
 void main() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const Main());
 }
 

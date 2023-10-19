@@ -248,22 +248,24 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
               return false;
             },
             child: AlertDialog(
-              title: Center(child:  Text(
-                        'Viaje cerrado',
-                        style: TextStyle(
-                          fontSize: 24.0,
-                          color: _colorFromHex(Widgets.colorPrimary),
-                        ),
-                      ),),
+              title: Center(
+                child: Text(
+                  'Viaje cerrado',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    color: _colorFromHex(Widgets.colorPrimary),
+                  ),
+                ),
+              ),
               content: Container(
                 width: double.maxFinite,
                 constraints: BoxConstraints(
                     maxHeight:
                         MediaQuery.of(context).size.height - keyboardHeight),
                 child: SingleChildScrollView(
-                  child: Form(
-                    key: formIncidenceKey,
-                    child: Column(
+                    child: Form(
+                  key: formIncidenceKey,
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
@@ -720,60 +722,60 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
-    return WillPopScope(
-      onWillPop: () async {
-         if(inicialTrip == 1){
-          return false;
-         }else{
-          return true;
-         }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          titleTextStyle: GoogleFonts.poppins(
-              fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
-          elevation: 0.1,
-          backgroundColor: _colorFromHex(Widgets.colorPrimary),
-          actions: [
-            Row(
-              children: [
-                Text(
-                  Strings.labelTripItinerario,
-                  style: GoogleFonts.poppins(
-                      fontSize: 19,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.alt_route_rounded),
-                  onPressed: () {
-                    showFlexibleBottomSheet(
-                      minHeight: 0,
-                      initHeight: 0.7,
-                      maxHeight: 1,
-                      context: context,
-                      builder: (context, scrollController, bottomSheetOffset) {
-                        return TripDetailScreen(
-                          viaje: widget.viaje,
-                          redirect: null,
-                          panelVisible: false,
-                        );
-                      },
-                      anchors: [0, 0.5, 1],
-                    );
-                  },
-                )
-              ],
-            )
-          ],
-        ),
+    return WillPopScope(onWillPop: () async {
+      if (inicialTrip == 1) {
+        return false;
+      } else {
+        return true;
+      }
+    }, child:
+        Consumer<TaxiTripProvider>(builder: (context, tripProvider, child) {
+      TaxiTrip? currentTrip = tripProvider.currentTrip;
+      return Scaffold(
+          appBar: AppBar(
+            titleTextStyle: GoogleFonts.poppins(
+                fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            elevation: 0.1,
+            backgroundColor: _colorFromHex(Widgets.colorPrimary),
+            actions: [
+              inicialTrip == 1
+                  ? Padding(
+                      padding: EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            child: Text(
+                              "Finalizar viaje",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 19,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            onTap: () {
+                              setState(() {
+                                endDate = Utility.getCurrentDate();
+                                bandFinishTrip = 1;
+                              });
 
-        //drawer: const MainDrawer(0),
-        body:
-            Consumer<TaxiTripProvider>(builder: (context, tripProvider, child) {
-          TaxiTrip? currentTrip = tripProvider.currentTrip;
+                              TaxiTrip? auxcurrentTrip =
+                                  tripProvider.currentTrip;
 
-          return SizedBox(
+                              tripProvider.stopTrip();
+                              _timer?.cancel();
+                              _locationSubscription!.cancel();
+
+                              _handleFinishTrip(context, auxcurrentTrip!);
+                            },
+                          )
+                        ],
+                      ),
+                    )
+                  : SizedBox()
+            ],
+          ),
+
+          //drawer: const MainDrawer(0),
+          body: SizedBox(
               height: height,
               width: width,
               child: Stack(
@@ -902,7 +904,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Text(
-                                  'Tarifas',
+                                  'Recorrido',
                                   style: TextStyle(
                                       fontSize: 20.0,
                                       color:
@@ -1000,26 +1002,27 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                     ? inicialTrip == 1
                                         ? ElevatedButton(
                                             onPressed: () {
-                                              setState(() {
-                                                endDate =
-                                                    Utility.getCurrentDate();
-                                                bandFinishTrip = 1;
-                                              });
-
-                                              TaxiTrip? auxcurrentTrip =
-                                                  tripProvider.currentTrip;
-
-                                              tripProvider.stopTrip();
-                                              _timer?.cancel();
-                                              _locationSubscription!.cancel();
-
-                                              _handleFinishTrip(
-                                                  context, auxcurrentTrip!);
+                                              showFlexibleBottomSheet(
+                                                minHeight: 0,
+                                                initHeight: 0.8,
+                                                maxHeight: 1,
+                                                context: context,
+                                                builder: (context,
+                                                    scrollController,
+                                                    bottomSheetOffset) {
+                                                  return TripDetailScreen(
+                                                    viaje: widget.viaje,
+                                                    redirect: null,
+                                                    panelVisible: false,
+                                                  );
+                                                },
+                                                anchors: [0, 0.5, 1],
+                                              );
                                             },
                                             child: const Padding(
                                               padding: EdgeInsets.all(8.0),
                                               child: Text(
-                                                "Finalizar Viaje",
+                                                "Ver detalle",
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 20.0,
@@ -1074,8 +1077,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                     ),
                   ),
                 ],
-              ));
-        })));
+              )));
+    }));
   }
 
   void sendRequest() {

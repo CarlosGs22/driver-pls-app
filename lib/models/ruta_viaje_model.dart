@@ -23,8 +23,9 @@ class RutaViajeModel {
   String fechaInicio;
   String fechaFin;
   String nombreSucursal;
-   String nombreEmpresa;
+  String nombreEmpresa;
   String parada1;
+  String evidencia;
 
   RutaViajeModel(
       {required this.idRuta,
@@ -49,37 +50,35 @@ class RutaViajeModel {
       required this.fechaFin,
       required this.nombreSucursal,
       required this.nombreEmpresa,
-      required this.parada1});
+      required this.parada1,
+      required this.evidencia});
 
   factory RutaViajeModel.fromJson(Map<String, dynamic> json) {
-
     Utility.printWrapped(json.toString());
     return RutaViajeModel(
-      idRuta: json['id_ruta'],
-      idViaje: json['id_viaje'],
-      idDir: json['id_dir'],
-      tipo: json['tipo'],
-      orden: json['orden'],
-      idDestino: json['id_destino'],
-      tipoDestino: json['tipo_destino'],
-      idSuc: json['id_suc'],
-      hora: json['hora'],
-      estatus: json['estatus'],
-      retraso: json['retraso'],
-      horaReal: json['hora_real'],
-      horaBajada: json['hora_bajada'],
-      latitud: double.tryParse(json['latitud']) ?? 0,
-      longitud: double.tryParse(json['longitud']) ?? 0,
-      direccion: json['direccion'],
-      personaNombre: json['personaNombre'] ?? "",
-      personaTelefono: json['personaTelefono'] ?? "",
-      fechaInicio: json['fecha_inicio'] ?? "",
-      fechaFin: json['fecha_fin'] ?? "",
-      nombreSucursal: json['nombreSucursal'] ?? "",
-      nombreEmpresa: json['nombreEmpresa'] ?? "",
-      parada1: json['parada1'] ?? ""
-    );
-
-    
+        idRuta: json['id_ruta'],
+        idViaje: json['id_viaje'],
+        idDir: json['id_dir'],
+        tipo: json['tipo'],
+        orden: json['orden'],
+        idDestino: json['id_destino'],
+        tipoDestino: json['tipo_destino'],
+        idSuc: json['id_suc'],
+        hora: json['hora'],
+        estatus: json['estatus'],
+        retraso: json['retraso'],
+        horaReal: json['hora_real'],
+        horaBajada: json['hora_bajada'],
+        latitud: double.tryParse(json['latitud']) ?? 0,
+        longitud: double.tryParse(json['longitud']) ?? 0,
+        direccion: json['direccion'],
+        personaNombre: json['personaNombre'] ?? "",
+        personaTelefono: json['personaTelefono'] ?? "",
+        fechaInicio: json['fecha_inicio'] ?? "",
+        fechaFin: json['fecha_fin'] ?? "",
+        nombreSucursal: json['nombreSucursal'] ?? "",
+        nombreEmpresa: json['nombreEmpresa'] ?? "",
+        parada1: json['parada1'] ?? "",
+        evidencia: json['evidencia'] ?? "");
   }
 }

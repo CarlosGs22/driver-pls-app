@@ -34,6 +34,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
 
   @override
   Widget build(BuildContext context) {
+    
     double total_viaje = (double.parse(
         (validateNullOrEmptyNumber(widget.viajeResumen["subtotal"]) ?? 0)));
 
