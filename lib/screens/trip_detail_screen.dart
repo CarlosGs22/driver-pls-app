@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -80,9 +81,52 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   bool onLoadingCam = false;
 
+  Position? position;
+
   Color _colorFromHex(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
+  }
+
+  String locationName = "NA";
+
+  Future<void> getLocationName() async {
+    try {
+      Position pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      setState(() {
+        position = pos;
+      });
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks[0];
+        String street = placemark.street!;
+        String subLocality = placemark.subLocality!;
+        String locality = placemark.locality!;
+        String administrativeArea = placemark.administrativeArea!;
+        String country = placemark.country!;
+
+        String completeAddress =
+            "$street,$subLocality, $locality, $administrativeArea, $country";
+        setState(() {
+          locationName = completeAddress;
+        });
+      } else {
+        setState(() {
+          locationName = "Dirección no encontrada";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        locationName = "Error: $e";
+      });
+    }
   }
 
   _setStateColor(value, int indexColor) {
@@ -162,6 +206,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     Intl.defaultLocale = "es_MX";
     initializeDateFormatting();
     _initializeCamera();
+
+    getLocationName();
   }
 
   @override
@@ -455,56 +501,124 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _handleCondition(File evidence, RutaViajeModel rutaViajeModel) {
-    Alert(
+    showDialog(
       context: context,
-      type: AlertType.warning,
-      title: "¿Estás seguro de enviar esta evidencia?",
-      closeIcon: const SizedBox(),
-      closeFunction: () {},
-      desc: "Esta opción no se puede restablecer",
-      buttons: [
-        DialogButton(
-          child: const Text(
-            "Cancelar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          onPressed: () {
-            if (onLoadingCam) {
-              return;
-            }
-            _camController.resumePreview();
-            Navigator.pop(context);
+      builder: (BuildContext context) {
+       
+        return WillPopScope(
+          onWillPop: () async {
+            return false;
           },
-          color: _colorFromHex(Widgets.colorSecundary),
-        ),
-        DialogButton(
-          child: const Text(
-            "Aceptar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+          child: AlertDialog(
+            title: Center(
+              child: Text(
+                '¿Estás seguro de enviar esta evidencia?',
+                style: TextStyle(
+                  fontSize: 24.0,
+                  color: _colorFromHex(Widgets.colorPrimary),
+                ),
+              ),
+            ),
+            content: SizedBox(
+              height: 139,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment
+                    .center, // Centra verticalmente el contenido
+                children: [
+                  Text(
+                    "Esta opción no se puede restablecer",
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      color: _colorFromHex(Widgets.colorGray),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment
+                        .center, // Centra los botones horizontalmente
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 4,
+                          right: 4,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (onLoadingCam) {
+                              return;
+                            }
+                            _camController.resumePreview();
+                            Navigator.pop(context);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Cancelar",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            primary: _colorFromHex(Widgets.colorSecundary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 4, right: 4),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              onLoadingCam = true;
+                            });
+                           
+                            _handleSendEvidence(evidence, rutaViajeModel);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Aceptar",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18.0,
+                              ),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            primary: _colorFromHex(Widgets.colorPrimary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-          onPressed: () {
-            _handleSendEvidence(evidence, rutaViajeModel);
-          },
-          color: _colorFromHex(Widgets.colorPrimary),
-        ),
-      ],
-    ).show();
+        );
+      },
+    );
   }
 
   _handleSendEvidence(File evidence, RutaViajeModel rutaViajeModel) async {
     try {
       Navigator.pop(context);
       Navigator.pop(context);
-
+      
       setState(() {
         onLoadingCam = true;
       });
 
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-
-      double latitude = position.latitude;
-      double longitude = position.longitude;
+      double latitude = position!.latitude;
+      double longitude = position!.longitude;
 
       // Procesa la imagen y agrega la marca de tiempo
       img.Image? image = img.decodeImage(evidence.readAsBytesSync());
@@ -574,6 +688,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
     _handleShowCamara(RutaViajeModel rutaViajeModel) {
       _camController.resumePreview();
+
       showFlexibleBottomSheet(
         minHeight: 0,
         initHeight: 0.96,
@@ -598,26 +713,26 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Padding(
-                    //   padding: const EdgeInsets.all(16.0),
-                    //   child: Text(
-                    //     'Fecha: ${DateTime.now().toString()}',
-                    //     style: TextStyle(
-                    //       color: Colors.white,
-                    //       fontSize: 18.0,
-                    //     ),
-                    //   ),
-                    // ),
-                    // Padding(
-                    //   padding: const EdgeInsets.all(16.0),
-                    //   child: Text(
-                    //     'Ubicación: Tu ubicación aquí',
-                    //     style: TextStyle(
-                    //       color: Colors.white,
-                    //       fontSize: 18.0,
-                    //     ),
-                    //   ),
-                    // ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Fecha: ${DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now())}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Ubicación: ' + locationName,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

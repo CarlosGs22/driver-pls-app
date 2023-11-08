@@ -291,6 +291,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
+  flutter_shake_animated:
+    dependency: "direct main"
+    description:
+      name: flutter_shake_animated
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.5"
   flutter_svg:
     dependency: transitive
     description:
