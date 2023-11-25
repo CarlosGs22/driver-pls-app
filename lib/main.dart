@@ -11,13 +11,15 @@ import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
-import 'package:intl/intl_standalone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'firebase_options.dart';
 
 class Main extends StatefulWidget {
   const Main({Key? key}) : super(key: key);
@@ -26,7 +28,13 @@ class Main extends StatefulWidget {
   State<Main> createState() => _MainState();
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -39,6 +47,12 @@ class _MainState extends State<Main> with ChangeNotifier {
   Future<User> getUserData() => UserPreferences().getUser();
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+       _requestNotificationPermission();
+  }
 
   getUserSessionData(BuildContext context) async {
     prefs = await SharedPreferences.getInstance();
@@ -65,12 +79,25 @@ class _MainState extends State<Main> with ChangeNotifier {
         User authUser = User.fromJson(dataInsert);
         Provider.of<UserProvider>(context, listen: false).setUser(authUser);
         UserPreferences().saveUser(authUser);
-        //notifyListeners();
+        notifyListeners();
       } else {
         print("USUARIO NO ENCONTRADO");
       }
     });
   }
+
+  
+  Future<void> _requestNotificationPermission() async {
+   final PermissionStatus status = await Permission.notification.request();
+   if (status.isGranted) {
+      // Notification permissions granted
+   } else if (status.isDenied) {
+      // Notification permissions denied
+   } else if (status.isPermanentlyDenied) {
+      // Notification permissions permanently denied, open app settings
+      await openAppSettings();
+   }
+}
 
   @override
   Widget build(BuildContext context) {

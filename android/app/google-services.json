@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "565593815316",
+    "project_id": "driver-please-1b5ee",
+    "storage_bucket": "driver-please-1b5ee.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:565593815316:android:0bdb61e18368477e0eea01",
+        "android_client_info": {
+          "package_name": "com.driverplease.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfut4-OzTkObrw340UXOOTC8z_vzni-9E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

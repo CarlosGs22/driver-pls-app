@@ -42,7 +42,7 @@ class HttpClass {
 
           Utility.printWrapped("************PARAMS -> " + params.toString());
 
-          Utility.printWrapped("************RESPONSE -> " + value.body);
+          //Utility.printWrapped("************RESPONSE -> " + value.body);
 
           var response = json.decode(value.body);
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
@@ -35,6 +36,8 @@ class _GainScreenState extends State<GainScreen> {
 
   final formKey = GlobalKey<FormState>();
 
+  CurrencyTextInputFormatter _formatter = CurrencyTextInputFormatter();
+
   bool openDrawer = false;
 
   bool isLoading = false;
@@ -42,6 +45,7 @@ class _GainScreenState extends State<GainScreen> {
   bool loadData = false;
 
   List<dynamic> mapGanancias = [];
+  List<dynamic> mapInicialGanancias = [];
 
   @override
   void initState() {
@@ -52,6 +56,8 @@ class _GainScreenState extends State<GainScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _filterResponse(context);
+
+    _inicialFilterResponse(context, {});
   }
 
   _filterResponse(BuildContext context) {
@@ -69,7 +75,7 @@ class _GainScreenState extends State<GainScreen> {
             {},
             "GET")
         .then((response) {
-      Utility.printWrapped(response.toString());
+      //Utility.printWrapped(response.toString());
       setState(() {
         isLoading = false;
         loadData = true;
@@ -91,17 +97,82 @@ class _GainScreenState extends State<GainScreen> {
     });
   }
 
+  _inicialFilterResponse(BuildContext context, Map weekOnCurse) {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    var txtFechaInicial = "";
+    var txtFechaFinal = "";
+    var idConductor = user.id;
+
+    if (weekOnCurse.isNotEmpty) {
+      txtFechaInicial = weekOnCurse["txtFechaInicial"];
+      txtFechaFinal = weekOnCurse["txtFechaFinal"];
+    } else {
+      DateTime now = DateTime.now();
+      int currentDayOfWeek = now.weekday;
+      DateTime startOfWeek = now.subtract(Duration(days: currentDayOfWeek - 1));
+      DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+      startOfWeek = DateTime(
+          startOfWeek.year, startOfWeek.month, startOfWeek.day, 0, 0, 0);
+      endOfWeek =
+          DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59);
+
+      txtFechaInicial = startOfWeek.toIso8601String().split('T')[0];
+      txtFechaFinal = endOfWeek.toIso8601String().split('T')[0];
+    }
+
+    HttpClass.httpData(
+            context,
+            Uri.parse(
+                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+            {},
+            {},
+            "GET")
+        .then((response) {
+      setState(() {
+        isLoading = false;
+        loadData = true;
+      });
+
+      if (!response["status"] ||
+          response["data"] == null ||
+          (response["data"] as List).isEmpty) {
+        setState(() {
+          mapInicialGanancias = [];
+        });
+
+        return;
+      }
+
+      setState(() {
+        mapInicialGanancias = json.decode(json.encode(response["data"]));
+      });
+    });
+  }
+
   _setGanancias(List<dynamic> mapGanancias) {
     List<Widget> listWidget = [];
 
-    for (var i = 1; i < mapGanancias.length; i++) {
-      double total_viaje = (double.parse(
-          (validateNullOrEmptyNumber(mapGanancias[i]["subtotal"]) ?? 0)));
+    if (mapGanancias.length < 1) {
+      return [SizedBox()];
+    }
 
-      double totalGanancia = (total_viaje -
-          ((validateNullOrEmptyString(
-                  double.parse(mapGanancias[i]["costo_comision"].toString())) ??
-              0)));
+    for (var i = 1; i < mapGanancias.length; i++) {
+      double total_viaje = 0;
+      double totalGanancia = 0;
+
+      if (validateNullOrEmptyNumber(mapGanancias[i]["subtotal"]) != 0) {
+        total_viaje = double.parse(mapGanancias[i]["subtotal"].toString());
+      }
+
+      if (validateNullOrEmptyNumber(mapGanancias[i]["costo_comision"]) != 0) {
+        totalGanancia += (total_viaje -
+            double.parse(mapGanancias[i]["costo_comision"].toString()));
+      }
 
       DateTime dateTime =
           DateTime.parse(mapGanancias[i]["fecha_inicio"].toString());
@@ -231,6 +302,153 @@ class _GainScreenState extends State<GainScreen> {
     return listWidget;
   }
 
+  _setInicialGanancias(List<dynamic> mapInicialGanancias) {
+    List<Widget> listWidget = [];
+
+    if (mapInicialGanancias.length < 1) {
+      return [SizedBox()];
+    }
+
+    double total_viaje = 0;
+    double totalGanancia = 0;
+    int totalSumaViajes = 0;
+
+    for (var i = 1; i < mapInicialGanancias.length; i++) {
+      totalSumaViajes++;
+
+      if (validateNullOrEmptyNumber(mapInicialGanancias[i]["subtotal"]) != 0) {
+        total_viaje =
+            double.parse(mapInicialGanancias[i]["subtotal"].toString());
+      }
+
+      if (validateNullOrEmptyNumber(mapInicialGanancias[i]["costo_comision"]) !=
+          0) {
+        totalGanancia += (total_viaje -
+            double.parse(mapInicialGanancias[i]["costo_comision"].toString()));
+      }
+    }
+
+    Widget wid = Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
+        child: Container(
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+            child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    //height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      border: Border(
+                        left: BorderSide(
+                          color: _colorFromHex(Widgets.colorPrimary),
+                          width: 5.0,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: buildText(
+                                  "Total ganancias de la semana",
+                                  15,
+                                  _colorFromHex(Widgets.colorGrayLight),
+                                  0.16,
+                                  "popins",
+                                  false,
+                                  19,
+                                  TextAlign.center,
+                                  FontWeight.w500,
+                                  Colors.transparent)),
+                        ),
+                        Flexible(
+                            flex: 6,
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: buildText(
+                                  "\$" +
+                                      (_formatter.format(
+                                              totalGanancia.toStringAsFixed(2)))
+                                          .replaceAll("USD", ""),
+                                  15,
+                                  _colorFromHex(Widgets.colorSecundary),
+                                  0.16,
+                                  "popins",
+                                  false,
+                                  19,
+                                  TextAlign.center,
+                                  FontWeight.bold,
+                                  Colors.transparent),
+                            ))
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    //height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      border: Border(
+                        left: BorderSide(
+                          color: _colorFromHex(Widgets.colorPrimary),
+                          width: 5.0,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          flex: 6,
+                          child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: buildText(
+                                  "Total viajes de la semana",
+                                  15,
+                                  _colorFromHex(Widgets.colorGrayLight),
+                                  0.16,
+                                  "popins",
+                                  false,
+                                  19,
+                                  TextAlign.center,
+                                  FontWeight.w500,
+                                  Colors.transparent)),
+                        ),
+                        Flexible(
+                            flex: 6,
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: buildText(
+                                  totalSumaViajes.toString(),
+                                  15,
+                                  _colorFromHex(Widgets.colorSecundary),
+                                  0.16,
+                                  "popins",
+                                  false,
+                                  19,
+                                  TextAlign.center,
+                                  FontWeight.bold,
+                                  Colors.transparent),
+                            ))
+                      ],
+                    ),
+                  ),
+                ])));
+
+    listWidget.add(wid);
+
+    return listWidget;
+  }
+
   @override
   Widget build(BuildContext context) {
     // return WillPopScope(
@@ -258,15 +476,18 @@ class _GainScreenState extends State<GainScreen> {
                 child: Column(children: [
                 Container(
                   margin: const EdgeInsets.only(top: 5, bottom: 5),
+                  child: Column(
+                      children: _setInicialGanancias(mapInicialGanancias)),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(top: 5, bottom: 5),
                   child: TableCalendar(
                     startingDayOfWeek: StartingDayOfWeek.monday,
-                    
-                    availableCalendarFormats:  {
+                    availableCalendarFormats: {
                       CalendarFormat.week: "Mes",
-                        CalendarFormat.month: "Semana",
+                      CalendarFormat.month: "Semana",
                       //CalendarFormat.twoWeeks: "Semana"
                     },
-                    
                     locale: 'es_MX',
                     calendarFormat: _calendarFormat,
                     onFormatChanged: (format) {
@@ -285,6 +506,42 @@ class _GainScreenState extends State<GainScreen> {
                         _selectedDay = selectedDay;
                         _focusedDay = focusedDay;
                       });
+
+                      DateTime startOfWeek = focusedDay
+                          .subtract(Duration(days: focusedDay.weekday - 1));
+                      DateTime endOfWeek = focusedDay
+                          .add(Duration(days: 7 - focusedDay.weekday));
+
+                      Map filterWeek = {
+                        "txtFechaInicial":
+                            DateFormat('yyyy/MM/dd').format(startOfWeek),
+                        "txtFechaFinal":
+                            DateFormat('yyyy/MM/dd').format(endOfWeek)
+                      };
+
+                      _inicialFilterResponse(context, filterWeek);
+
+                      _filterResponse(context);
+                    },
+                    onPageChanged: (focusedDay) {
+                      DateTime startOfWeek = focusedDay
+                          .subtract(Duration(days: focusedDay.weekday - 1));
+                      DateTime endOfWeek = focusedDay
+                          .add(Duration(days: 7 - focusedDay.weekday));
+
+                      Map filterWeek = {
+                        "txtFechaInicial":
+                            DateFormat('yyyy/MM/dd').format(startOfWeek),
+                        "txtFechaFinal":
+                            DateFormat('yyyy/MM/dd').format(endOfWeek)
+                      };
+
+                      setState(() {
+                        _selectedDay = startOfWeek;
+                        _focusedDay = focusedDay;
+                      });
+
+                      _inicialFilterResponse(context, filterWeek);
 
                       _filterResponse(context);
                     },
@@ -321,7 +578,7 @@ class _GainScreenState extends State<GainScreen> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 buildText(
-                                                    "Ganancias Totales del día",
+                                                    "Ganancias Totales\n del día",
                                                     15,
                                                     _colorFromHex(
                                                         Widgets.colorGrayLight),
@@ -365,7 +622,7 @@ class _GainScreenState extends State<GainScreen> {
                                                   MainAxisAlignment.center,
                                               children: [
                                                 buildText(
-                                                    "Viajes Totales del día",
+                                                    "Viajes Totales \n del día",
                                                     15,
                                                     _colorFromHex(
                                                         Widgets.colorGrayLight),

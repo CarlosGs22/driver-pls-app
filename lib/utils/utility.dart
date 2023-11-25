@@ -33,6 +33,40 @@ class Utility {
     }
   }
 
+  static String convertirAFormatoHoraMinutoSegundo(double valorDecimal) {
+  // Obtener la parte entera y decimal del valor
+  int horas = valorDecimal.toInt();
+  double minutosDecimal = (valorDecimal - horas) * 60;
+  int minutos = minutosDecimal.toInt();
+  int segundos = ((minutosDecimal - minutos) * 60).toInt();
+
+  // Formatear el tiempo en una cadena en el formato HH:mm:ss
+  String tiempoFormateado =
+      '${horas.toString().padLeft(2, '0')}:${minutos.toString().padLeft(2, '0')}:${segundos.toString().padLeft(2, '0')}';
+
+  return tiempoFormateado;
+}
+
+static String convertirMinutosAHorasYSegundos(double minutos) {
+  // Calcular horas, minutos y segundos
+  int horas = minutos.floor();
+  int minutosRestantes = ((minutos - horas) * 60).floor();
+  int segundos = ((minutos - horas) * 3600 % 60).round();
+
+  // Formatear la salida
+  String resultado = '$horas horas ';
+  if (minutosRestantes > 0) {
+    resultado += '$minutosRestantes minutos ';
+  }
+  if (segundos > 0) {
+    resultado += '$segundos segundos';
+  }
+
+  return resultado;
+}
+
+
+
   static double calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -136,6 +170,4 @@ String formatTimeMinutes(double totalMinutes) {
   return '$horasStr:$minutosStr:$segundosStr';
 }
 
-_setBelongTo(var option){
 
-}

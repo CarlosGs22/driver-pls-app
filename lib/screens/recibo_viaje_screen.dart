@@ -112,9 +112,9 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                             ),
                             Text(
                               (validateNullOrEmptyString(
-                                          widget.viajeResumen["tiempo"]) ??
+                                          widget.viajeResumen["formatoHora"]) ??
                                       "") +
-                                  " Mins",
+                                  " Hrs",
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,

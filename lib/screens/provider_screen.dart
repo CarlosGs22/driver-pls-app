@@ -15,14 +15,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class ProviderScreen extends StatefulWidget {
+  const ProviderScreen({Key? key}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<LoginScreen> {
+class _LoginState extends State<ProviderScreen> {
   final formKey = GlobalKey<FormState>();
   bool _passwordVisible = true;
   final myController = TextEditingController();

@@ -129,7 +129,7 @@ class _SupportState extends State<SupportScreen> {
 
       msj += "\n \n $description";
 
-      _setWhatsAppMessage("6143136361", msj, context);
+      _setWhatsAppMessage("6141088623", msj, context);
     }
   }
 

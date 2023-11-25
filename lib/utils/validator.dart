@@ -1,3 +1,5 @@
+import 'package:email_validator/email_validator.dart';
+
 String? validateEmail(String value) {
   String? _msg;
   RegExp regex = new RegExp(
@@ -11,7 +13,7 @@ String? validateEmail(String value) {
   return _msg;
 }
 
-String? validateField(String value) {
+String? validateField(String value,{email = null,maxLenght = null}) {
   String? _msg;
   if (value.isEmpty) {
     _msg = "\u26A0 El campo es requerido";
@@ -24,8 +26,24 @@ String? validateField(String value) {
     _msg = "\u26A0 El campo es requerido";
   }
 
+  if(email != null){
+     if (!EmailValidator.validate(value.toString())) {
+       _msg = "\u26A0 El correo es inválido";
+     }
+  }
+
+  if(maxLenght != null){
+     if(maxLenght > value.toString().length){
+          _msg = "\u26A0 Mínimo 9 dígitos";
+     }
+  }
+
   return _msg;
 }
+
+
+
+
 
 var validateData = (var band, var value) {
   if (band == "1") {

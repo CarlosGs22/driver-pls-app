@@ -319,9 +319,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                   )),
                               Text(
                                 validateNullOrEmptyString(
-                                            getDataInserted["tiempo"]) !=
+                                            getDataInserted["formatoHora"]) !=
                                         null
-                                    ? getDataInserted["tiempo"].toString()
+                                    ? getDataInserted["formatoHora"].toString()
                                     : "00:00",
                                 style: GoogleFonts.poppins(
                                   fontSize: 21,
