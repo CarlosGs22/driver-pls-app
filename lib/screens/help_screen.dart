@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
@@ -30,6 +31,10 @@ class _HelpScreentState extends State<HelpScreen> {
   }
 
   List<Widget> setPaddingCard() {
+        final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+  String nombreCliente = cliente.nombre;
+
     List<Widget> generalList = [];
 
     List<dynamic> mapData = [];
@@ -73,7 +78,7 @@ class _HelpScreentState extends State<HelpScreen> {
                     link = Uri(
                       scheme: 'mailto',
                       path: valor,
-                      query: 'body=$message&subject=Driver Please',
+                      query: 'body=$message&subject=$nombreCliente',
                     );
                     break;
                   case 1:

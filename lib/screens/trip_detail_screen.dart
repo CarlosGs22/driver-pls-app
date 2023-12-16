@@ -6,6 +6,7 @@ import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:camera/camera.dart';
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
 import 'package:driver_please_flutter/screens/preview_evidence.dart';
@@ -28,6 +29,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:motion_toast/motion_toast.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -169,8 +171,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _getRutaViajes() async {
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     List<RutaViajeModel> auxRutaViajes =
-        await RutaViajeService.getViajes(context, widget.viaje.idViaje);
+        await RutaViajeService.getViajes(context, widget.viaje.idViaje,path: cliente.path);
 
     if (auxRutaViajes.isNotEmpty) {
       setState(() {
@@ -180,9 +184,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _getViajeResumen() async {
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     Map<String, dynamic> auxViajeResumen =
         await ViajeResumenService.getViajeResumen(
-            context, widget.viaje.idViaje);
+            context, widget.viaje.idViaje,path: cliente.path);
 
     if (auxViajeResumen.isNotEmpty) {
       setState(() {
@@ -331,10 +337,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         "tripStatus": 6
       });
 
+      final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/saveIncidence.php"),
+                cliente.path +   "aplicacion/saveIncidence.php"),
               formIncidence,
               {},
               "POST")
@@ -368,10 +377,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   _sendRequestOnConfirm(
       var formParams, var option, ViajeModel viaje, var redirec) {
+
+        final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/confirmViaje.php"),
+              cliente.path  +  "aplicacion/confirmViaje.php"),
             formParams,
             {},
             "POST")
@@ -473,15 +486,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             )),
         buttons: []).show();
 
-    /*
-    HttpClass.httpData(
-            context,
-            Uri.parse("https://www.driverplease.net/aplicacion/confirmViaje.php"),
-            formParams,
-            {},
-            "POST")
-        .then((response) {
-    });*/
+    
   }
 
   Future<void> _initializeCamera() async {
@@ -609,7 +614,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _handleSendEvidence(File evidence, RutaViajeModel rutaViajeModel) async {
+    
     try {
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
       Navigator.pop(context);
       Navigator.pop(context);
       
@@ -631,7 +639,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
       // Luego, aquí puedes enviar la imagen al servidor como lo hacías antes.
       var request = http.MultipartRequest('POST',
-          Uri.parse("https://www.driverplease.net/aplicacion/evidencia.php"));
+          Uri.parse(cliente.path + "aplicacion/evidencia.php"));
       request.files.add(await http.MultipartFile.fromPath(
           'evidencia', processedImageFile.path));
 

@@ -4,9 +4,11 @@ import 'package:driver_please_flutter/screens/help_screen.dart';
 import 'package:driver_please_flutter/screens/historial_trip_list_screen.dart';
 import 'package:driver_please_flutter/screens/login_screen.dart';
 import 'package:driver_please_flutter/screens/my_car_screen.dart';
+import 'package:driver_please_flutter/screens/provider_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_finished_screen.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
+import 'package:driver_please_flutter/utils/shared_preference_cliente.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
@@ -161,8 +163,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              const GainScreen()));
+                          builder: (context) => const GainScreen()));
                 }),
           ),
 
@@ -200,10 +201,14 @@ class _MainDrawerState extends State<MainDrawer> {
                 onTap: () {
                   Navigator.pop(context);
                   UserPreferences().removeUser();
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                          builder: (context) => const LoginScreen()),
-                      (Route<dynamic> route) => false);
+                  ClientePreferences().removeCliente();
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProviderScreen()),
+                    (Route<dynamic> route) => false,
+                  );
                 }),
           ),
           const Divider(

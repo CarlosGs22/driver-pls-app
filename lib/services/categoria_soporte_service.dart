@@ -6,11 +6,11 @@ import 'package:flutter/cupertino.dart';
 
 class CategoriaSoporteService {
   static Future<List<CategoriaSoporteModel>> getCategoriaSoporte(
-          BuildContext context,var idCon) async =>
+          BuildContext context,var idCon,{required String path}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getCategoriaSoporte.php?idCon=$idCon"),
+                 path +  "aplicacion/getCategoriaSoporte.php?idCon=$idCon"),
               {},
               {},
               "GET")

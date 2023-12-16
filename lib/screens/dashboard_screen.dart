@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:driver_please_flutter/models/cliente_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/support_screen.dart';
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
@@ -42,20 +44,27 @@ class _DashboardState extends State<Dashboard> {
       return;
     }
 
+     final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     final token = _firebaseMessaging
         .getToken()
-        .then((value) => sendRegistrationToServer(value.toString(), idAgent));
+        .then((value) => sendRegistrationToServer(value.toString(), idAgent,cliente.path));
   }
 
   _redirectNotification(Map<String, dynamic> params) {
+
     try {
+
+
+       final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
       setState(() {
         isLoading = true;
       });
 
       HttpClass.httpData(
               context,
-              Uri.parse("https://www.driverplease.net/aplicacion/getViaje.php"),
+              Uri.parse(cliente.path + "aplicacion/getViaje.php"),
               params,
               {},
               "POST")
@@ -116,13 +125,15 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  sendRegistrationToServer(String token, String id) {
+  sendRegistrationToServer(String token, String id,String path) {
     Map<String, dynamic> params = {"idCon": id, "token": token};
+
+    
 
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/updateToken.php"),
+               path +  "aplicacion/updateToken.php"),
             params,
             {},
             "POST")

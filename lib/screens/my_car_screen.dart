@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:driver_please_flutter/models/carro_model.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/services/carro_service.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -36,7 +37,9 @@ class _MyCarScreenState extends State<MyCarScreen> {
     super.initState();
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    CarroService.getCarroConductor(context, user.id).then((value) {
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+    CarroService.getCarroConductor(context, user.id,path: cliente.path).then((value) {
       setState(() {
         carList = value;
       });

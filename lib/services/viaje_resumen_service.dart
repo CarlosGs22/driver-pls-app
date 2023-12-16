@@ -6,11 +6,11 @@ import 'package:flutter/cupertino.dart';
 
 class ViajeResumenService {
   static Future<Map<String, dynamic>> getViajeResumen(
-          BuildContext context, var idViaje) async =>
+          BuildContext context, var idViaje,{required String path}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getViajeResumen.php?id_viaje=$idViaje"),
+                 path +  "aplicacion/getViajeResumen.php?id_viaje=$idViaje"),
               {},
               {},
               "GET")

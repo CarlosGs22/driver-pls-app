@@ -78,8 +78,6 @@ class _GoogleMapSingleRouteState extends State<GoogleMapSingleRoute> {
     );
 
     if (result.points.isNotEmpty) {
-      // loop through all PointLatLng points and convert them
-      // to a list of LatLng, required by the Polyline
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(
           LatLng(point.latitude, point.longitude),

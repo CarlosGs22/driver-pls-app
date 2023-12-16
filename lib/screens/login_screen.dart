@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:driver_please_flutter/main.dart';
 import 'package:driver_please_flutter/models/user.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
+import 'package:driver_please_flutter/screens/provider_screen.dart';
 import 'package:driver_please_flutter/screens/register_profile.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
+import 'package:driver_please_flutter/utils/shared_preference_cliente.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
@@ -16,7 +19,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  Map<String, dynamic> dataMap;
+
+  LoginScreen({Key? key, required this.dataMap}) : super(key: key);
 
   @override
   _LoginState createState() => _LoginState();
@@ -83,13 +88,20 @@ class _LoginState extends State<LoginScreen> {
     var email,
     var password,
   ) async {
-    Map<String, dynamic> params = {"username": email, "password": password};
+    Map<String, dynamic> params = {
+      "username": email,
+      "password": password,
+      "path": widget.dataMap["path"]
+    };
 
     params.removeWhere((key, value) => value == null);
 
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     HttpClass.httpData(
             context,
-            Uri.parse("https://www.driverplease.net/aplicacion/login.php"),
+            Uri.parse(cliente.path + "aplicacion/login.php"),
             params,
             {},
             "POST")
@@ -143,33 +155,15 @@ class _LoginState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     Color color1 = _colorFromHex("#fff");
     Color color2 = _colorFromHex("#fff");
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
 
-    final forgotLabel = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        TextButton(
-          child: buildText(
-              Strings.labelLoginLostPassword,
-              16,
-              _colorFromHex(Widgets.colorSecundary),
-              0.16,
-              "popins",
-              true,
-              19,
-              TextAlign.center,
-              FontWeight.normal,
-              Colors.transparent),
-          onPressed: () {},
-        ),
-      ],
-    );
 
     final registerLabel = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         TextButton(
           child: buildText(
-              Strings.labelLoginCreateAccount,
+              Strings.labelLoginGoProvider,
               16,
               _colorFromHex(Widgets.colorSecundary),
               0.16,
@@ -180,8 +174,14 @@ class _LoginState extends State<LoginScreen> {
               FontWeight.normal,
               Colors.transparent),
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => RegisterProfile()));
+            UserPreferences().removeUser();
+            ClientePreferences().removeCliente();
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const ProviderScreen()),
+              (Route<dynamic> route) => false,
+            );
           },
         ),
       ],
@@ -217,7 +217,7 @@ class _LoginState extends State<LoginScreen> {
                               fit: BoxFit.fitHeight,
                             ),
                             buildText(
-                                Strings.labelAppNameTitle,
+                                cliente.nombre,
                                 44,
                                 _colorFromHex(Widgets.colorPrimary),
                                 0.16,

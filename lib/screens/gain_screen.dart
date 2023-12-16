@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -62,15 +63,18 @@ class _GainScreenState extends State<GainScreen> {
 
   _filterResponse(BuildContext context) {
     final user = Provider.of<UserProvider>(context, listen: false).user;
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
 
     var txtFechaInicial = _selectedDay.toIso8601String().split('T')[0];
     var txtFechaFinal = _selectedDay.toIso8601String().split('T')[0];
     var idConductor = user.id;
 
+
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+               cliente.path +  "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
             {},
             {},
             "GET")
@@ -125,10 +129,13 @@ class _GainScreenState extends State<GainScreen> {
       txtFechaFinal = endOfWeek.toIso8601String().split('T')[0];
     }
 
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+              cliente.path + "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
             {},
             {},
             "GET")

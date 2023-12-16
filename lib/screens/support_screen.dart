@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:driver_please_flutter/models/categoria_soporte_model.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/services/categoria_soporte_service.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
@@ -26,17 +27,22 @@ class _SupportState extends State<SupportScreen> {
   List<Color> colorListLocal = [];
 
   String type = "";
-  String description = "";
+
+  final TextEditingController _descriptionController = TextEditingController();
+
 
   bool isLoading = false;
 
   List<String> listaCategoriaSoporte = [];
 
   _getCategoriaSoporte() async {
-     final user = Provider.of<UserProvider>(context, listen: false).user;
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     List<CategoriaSoporteModel> auxCategoriaSoporte =
-        await CategoriaSoporteService.getCategoriaSoporte(context,user.id);
+        await CategoriaSoporteService.getCategoriaSoporte(context, user.id,
+            path: cliente.path);
 
     List<String> auxLista = [];
 
@@ -88,6 +94,7 @@ class _SupportState extends State<SupportScreen> {
 
       if (Platform.isIOS) {
         if (await canLaunch(whatappURL_ios)) {
+          _descriptionController.text = "";
           await launch(whatappURL_ios, forceSafariVC: false);
         } else {
           MotionToast.error(
@@ -97,8 +104,11 @@ class _SupportState extends State<SupportScreen> {
         }
       } else {
         if (await canLaunch(whatsappURl_android)) {
+         _descriptionController.text = "";
+
           await launch(whatsappURl_android);
         } else {
+         
           MotionToast.error(
                   title: const Text("Error"),
                   description: const Text("WhatsApp no instalado"))
@@ -127,7 +137,7 @@ class _SupportState extends State<SupportScreen> {
 
       msj += "***** $type *****";
 
-      msj += "\n \n $description";
+      msj += "\n \n " + _descriptionController.text;
 
       _setWhatsAppMessage("6141088623", msj, context);
     }
@@ -173,15 +183,17 @@ class _SupportState extends State<SupportScreen> {
                     ),
                     SizedBox(
                       child: DropdownSearch<String>(
+                        
                         showSearchBox: true,
-                          validator: (value) =>
-                                  validateField(value.toString()),
+                        validator: (value) => validateField(value.toString()),
                         dropdownSearchDecoration: InputDecoration(
                           labelText: Strings.hintSupportType,
                           labelStyle: GoogleFonts.poppins(
-                          fontSize: 17, color: _colorFromHex(Widgets.colorGrayLight)),
-                          helperStyle:  GoogleFonts.poppins(
-                          fontSize: 17, color: _colorFromHex(Widgets.colorGrayLight)),
+                              fontSize: 17,
+                              color: _colorFromHex(Widgets.colorGrayLight)),
+                          helperStyle: GoogleFonts.poppins(
+                              fontSize: 17,
+                              color: _colorFromHex(Widgets.colorGrayLight)),
                           filled: true,
                           fillColor: Colors.white,
                           focusedBorder: OutlineInputBorder(
@@ -202,8 +214,8 @@ class _SupportState extends State<SupportScreen> {
                                   BorderRadius.all(Radius.circular(10.0))),
                           errorStyle: GoogleFonts.poppins(color: Colors.red),
                         ),
-                        
                         items: listaCategoriaSoporte,
+                        
                         onChanged: (value) => _setStateColor(value, 0),
                         onSaved: (value) => type = value.toString(),
                         selectedItem: "",
@@ -220,16 +232,14 @@ class _SupportState extends State<SupportScreen> {
                         children: <Widget>[
                           TextFormField(
                               maxLines: 7,
-                              initialValue: "",
+                             controller: _descriptionController,
                               autofocus: false,
                               validator: (value) =>
                                   validateField(value.toString()),
                               onChanged: (value) => _setStateColor(value, 1),
-                              onSaved: (value) =>
-                                  description = value.toString(),
+        
                               decoration: InputDecoration(
                                 labelText: Strings.hintSupportDescription,
-                           
                                 filled: true,
                                 fillColor: Colors.white,
                                 focusedBorder: OutlineInputBorder(

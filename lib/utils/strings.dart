@@ -11,12 +11,15 @@ class Strings {
   static const String labelHistorialListTrip = "Historial de viajes";
   static const String labelMyCarLabel = "Mis carros";
 
-  static const String labelAppNameTitle = "Driver Please";
+  static const String labelAppNameTitle = "Movilistica";
   static const String labelLoginCreateAccount = "Crear cuenta";
   static const String labelLoginLostPassword = "¿Perdiste tu contraseña?";
   static const String labelLoginbtn = "Iniciar sesión";
   static const String hintLoginEmail = "Correo eléctronico";
   static const String hintLoginPassword = "Contraseña";
+
+  static const String hintLoginProvider = "Proveedor";
+  static const String labelLoginProviderBtn = "Validar";
 
   static const String labelTripDate = "Fecha";
   static const String labelTripHour = "Hora programada";
@@ -45,4 +48,6 @@ class Strings {
 
   static const String labelUpdateProfile = "Datos del Conductor";
   static const String labelUpdateProfileBtn = "Actualizar";
+
+    static const String labelLoginGoProvider = "Proveedor";
 }

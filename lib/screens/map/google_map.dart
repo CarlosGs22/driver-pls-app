@@ -6,6 +6,7 @@ import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/taxi_trip.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
 import 'package:driver_please_flutter/screens/map/google_map_single_route.dart';
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
@@ -176,12 +177,15 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   }
 
   _sendRequestTrip() {
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     var formParams = {
       "id_viaje": widget.viaje.idViaje,
     };
     HttpClass.httpData(
             context,
-            Uri.parse("https://www.driverplease.net/aplicacion/startViaje.php"),
+            Uri.parse(cliente.path + "aplicacion/startViaje.php"),
             formParams,
             {},
             "POST")
@@ -216,6 +220,49 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           onPressed: () {
             _closeTrip("CANCEL");
             Navigator.pop(context);
+          },
+          color: _colorFromHex(Widgets.colorPrimary),
+        ),
+      ],
+    ).show();
+  }
+
+  void _handleModalCloseTrip(
+      BuildContext context, TaxiTripProvider tripProvider) {
+    Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "¡Atención!",
+      closeIcon: const SizedBox(),
+      closeFunction: () {},
+      desc: "¿Estás seguro de finalizar el viaje?",
+      buttons: [
+        DialogButton(
+          child: const Text(
+            "Cancelar",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () => Navigator.pop(context),
+          color: _colorFromHex(Widgets.colorSecundary),
+        ),
+        DialogButton(
+          child: const Text(
+            "Aceptar",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          onPressed: () {
+            setState(() {
+              endDate = Utility.getCurrentDate();
+              bandFinishTrip = 1;
+            });
+
+            TaxiTrip? auxcurrentTrip = tripProvider.currentTrip;
+
+            tripProvider.stopTrip();
+            _timer?.cancel();
+            _locationSubscription!.cancel();
+
+            _handleFinishTrip(context, auxcurrentTrip!);
           },
           color: _colorFromHex(Widgets.colorPrimary),
         ),
@@ -449,11 +496,14 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       "fecha_fin": endDate,
       "poligono": json.encode(_polylineCoordinates)
     });
+    Navigator.pop(context);
+
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     HttpClass.httpData(
             context,
-            Uri.parse(
-                "https://www.driverplease.net/aplicacion/insertviajes.php"),
+            Uri.parse(cliente.path + "aplicacion/insertviajes.php"),
             formParams,
             {"content-type": "application/json"},
             "POST")
@@ -474,10 +524,12 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         "tripStatus": 3
       });
 
+      final cliente =
+          Provider.of<ClienteProvider>(context, listen: false).cliente;
+
       HttpClass.httpData(
               context,
-              Uri.parse(
-                  "https://www.driverplease.net/aplicacion/saveIncidence.php"),
+              Uri.parse(cliente.path + "aplicacion/saveIncidence.php"),
               formIncidence,
               {"content-type": "application/json"},
               "POST")
@@ -752,19 +804,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                                   fontWeight: FontWeight.w500),
                             ),
                             onTap: () {
-                              setState(() {
-                                endDate = Utility.getCurrentDate();
-                                bandFinishTrip = 1;
-                              });
-
-                              TaxiTrip? auxcurrentTrip =
-                                  tripProvider.currentTrip;
-
-                              tripProvider.stopTrip();
-                              _timer?.cancel();
-                              _locationSubscription!.cancel();
-
-                              _handleFinishTrip(context, auxcurrentTrip!);
+                              _handleModalCloseTrip(context, tripProvider);
                             },
                           )
                         ],

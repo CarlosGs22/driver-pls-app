@@ -299,19 +299,19 @@ setStatusTrip(String stat, String confirm) {
   switch (status) {
     case 1:
       if (confirmado == 1) {
-           res = "CONTINUAR";
+           res = "ACEPTAR";
       } else {
         if (confirmado == 2) {
-          res = "EMPEZAR";
+          res = "CONTINUAR";
         }
       }
       break;
     case 2:
       if (confirmado == 1) {
-        res = "CONTINUAR";
+        res = "ACEPTAR";
       } else {
         if (confirmado == 2) {
-          res = "EMPEZAR";
+          res = "CONTINUAR";
         }
       }
       break;

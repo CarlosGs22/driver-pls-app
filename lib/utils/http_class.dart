@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 
 class HttpClass {
   static Future httpData(BuildContext context, Uri url, var params,
       Map<String, String> headers, var method) async {
+
     try {
       if (method == "GET") {
         
@@ -22,7 +25,7 @@ class HttpClass {
 
           Utility.printWrapped( "************RESPONSE -> " + value.statusCode.toString());
 
-          //Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
+          Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
 
           var response = json.decode(value.body);
 
@@ -42,7 +45,7 @@ class HttpClass {
 
           Utility.printWrapped("************PARAMS -> " + params.toString());
 
-          //Utility.printWrapped("************RESPONSE -> " + value.body);
+          Utility.printWrapped("************RESPONSE -> " + value.body);
 
           var response = json.decode(value.body);
 

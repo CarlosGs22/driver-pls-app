@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_shake_animated/flutter_shake_animated.dart';
@@ -34,6 +36,7 @@ class _TripListState extends State<TripListAssignedScreen> {
   int _totalPages = 1;
   List<ViajeModel> _viajes = [];
   String idAgent = "";
+  String path = "";
   List<IconData> iconList = [];
 
   bool openDrawer = false;
@@ -49,16 +52,20 @@ class _TripListState extends State<TripListAssignedScreen> {
 
   _getViajes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
 
     List<ViajeModel> viajes = await ViajeService.getViajes(context,
         pageNumber: _pageNumber,
         pageSize: _pageSize,
         idUser: prefs.getString('id_con').toString(),
         status: 1,
-        order: "1");
+        order: "1",
+        path: cliente.path);
     if (viajes.isNotEmpty) {
       setState(() {
         idAgent = prefs.getString("id_con").toString();
+        path = prefs.getString("path_cliente").toString();
         _viajes = viajes;
         _totalPages = viajes.first.totalPages;
       });
@@ -346,7 +353,9 @@ class _TripListState extends State<TripListAssignedScreen> {
                                   pageSize: _pageSize,
                                   idUser: idAgent,
                                   status: 1,
-                                  order: "1");
+                                  order: "1",
+                                  path: path
+                                  );
                           setState(() {
                             _viajes = viajes;
                           });
@@ -367,7 +376,8 @@ class _TripListState extends State<TripListAssignedScreen> {
                                   pageSize: _pageSize,
                                   idUser: idAgent,
                                   status: 1,
-                                  order: "1");
+                                  order: "1",
+                                  path: path);
                           setState(() {
                             _viajes = viajes;
                           });

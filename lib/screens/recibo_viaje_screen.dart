@@ -1,8 +1,10 @@
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ReciboViajeScreen extends StatefulWidget {
   Map<String, dynamic> viajeResumen = {};
@@ -42,6 +44,10 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
         ((validateNullOrEmptyString(double.parse(
                 widget.viajeResumen["costo_comision"].toString())) ??
             0)));
+
+  final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+  String nombreCliente = cliente.nombre;
 
     return Scaffold(
         key: scaffoldKey,
@@ -259,8 +265,8 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                         endIndent: 20,
                         color: Color(0xFFC50F0F),
                       ),
-                      const Text(
-                        'Servicio de logistica inteligente \n Driver Please (Servicio LINDP)',
+                       Text(
+                        "Servicio de logistica inteligente $nombreCliente (Servicio LINDP)",
                         style: TextStyle(
                           fontFamily: 'Open Sans',
                           fontSize: 17,

@@ -10,11 +10,12 @@ class ViajeService {
           required int pageSize,
           required String idUser,
           var status,
-          required String order}) async =>
+          required String order,
+          required String path}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getViajesGeneral.php?pageNumber=$pageNumber&pageSize=$pageSize&idUser=$idUser&tripStatus=$status&order=$order"),
+                  path + "aplicacion/getViajesGeneral.php?pageNumber=$pageNumber&pageSize=$pageSize&idUser=$idUser&tripStatus=$status&order=$order"),
               {},
               {},
               "GET")
@@ -66,11 +67,12 @@ class ViajeService {
           var status,
           required String order,
           required inicialDate,
-          required endDate}) async =>
+          required endDate,
+          required String path}) async =>
       HttpClass.httpData(
               context,
               Uri.parse(
-                  "https://www.driverplease.net/aplicacion/getViajesHistorial.php?pageNumber=$pageNumber&pageSize=$pageSize&idCon=$idUser&tripStatus=$status&order=$order&inicialDate=$inicialDate&endDate=$endDate"),
+                 path +  "aplicacion/getViajesHistorial.php?pageNumber=$pageNumber&pageSize=$pageSize&idCon=$idUser&tripStatus=$status&order=$order&inicialDate=$inicialDate&endDate=$endDate"),
               {},
               {},
               "GET")

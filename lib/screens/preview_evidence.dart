@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:driver_please_flutter/models/ruta_viaje_model.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:http/http.dart' as http;
 
@@ -78,8 +80,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   _handleSendEvidence(File evidence) async {
+     final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
     var request = http.MultipartRequest('POST',
-        Uri.parse("https://www.driverplease.net/aplicacion/evidencia.php"));
+        Uri.parse(cliente.path + "aplicacion/evidencia.php"));
 
     request.files
         .add(await http.MultipartFile.fromPath('evidencia', evidence.path));

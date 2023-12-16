@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:driver_please_flutter/main.dart';
 import 'package:driver_please_flutter/models/user.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/shared_preference.dart';
 import 'package:driver_please_flutter/utils/strings.dart';
@@ -91,10 +92,13 @@ class _UpdateProfileState extends State<UpdateProfile> {
       "telefono": mobilecontroller.text
     };
 
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+
     HttpClass.httpData(
             context,
             Uri.parse(
-                "https://www.driverplease.net/aplicacion/updatePerfil.php"),
+               cliente.path  + "aplicacion/updatePerfil.php"),
             formParams,
             {},
             "POST")

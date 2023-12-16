@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/agent_provider.dart';
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/support_screen.dart';
 
@@ -57,6 +58,8 @@ class _TripListState extends State<HistorialTripListScreen> {
 
   _getViajes(var inicialDate, var endDate) async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
+    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+
 
     var txtFechaInicial = dateInicialController.text;
     var txtFechaFinal = dateFinalController.text;
@@ -73,7 +76,8 @@ class _TripListState extends State<HistorialTripListScreen> {
         status: "0",
         order: "2",
         inicialDate: inicialDate,
-        endDate: endDate);
+        endDate: endDate,
+        path: cliente.path);
     if (viajes.isNotEmpty) {
       setState(() {
         _viajes = viajes;
