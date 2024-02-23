@@ -8,18 +8,21 @@ class Cliente {
   String promocion = "";
   String estatus = "";
   String path = "";
+  String logo = "";
+  String whatsapp = "";
 
-  Cliente({
-    required this.path,
-    required this.idCliente,
-    required this.nombre,
-    required this.correo,
-    required this.telefono,
-    required this.vigencia,
-    required this.suscripcion,
-    required this.promocion,
-    required this.estatus,
-  });
+  Cliente(
+      {required this.path,
+      required this.idCliente,
+      required this.nombre,
+      required this.correo,
+      required this.telefono,
+      required this.vigencia,
+      required this.suscripcion,
+      required this.promocion,
+      required this.estatus,
+      required this.logo,
+      required this.whatsapp});
 
   factory Cliente.fromJson(Map<String, dynamic> responseData) {
     return Cliente(
@@ -32,6 +35,8 @@ class Cliente {
       promocion: responseData['promocion'] ?? '',
       estatus: responseData['estatus'] ?? '',
       path: responseData['path'] ?? '',
+      logo: responseData['logo'] ?? '',
+      whatsapp: responseData['whatsapp'] ?? '',
     );
   }
 

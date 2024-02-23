@@ -16,7 +16,7 @@ class HttpClass {
       if (method == "GET") {
         
         return await get(url, headers: headers)
-            .timeout(const Duration(seconds: 10))
+            .timeout(const Duration(seconds: 60))
             .then((value) {
               
           Utility.printWrapped("**************API-URL -> " + url.toString());
@@ -39,7 +39,7 @@ class HttpClass {
         });
       } else {
         return await post(url, body: params, headers: headers)
-            .timeout(const Duration(seconds: 10))
+            .timeout(const Duration(seconds: 60))
             .then((value) {
           Utility.printWrapped("**************API-URL -> " + url.toString());
 

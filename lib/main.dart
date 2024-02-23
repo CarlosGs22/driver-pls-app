@@ -7,6 +7,7 @@ import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/providers/taxi_trip_provider.dart';
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/provider_screen.dart';
+import 'package:driver_please_flutter/screens/start_trip.dart';
 import 'package:driver_please_flutter/screens/taximeter_screen.dart';
 import 'package:driver_please_flutter/screens/login_screen.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';

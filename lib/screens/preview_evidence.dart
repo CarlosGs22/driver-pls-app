@@ -55,9 +55,9 @@ class _CameraScreenState extends State<CameraScreen> {
       desc: "Esta opción no se puede restablecer",
       buttons: [
         DialogButton(
-          child: const Text(
+          child:  Text(
             "Cancelar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: _colorFromHex(Widgets.colorWhite), fontSize: 18),
           ),
           onPressed: () {
             _controller.resumePreview();
@@ -66,9 +66,9 @@ class _CameraScreenState extends State<CameraScreen> {
           color: _colorFromHex(Widgets.colorSecundary),
         ),
         DialogButton(
-          child: const Text(
+          child:  Text(
             "Aceptar",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(color: _colorFromHex(Widgets.colorWhite), fontSize: 18),
           ),
           onPressed: () {
             _handleSendEvidence(evidence);
@@ -161,7 +161,7 @@ class _CameraScreenState extends State<CameraScreen> {
       appBar: AppBar(
         title: Text("Evidencia"),
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
         actions: [],
@@ -178,7 +178,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: Text(
                   'Fecha: ${DateTime.now().toString()}',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: _colorFromHex(Widgets.colorWhite),
                     fontSize: 18.0,
                   ),
                 ),
@@ -188,7 +188,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 child: Text(
                   'Ubicación: Tu ubicación aquí',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: _colorFromHex(Widgets.colorWhite),
                     fontSize: 18.0,
                   ),
                 ),
@@ -207,7 +207,7 @@ class _CameraScreenState extends State<CameraScreen> {
             _handleCondition(evidence);
           }
         },
-        child: Icon(Icons.camera, color: Colors.white),
+        child: Icon(Icons.camera, color: _colorFromHex(Widgets.colorWhite)),
       ),
     );
   }

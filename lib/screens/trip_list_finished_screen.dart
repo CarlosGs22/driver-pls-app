@@ -84,7 +84,7 @@ class _TripListState extends State<TripListFinishedScreen> {
       },
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
         title: const Text(Strings.labelListTripFinished),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -99,6 +99,7 @@ class _TripListState extends State<TripListFinishedScreen> {
               })
         ],
       ),
+      backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
       drawer: MainDrawer(2),
       body: Column(
         children: [
@@ -123,6 +124,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                         viaje: viaje,
                                         redirect: null,
                                         panelVisible: true,
+                                        bandCancelTrip: false,
                                       )));
                         },
                         child: ListTile(
@@ -141,7 +143,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
                                         color: _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         fontSize: 16),
                                   ),
                                 ),
@@ -152,7 +154,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       Icons.circle,
                                       _colorFromHex(Widgets.colorPrimary),
                                       "Empresa: ${viaje.nombreEmpresa}",
-                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      _colorFromHex(Widgets.colorWhite),
                                       8),
                                 ],
                                 if (validateNullOrEmptyString(
@@ -162,14 +164,14 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       Icons.circle,
                                       _colorFromHex(Widgets.colorPrimary),
                                       "Sucursal: ${viaje.nombreSucursal}",
-                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      _colorFromHex(Widgets.colorWhite),
                                       8),
                                 ],
                                 buildBubblePadding(
                                     Icons.circle,
                                     _colorFromHex(Widgets.colorPrimary),
                                     "Costo del viaje: \$${viaje.subtotal}",
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorWhite),
                                     8),
                               ],
                             ),
@@ -184,7 +186,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
                                         color: _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),
@@ -195,7 +197,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
                                         color: _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),

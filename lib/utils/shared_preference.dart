@@ -82,7 +82,7 @@ class UserPreferences {
 
   Future<bool> saveValueUser(var key, var value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString(key, "");
+    prefs.setString(key, value);
     return prefs.commit();
   }
 

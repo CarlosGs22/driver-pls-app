@@ -36,18 +36,30 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
 
   @override
   Widget build(BuildContext context) {
-    
+    int segundos = (validateNullOrEmptyNumber(
+            int.tryParse(widget.viajeResumen["segundos_espera"]) ?? 0) ??
+        0);
+    String resultadoSegundosEspera = convertirSegundosAHora(segundos);
+
     double total_viaje = (double.parse(
         (validateNullOrEmptyNumber(widget.viajeResumen["subtotal"]) ?? 0)));
+
+        //   double costEspera = (double.parse(
+        // (validateNullOrEmptyNumber(widget.viajeResumen["costo_espera"]) ?? 0)));
+
+        // total_viaje = total_viaje + costEspera;
+
+    
 
     double totalGanancia = (total_viaje -
         ((validateNullOrEmptyString(double.parse(
                 widget.viajeResumen["costo_comision"].toString())) ??
             0)));
 
-  final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
-  String nombreCliente = cliente.nombre;
+    String nombreCliente = cliente.nombre;
 
     return Scaffold(
         key: scaffoldKey,
@@ -121,6 +133,31 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                                           widget.viajeResumen["formatoHora"]) ??
                                       "") +
                                   " Hrs",
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(0, 7, 0, 7),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              'Costo tiempo \n de espera',
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              ((validateNullOrEmptyString(convertirSegundosAHora(int.tryParse(widget.viajeResumen["segundos_espera"]) ?? 0))
+                                      ) ?? "00:00:00"),
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,
@@ -254,6 +291,34 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                           ],
                         ),
                       ),
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(0, 7, 0, 7),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              'Costo de tiempo \nde espera',
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontSize: 15,
+                              ),
+                            ),
+                            Text(
+                              "\$ " + ((validateNullOrEmptyString(double.parse(widget
+                                          .viajeResumen["costo_espera"]
+                                          .toString())
+                                      .toString()) ??
+                                  "0")),
+                              style: TextStyle(
+                                fontFamily: 'Open Sans',
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   Column(
@@ -265,7 +330,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                         endIndent: 20,
                         color: Color(0xFFC50F0F),
                       ),
-                       Text(
+                      Text(
                         "Servicio de logistica inteligente $nombreCliente (Servicio LINDP)",
                         style: TextStyle(
                           fontFamily: 'Open Sans',

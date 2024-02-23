@@ -15,7 +15,7 @@ class ClientePreferences {
     prefs.setString('promocion_cliente', cliente.promocion);
     prefs.setString('estatus_cliente', cliente.estatus);
     prefs.setString('path_cliente', cliente.path);
-
+    prefs.setString('logo_cliente', cliente.logo);
 
     return prefs.commit();
   }
@@ -32,6 +32,8 @@ class ClientePreferences {
     String promocion = prefs.getString("promocion_cliente").toString();
     String estatus = prefs.getString("estatus_cliente").toString();
     String path = prefs.getString("path_cliente").toString();
+    String logo = prefs.getString("logo_cliente").toString();
+    String whatsapp = prefs.getString("whatsapp_cliente").toString();
 
     var cliente = Cliente(
         idCliente: clienteId,
@@ -42,7 +44,9 @@ class ClientePreferences {
         suscripcion: subscripcion,
         promocion: promocion,
         estatus: estatus,
-        path: path);
+        path: path,
+        logo: logo,
+        whatsapp: whatsapp);
     return cliente;
   }
 

@@ -143,6 +143,7 @@ class _TripListState extends State<HistorialTripListScreen> {
     //     onWillPop: showExitPopup,
     //     child: 
     return Scaffold(
+      backgroundColor: _colorFromHex("#2a2a2a"),
           onDrawerChanged: (isOpened) {
             if (isOpened) {
               setState(() {
@@ -150,8 +151,6 @@ class _TripListState extends State<HistorialTripListScreen> {
               });
             }
           },
-          backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
-          
           appBar: AppBar(
             titleTextStyle: GoogleFonts.poppins(
                 fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
@@ -175,7 +174,7 @@ class _TripListState extends State<HistorialTripListScreen> {
           Column(
             children: [
               Card(
-                  color: _colorFromHex(Widgets.colorWhite),
+                  color: _colorFromHex("#2a2a2a"),
                   elevation: 6.0,
                   margin:
                       EdgeInsets.only(top: 15, bottom: 15, left: 5, right: 5),
@@ -184,12 +183,14 @@ class _TripListState extends State<HistorialTripListScreen> {
                       child: Column(
                         children: <Widget>[
                           ListTile(
-                            leading:  Icon(Icons.calendar_today_outlined,color: _colorFromHex(Widgets.colorPrimary),),
+                            leading: const Icon(Icons.calendar_today_outlined),
                             title: TextFormField(
+                              style: TextStyle(color: Colors.white),
                               controller: dateInicialController,
                               decoration: const InputDecoration(
                                 hintText: 'Selecciona fecha inicial',
                                 labelText: 'Fecha inicial',
+                                
                               ),
                               validator: (value) =>
                                   validateField(value.toString()),
@@ -216,7 +217,7 @@ class _TripListState extends State<HistorialTripListScreen> {
                             ),
                           ),
                           ListTile(
-                            leading:  Icon(Icons.calendar_today_outlined,color: _colorFromHex(Widgets.colorPrimary),),
+                            leading: const Icon(Icons.calendar_today_outlined),
                             title: TextFormField(
                               controller: dateFinalController,
                               decoration: const InputDecoration(
@@ -283,7 +284,7 @@ class _TripListState extends State<HistorialTripListScreen> {
                             ChatBubbleClipper5(type: BubbleType.receiverBubble),
                         margin: const EdgeInsets.only(
                             top: 10, bottom: 10, left: 5, right: 5),
-                        backGroundColor: _colorFromHex(Widgets.colorPrimary),
+                        backGroundColor: _colorFromHex("#000000"),
                         child: InkWell(
                             onTap: () {
                               Navigator.push(

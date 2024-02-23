@@ -61,9 +61,10 @@ class _MyCarScreenState extends State<MyCarScreen> {
               });
             }
           },
+          backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
           appBar: AppBar(
             titleTextStyle: GoogleFonts.poppins(
-                fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+                fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
             title: Text(Strings.labelMyCarLabel),
             elevation: 0.1,
             backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -78,20 +79,24 @@ class _MyCarScreenState extends State<MyCarScreen> {
                     return InkWell(
                         onTap: () {},
                         child: Card(
+                          color: _colorFromHex(Widgets.colorPrimary),
                           clipBehavior: Clip.antiAlias,
                           child: Column(children: <Widget>[
                             ListTile(
                               title: Text(
                                   validateNullOrEmptyString(item.marca) ??
-                                      "NA"),
+                                      "NA",
+                                       style: TextStyle(
+                                  color: _colorFromHex(Widgets.colorWhite),
+                                ),),
                               subtitle: Text(
                                 validateNullOrEmptyString(item.modelo) ?? "NA",
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: _colorFromHex(Widgets.colorWhite),
                                 ),
                               ),
                             ),
-                            Icon(Icons.directions_car,size: 70,),
+                            Icon(Icons.directions_car,size: 70,color: _colorFromHex(Widgets.colorWhite),),
                             // CachedNetworkImage(
                             //   imageUrl:
                             //       "https://acnews.blob.core.windows.net/imgnews/extralarge/NAZ_339be1c306fb40fbb9de02ba7722f528.jpg",
@@ -110,7 +115,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                         right: 20.0,
                                         top: 10.0,
                                         bottom: 10.0),
-                                    child: Divider(color: Colors.green),
+                                    child: Divider(color: Colors.white),
                                   ),
                                 ),
                               ],
@@ -129,7 +134,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          Icon(Icons.car_repair),
+                                          Icon(Icons.car_repair,color: _colorFromHex(Widgets.colorWhite),),
                                           SizedBox(
                                             width: 5.0,
                                           ),
@@ -138,6 +143,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                                     item.color) ??
                                                 "NA",
                                             textAlign: TextAlign.left,
+                                            style: TextStyle(color: _colorFromHex(Widgets.colorWhite)),
                                           ),
                                           SizedBox(
                                             width: 5.0,
@@ -153,6 +159,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                                     item.tipo) ??
                                                 "NA",
                                             textAlign: TextAlign.left,
+                                            style: TextStyle(color: _colorFromHex(Widgets.colorWhite)),
                                           ),
                                           SizedBox(
                                             width: 5.0,
@@ -176,6 +183,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                             textAlign: TextAlign.right,
                                             style: TextStyle(
                                                 fontSize: 22.0,
+                                                color: _colorFromHex(Widgets.colorWhite),
                                                 fontWeight: FontWeight.bold),
                                           ),
                                         ),
@@ -188,7 +196,7 @@ class _MyCarScreenState extends State<MyCarScreen> {
                                                 "NA",
                                             textAlign: TextAlign.right,
                                             style: TextStyle(
-                                              color: Colors.red,
+                                              color: _colorFromHex(Widgets.colorWhite),
                                               fontSize: 14.0,
                                             ),
                                           ),

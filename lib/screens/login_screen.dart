@@ -210,8 +210,8 @@ class _LoginState extends State<LoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Image.asset(
-                              'assets/images/logoApp.png',
+                            Image.network(
+                              cliente.logo != null || cliente.logo != "" ? cliente.logo :  "assets/images/MovilisticaLogo.png",
                               width: 120,
                               height: 110,
                               fit: BoxFit.fitHeight,
@@ -249,7 +249,7 @@ class _LoginState extends State<LoginScreen> {
                                           fontSize: 17,
                                           color: colorListLocal[0]),
                                       filled: true,
-                                      fillColor: Colors.white,
+                                      fillColor: _colorFromHex(Widgets.colorWhite),
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius:
                                             BorderRadius.circular(4.0),
@@ -282,7 +282,7 @@ class _LoginState extends State<LoginScreen> {
                                 alignment: Alignment.topRight,
                                 children: <Widget>[
                                   TextFormField(
-                                      initialValue: "admin",
+                                      initialValue: "",
                                       autofocus: false,
                                       obscureText: !_passwordVisible,
                                       validator: (value) =>
@@ -310,7 +310,7 @@ class _LoginState extends State<LoginScreen> {
                                             fontSize: 17,
                                             color: colorListLocal[1]),
                                         filled: true,
-                                        fillColor: Colors.white,
+                                        fillColor: _colorFromHex(Widgets.colorWhite),
                                         focusedBorder: OutlineInputBorder(
                                           borderRadius:
                                               BorderRadius.circular(4.0),

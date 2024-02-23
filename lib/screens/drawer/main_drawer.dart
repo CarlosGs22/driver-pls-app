@@ -1,3 +1,4 @@
+import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/gain_screen.dart';
 import 'package:driver_please_flutter/screens/help_screen.dart';
@@ -13,6 +14,9 @@ import 'package:driver_please_flutter/utils/strings.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motion_toast/motion_toast.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainDrawer extends StatefulWidget {
   int _selectedDestination = 0;
@@ -30,7 +34,11 @@ class _MainDrawerState extends State<MainDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
+
     return Drawer(
+      backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
       child: ListView(
         children: <Widget>[
           Container(
@@ -40,24 +48,31 @@ class _MainDrawerState extends State<MainDrawer> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Image.asset(
-                  "assets/images/logoAppTransparente.png",
-                  width: 175,
-                  height: 175,
+                Image.network(
+                  cliente.logo != null || cliente.logo != ""
+                      ? cliente.logo
+                      : "assets/images/MovilisticaLogo.png",
+                  width: 120,
+                  height: 120,
                 ),
               ],
             ),
           ),
           Ink(
             color: widget._selectedDestination == 0
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.home),
+                leading: Icon(Icons.home,
+                    color: widget._selectedDestination == 0
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Inicio",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 0
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 0,
                 onTap: () {
@@ -68,14 +83,19 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
           Ink(
             color: widget._selectedDestination == 1
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.trending_up_rounded),
+                leading: Icon(Icons.trending_up,
+                    color: widget._selectedDestination == 1
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Viajes asignados",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 1
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 1,
                 onTap: () {
@@ -89,14 +109,19 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
           Ink(
             color: widget._selectedDestination == 2
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.trending_down_rounded),
+                leading: Icon(Icons.trending_down,
+                    color: widget._selectedDestination == 2
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Viajes finalizados",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 2
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 2,
                 onTap: () {
@@ -110,14 +135,14 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
           // Ink(
           //   color: widget._selectedDestination == 3
-          //       ? _colorFromHex(Widgets.colorSecundayLight)
+          //       ? _colorFromHex(Widgets.colorPrimary)
           //       : Colors.transparent,
           //   child: ListTile(
           //       leading: const Icon(Icons.contact_support_rounded),
           //       title: Text("Contacto",
           //           style: GoogleFonts.poppins(
           //               fontSize: 15,
-          //               color: _colorFromHex(Widgets.colorGray),
+          //               color: _colorFromHex(Widgets.colorWhite),
           //               fontWeight: FontWeight.w500)),
           //       selected: widget._selectedDestination == 3,
           //       onTap: () {
@@ -128,14 +153,19 @@ class _MainDrawerState extends State<MainDrawer> {
 
           Ink(
             color: widget._selectedDestination == 5
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.history),
+                leading: Icon(Icons.history,
+                    color: widget._selectedDestination == 5
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Historial de viajes",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 5
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 5,
                 onTap: () {
@@ -148,14 +178,19 @@ class _MainDrawerState extends State<MainDrawer> {
           ),
           Ink(
             color: widget._selectedDestination == 4
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.attach_money_outlined),
+                leading: Icon(Icons.monetization_on,
+                    color: widget._selectedDestination == 4
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Mis ganancias",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 4
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 4,
                 onTap: () {
@@ -169,14 +204,19 @@ class _MainDrawerState extends State<MainDrawer> {
 
           Ink(
             color: widget._selectedDestination == 7
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.car_repair),
+                leading: Icon(Icons.car_repair,
+                    color: widget._selectedDestination == 7
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Mis autos",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 7
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 7,
                 onTap: () {
@@ -186,16 +226,22 @@ class _MainDrawerState extends State<MainDrawer> {
                 }),
           ),
 
+        
           Ink(
             color: widget._selectedDestination == 6
-                ? _colorFromHex(Widgets.colorSecundayLight)
+                ? _colorFromHex(Widgets.colorPrimary)
                 : Colors.transparent,
             child: ListTile(
-                leading: const Icon(Icons.exit_to_app_rounded),
+                leading: Icon(Icons.exit_to_app,
+                    color: widget._selectedDestination == 6
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
                 title: Text("Cerrar sesión",
                     style: GoogleFonts.poppins(
                         fontSize: 15,
-                        color: _colorFromHex(Widgets.colorGray),
+                        color: widget._selectedDestination == 6
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
                         fontWeight: FontWeight.w500)),
                 selected: widget._selectedDestination == 5,
                 onTap: () {
@@ -211,14 +257,74 @@ class _MainDrawerState extends State<MainDrawer> {
                   );
                 }),
           ),
+
+           Ink(
+            color: widget._selectedDestination == 8
+                ? _colorFromHex(Widgets.colorPrimary)
+                : Colors.transparent,
+            child: ListTile(
+                leading: Icon(Icons.close,
+                    color: widget._selectedDestination == 8
+                        ? _colorFromHex(Widgets.colorWhite)
+                        : _colorFromHex(Widgets.colorWhite)),
+                title: Text("Eliminar cuenta",
+                    style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        color: widget._selectedDestination == 8
+                            ? _colorFromHex(Widgets.colorWhite)
+                            : _colorFromHex(Widgets.colorWhite),
+                        fontWeight: FontWeight.w500)),
+                selected: widget._selectedDestination == 8,
+                onTap: () async {
+                  final cliente =
+                      Provider.of<ClienteProvider>(context, listen: false)
+                          .cliente;
+
+                 
+                       
+
+                  try {
+                    if (await canLaunchUrl(
+                        Uri.parse(cliente.path + "aplicacion/deleteCuenta.php"))) {
+                      launchUrl(Uri.parse(cliente.path + "aplicacion/deleteCuenta.php"));
+                    } else {
+                      MotionToast.error(
+                              title: const Text("Error"),
+                              description:
+                                  const Text("No se puede abrir el enlace"))
+                          .show(context);
+                    }
+                  } catch (e) {
+                    MotionToast.error(
+                            title: const Text("Error"),
+                            description: const Text("Ocurrió un error"))
+                        .show(context);
+                  }
+                }),
+          ),
+
+          
           const Divider(
             height: 1,
             thickness: 1,
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text(
-              "V " + Strings.labelVersion,
+            child: RichText(
+              text: TextSpan(
+                style: DefaultTextStyle.of(context).style,
+                children: [
+                  TextSpan(
+                    text: "Powered by ",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  TextSpan(
+                    text: "MOVILÍSTICA",
+                    style: TextStyle(
+                        color: _colorFromHex(Widgets.colorSecundayLight2)),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

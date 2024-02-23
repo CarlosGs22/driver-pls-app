@@ -159,7 +159,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
           hintStyle:
               GoogleFonts.poppins(fontSize: 17, color: colorListLocal[4]),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _colorFromHex(Widgets.colorWhite),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4.0),
             borderSide: BorderSide(
@@ -194,7 +194,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
           hintStyle:
               GoogleFonts.poppins(fontSize: 17, color: colorListLocal[0]),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _colorFromHex(Widgets.colorWhite),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4.0),
             borderSide: BorderSide(
@@ -229,7 +229,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
           hintStyle:
               GoogleFonts.poppins(fontSize: 17, color: colorListLocal[1]),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _colorFromHex(Widgets.colorWhite),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4.0),
             borderSide: BorderSide(
@@ -270,7 +270,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
           hintStyle:
               GoogleFonts.poppins(fontSize: 17, color: colorListLocal[2]),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: _colorFromHex(Widgets.colorWhite),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4.0),
             borderSide: BorderSide(
@@ -298,7 +298,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     return Scaffold(
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
         title: const Text(Strings.labelUpdateProfile),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -306,7 +306,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
       ),
       body: Center(
         child: Container(
-          color: Colors.white,
+          color: _colorFromHex(Widgets.colorWhite),
           child: Padding(
               padding: const EdgeInsets.all(36.0),
               child: SingleChildScrollView(
@@ -336,7 +336,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                               child: FlatButton(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(50),
-                                  side: BorderSide(color: Colors.white),
+                                  side: BorderSide(color: _colorFromHex(Widgets.colorWhite)),
                                 ),
                                 color: Color(0xFFF5F6F9),
                                 onPressed: () {},

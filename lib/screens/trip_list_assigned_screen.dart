@@ -58,7 +58,7 @@ class _TripListState extends State<TripListAssignedScreen> {
     List<ViajeModel> viajes = await ViajeService.getViajes(context,
         pageNumber: _pageNumber,
         pageSize: _pageSize,
-        idUser: prefs.getString('id_con').toString(),
+        idUser: prefs.getString("id_con").toString(),
         status: 1,
         order: "1",
         path: cliente.path);
@@ -90,11 +90,13 @@ class _TripListState extends State<TripListAssignedScreen> {
           });
         }
       },
+      backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
         title: const Text(Strings.labelListTripAssigned),
         elevation: 0.1,
+        
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
       ),
       drawer: MainDrawer(1),
@@ -132,6 +134,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                               viaje: viaje,
                                               redirect: null,
                                               panelVisible: true,
+                                              bandCancelTrip: false,
                                             )));
                               },
                               child: Column(
@@ -145,7 +148,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         _colorFromHex(Widgets.colorPrimary),
                                         "Empresa: ${viaje.nombreEmpresa}",
                                         _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         8),
                                   ],
                                   if (validateNullOrEmptyString(
@@ -156,7 +159,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         _colorFromHex(Widgets.colorPrimary),
                                         "Sucursal: ${viaje.nombreSucursal}",
                                         _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         8),
                                   ],
                                   if (validateNullOrEmptyString(
@@ -170,20 +173,20 @@ class _TripListState extends State<TripListAssignedScreen> {
                                                 viaje.fechaViaje
                                                     .replaceAll(" ", ""))),
                                         _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         8),
                                   ],
                                   buildBubblePadding(
                                       Icons.circle,
                                       _colorFromHex(Widgets.colorPrimary),
                                       "Hora: ${horaViaje} Hrs",
-                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      _colorFromHex(Widgets.colorWhite),
                                       8),
                                   buildBubblePadding(
                                       Icons.circle,
                                       _colorFromHex(Widgets.colorPrimary),
                                       "Tipo: ${viaje.tipo}",
-                                      _colorFromHex(Widgets.colorSecundayLight),
+                                      _colorFromHex(Widgets.colorWhite),
                                       8),
                                 ],
                               ),
@@ -207,7 +210,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         style: TextStyle(
                                             fontStyle: FontStyle.italic,
                                             color: _colorFromHex(
-                                                Widgets.colorSecundayLight),
+                                                Widgets.colorWhite),
                                             fontSize: 20),
                                       ),
                                     ),
@@ -218,7 +221,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         style: TextStyle(
                                             fontStyle: FontStyle.italic,
                                             color: _colorFromHex(
-                                                Widgets.colorSecundayLight),
+                                                Widgets.colorWhite),
                                             fontSize: 20),
                                       ),
                                     ),
@@ -245,6 +248,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                           viaje: viaje,
                                           redirect: null,
                                           panelVisible: true,
+                                          bandCancelTrip: false,
                                         )));
                           },
                           child: Column(
@@ -257,7 +261,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     Icons.circle,
                                     _colorFromHex(Widgets.colorPrimary),
                                     "Empresa: ${viaje.nombreEmpresa}",
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorWhite),
                                     8),
                               ],
                               if (validateNullOrEmptyString(
@@ -267,7 +271,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     Icons.circle,
                                     _colorFromHex(Widgets.colorPrimary),
                                     "Sucursal: ${viaje.nombreSucursal}",
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorWhite),
                                     8),
                               ],
                               if (validateNullOrEmptyString(viaje.fechaViaje) !=
@@ -279,20 +283,20 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         setFormatDatetime(setFormatDate(viaje
                                             .fechaViaje
                                             .replaceAll(" ", ""))),
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorWhite),
                                     8),
                               ],
                               buildBubblePadding(
                                   Icons.circle,
                                   _colorFromHex(Widgets.colorPrimary),
                                   "Hora: ${horaViaje} Hrs",
-                                  _colorFromHex(Widgets.colorSecundayLight),
+                                  _colorFromHex(Widgets.colorWhite),
                                   8),
                               buildBubblePadding(
                                   Icons.circle,
                                   _colorFromHex(Widgets.colorPrimary),
                                   "Tipo: ${viaje.tipo}",
-                                  _colorFromHex(Widgets.colorSecundayLight),
+                                  _colorFromHex(Widgets.colorWhite),
                                   8),
                             ],
                           ),
@@ -316,7 +320,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
                                         color: _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorPrimary),
                                         fontSize: 20),
                                   ),
                                 ),
@@ -327,7 +331,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
                                         color: _colorFromHex(
-                                            Widgets.colorSecundayLight),
+                                            Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),

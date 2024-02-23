@@ -58,7 +58,7 @@ class _HelpScreentState extends State<HelpScreen> {
           width: MediaQuery.of(context).size.width * .95,
           height: 60,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _colorFromHex(Widgets.colorWhite),
             boxShadow: const [
               BoxShadow(
                 blurRadius: 5,
@@ -198,14 +198,14 @@ class _HelpScreentState extends State<HelpScreen> {
             appBar: AppBar(
               titleTextStyle: GoogleFonts.poppins(
                   fontSize: 19,
-                  color: Colors.white,
+                  color: _colorFromHex(Widgets.colorWhite),
                   fontWeight: FontWeight.w500),
               title: const Text(Strings.labelContact),
               elevation: 0.1,
               backgroundColor: _colorFromHex(Widgets.colorPrimary),
             ),
             drawer:  MainDrawer(3),
-            backgroundColor: Colors.white,
+            backgroundColor: _colorFromHex(Widgets.colorWhite),
             body: Center(
                 child: SingleChildScrollView(
               child: Column(

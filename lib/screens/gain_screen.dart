@@ -63,18 +63,17 @@ class _GainScreenState extends State<GainScreen> {
 
   _filterResponse(BuildContext context) {
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
-
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     var txtFechaInicial = _selectedDay.toIso8601String().split('T')[0];
     var txtFechaFinal = _selectedDay.toIso8601String().split('T')[0];
     var idConductor = user.id;
 
-
     HttpClass.httpData(
             context,
-            Uri.parse(
-               cliente.path +  "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+            Uri.parse(cliente.path +
+                "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
             {},
             {},
             "GET")
@@ -129,13 +128,13 @@ class _GainScreenState extends State<GainScreen> {
       txtFechaFinal = endOfWeek.toIso8601String().split('T')[0];
     }
 
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
-
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     HttpClass.httpData(
             context,
-            Uri.parse(
-              cliente.path + "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
+            Uri.parse(cliente.path +
+                "aplicacion/getGanancias.php?fecha_inicial=$txtFechaInicial&fecha_final=$txtFechaFinal&id_conductor=$idConductor"),
             {},
             {},
             "GET")
@@ -191,7 +190,7 @@ class _GainScreenState extends State<GainScreen> {
           padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
           child: Container(
               width: MediaQuery.of(context).size.width,
-              color: Colors.white,
+              color: _colorFromHex(Widgets.colorPrimary),
               height: 100,
               child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -201,6 +200,7 @@ class _GainScreenState extends State<GainScreen> {
                       width: MediaQuery.of(context).size.width,
                       height: 100,
                       decoration: BoxDecoration(
+                        color: _colorFromHex(Widgets.colorPrimary),
                         shape: BoxShape.rectangle,
                         border: Border(
                           left: BorderSide(
@@ -232,8 +232,7 @@ class _GainScreenState extends State<GainScreen> {
                                         buildText(
                                             (horaViaje) + " Hrs",
                                             15,
-                                            _colorFromHex(
-                                                Widgets.colorGrayLight),
+                                            _colorFromHex(Widgets.colorWhite),
                                             0.16,
                                             "popins",
                                             false,
@@ -244,8 +243,7 @@ class _GainScreenState extends State<GainScreen> {
                                         buildText(
                                             mapGanancias[i]["id_viaje"] ?? "NA",
                                             18,
-                                            _colorFromHex(
-                                                Widgets.colorSecundary),
+                                            _colorFromHex(Widgets.colorWhite),
                                             0.16,
                                             "popins",
                                             false,
@@ -282,8 +280,7 @@ class _GainScreenState extends State<GainScreen> {
                                                 (totalGanancia)
                                                     .toStringAsFixed(2),
                                             18,
-                                            _colorFromHex(
-                                                Widgets.colorSecundary),
+                                            _colorFromHex(Widgets.colorWhite),
                                             0.16,
                                             "popins",
                                             false,
@@ -339,7 +336,7 @@ class _GainScreenState extends State<GainScreen> {
         padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 10, 10),
         child: Container(
             width: MediaQuery.of(context).size.width,
-            color: Colors.white,
+            color: _colorFromHex(Widgets.colorPrimary),
             child: Column(
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,6 +345,7 @@ class _GainScreenState extends State<GainScreen> {
                     width: MediaQuery.of(context).size.width,
                     //height: 50,
                     decoration: BoxDecoration(
+                      color: _colorFromHex(Widgets.colorPrimary),
                       shape: BoxShape.rectangle,
                       border: Border(
                         left: BorderSide(
@@ -367,7 +365,7 @@ class _GainScreenState extends State<GainScreen> {
                               child: buildText(
                                   "Total ganancias de la semana",
                                   15,
-                                  _colorFromHex(Widgets.colorGrayLight),
+                                  _colorFromHex(Widgets.colorWhite),
                                   0.16,
                                   "popins",
                                   false,
@@ -386,7 +384,7 @@ class _GainScreenState extends State<GainScreen> {
                                               totalGanancia.toStringAsFixed(2)))
                                           .replaceAll("USD", ""),
                                   15,
-                                  _colorFromHex(Widgets.colorSecundary),
+                                  _colorFromHex(Widgets.colorWhite),
                                   0.16,
                                   "popins",
                                   false,
@@ -421,7 +419,7 @@ class _GainScreenState extends State<GainScreen> {
                               child: buildText(
                                   "Total viajes de la semana",
                                   15,
-                                  _colorFromHex(Widgets.colorGrayLight),
+                                  _colorFromHex(Widgets.colorWhite),
                                   0.16,
                                   "popins",
                                   false,
@@ -437,7 +435,7 @@ class _GainScreenState extends State<GainScreen> {
                               child: buildText(
                                   totalSumaViajes.toString(),
                                   15,
-                                  _colorFromHex(Widgets.colorSecundary),
+                                  _colorFromHex(Widgets.colorWhite),
                                   0.16,
                                   "popins",
                                   false,
@@ -471,12 +469,15 @@ class _GainScreenState extends State<GainScreen> {
         },
         appBar: AppBar(
           titleTextStyle: GoogleFonts.poppins(
-              fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+              fontSize: 19,
+              color: _colorFromHex(Widgets.colorWhite),
+              fontWeight: FontWeight.w500),
           title: const Text(Strings.labelTripGain),
           elevation: 0.1,
           backgroundColor: _colorFromHex(Widgets.colorPrimary),
         ),
         drawer: MainDrawer(4),
+        backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
         body: isLoading
             ? buildCircularProgress(context)
             : SingleChildScrollView(
@@ -489,7 +490,55 @@ class _GainScreenState extends State<GainScreen> {
                 Container(
                   margin: const EdgeInsets.only(top: 5, bottom: 5),
                   child: TableCalendar(
+                    headerStyle: HeaderStyle(
+                        titleTextStyle: TextStyle(
+                          color: _colorFromHex(Widgets.colorWhite),
+                        ),
+                        leftChevronIcon: Icon(
+                          Icons.arrow_back_ios,
+                          color: Colors
+                              .white, // Cambia el color según tus preferencias
+                        ),
+                        rightChevronIcon: Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors
+                              .white, // Cambia el color según tus preferencias
+                        ),
+                        formatButtonTextStyle: TextStyle(
+                            color: _colorFromHex(Widgets.colorWhite))),
+                    calendarStyle: CalendarStyle(
+                      rangeHighlightColor: Colors.white,
+                      todayTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      defaultTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      weekendTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      weekNumberTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      selectedTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      holidayTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      outsideTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      rangeStartTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      rangeEndTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      withinRangeTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                      disabledTextStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                    ),
                     startingDayOfWeek: StartingDayOfWeek.monday,
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(
+                        color: _colorFromHex(Widgets.colorWhite),
+                      ),
+                      weekendStyle:
+                          TextStyle(color: _colorFromHex(Widgets.colorWhite)),
+                    ),
                     availableCalendarFormats: {
                       CalendarFormat.week: "Mes",
                       CalendarFormat.month: "Semana",
@@ -562,12 +611,12 @@ class _GainScreenState extends State<GainScreen> {
                         Container(
                           width: MediaQuery.of(context).size.width,
                           height: 100,
-                          decoration: const BoxDecoration(),
+                          color: _colorFromHex(Widgets.colorPrimary),
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Container(
-                                color: Colors.white,
+                                color: _colorFromHex(Widgets.colorPrimary),
                                 width: MediaQuery.of(context).size.width,
                                 height: 100,
                                 child: Row(
@@ -588,7 +637,7 @@ class _GainScreenState extends State<GainScreen> {
                                                     "Ganancias Totales\n del día",
                                                     15,
                                                     _colorFromHex(
-                                                        Widgets.colorGrayLight),
+                                                        Widgets.colorWhite),
                                                     0.16,
                                                     "popins",
                                                     false,
@@ -603,7 +652,7 @@ class _GainScreenState extends State<GainScreen> {
                                                             "0"),
                                                     18,
                                                     _colorFromHex(
-                                                        Widgets.colorSecundary),
+                                                        Widgets.colorWhite),
                                                     0.16,
                                                     "popins",
                                                     false,
@@ -632,7 +681,7 @@ class _GainScreenState extends State<GainScreen> {
                                                     "Viajes Totales \n del día",
                                                     15,
                                                     _colorFromHex(
-                                                        Widgets.colorGrayLight),
+                                                        Widgets.colorWhite),
                                                     0.16,
                                                     "popins",
                                                     false,
@@ -646,7 +695,7 @@ class _GainScreenState extends State<GainScreen> {
                                                         "0"),
                                                     18,
                                                     _colorFromHex(
-                                                        Widgets.colorSecundary),
+                                                        Widgets.colorWhite),
                                                     0.16,
                                                     "popins",
                                                     false,
@@ -684,8 +733,7 @@ class _GainScreenState extends State<GainScreen> {
                                 style: GoogleFonts.poppins(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
-                                    color: _colorFromHex(
-                                        Widgets.colorSecundayLight)),
+                                    color: _colorFromHex(Widgets.colorWhite)),
                               ),
                             )
                           ],

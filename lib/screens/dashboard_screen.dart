@@ -17,6 +17,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:motion_toast/motion_toast.dart';
 import 'package:provider/provider.dart';
 
 class Dashboard extends StatefulWidget {
@@ -44,19 +45,17 @@ class _DashboardState extends State<Dashboard> {
       return;
     }
 
-     final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
-    final token = _firebaseMessaging
-        .getToken()
-        .then((value) => sendRegistrationToServer(value.toString(), idAgent,cliente.path));
+    final token = _firebaseMessaging.getToken().then((value) =>
+        sendRegistrationToServer(value.toString(), idAgent, cliente.path));
   }
 
   _redirectNotification(Map<String, dynamic> params) {
-
     try {
-
-
-       final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+      final cliente =
+          Provider.of<ClienteProvider>(context, listen: false).cliente;
 
       setState(() {
         isLoading = true;
@@ -114,6 +113,7 @@ class _DashboardState extends State<Dashboard> {
                       viaje: auxViajeList[0],
                       redirect: null,
                       panelVisible: true,
+                      bandCancelTrip: false,
                     )));
       });
     } catch (e) {
@@ -125,18 +125,11 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  sendRegistrationToServer(String token, String id,String path) {
+  sendRegistrationToServer(String token, String id, String path) {
     Map<String, dynamic> params = {"idCon": id, "token": token};
 
-    
-
-    HttpClass.httpData(
-            context,
-            Uri.parse(
-               path +  "aplicacion/updateToken.php"),
-            params,
-            {},
-            "POST")
+    HttpClass.httpData(context, Uri.parse(path + "aplicacion/updateToken.php"),
+            params, {}, "POST")
         .then((response) {
       print("TOKEN");
       Utility.printWrapped(response.toString());
@@ -152,6 +145,37 @@ class _DashboardState extends State<Dashboard> {
 
     _configureFirebaseMessaging();
     _configureLocalNotifications();
+
+    insertTripNetwork(context).then((value) {
+      if (value["code"] == 200) {
+        finishTripNetwork(value, context);
+      } else {
+        if (value["code"] == 500) {
+          MotionToast.error(
+                  title: const Text("Error"),
+                  description: Text(value["payload"] ??
+                      "Ocurrió un error al registrar viaje"))
+              .show(context);
+        }
+      }
+    });
+
+    insertIncidenceNetwork(context).then((value) {
+      if (value["code"] == 200) {
+        MotionToast.success(
+                title: const Text("Registro exitoso"),
+                description: Text("Se registro la incidencia correctamente"))
+            .show(context);
+      } else {
+        if (value["code"] == 500) {
+          MotionToast.error(
+                  title: const Text("Error"),
+                  description: Text(value["payload"] ??
+                      "Ocurrió un error al registrar viaje"))
+              .show(context);
+        }
+      }
+    });
   }
 
   void _configureFirebaseMessaging() {
@@ -287,7 +311,7 @@ class _DashboardState extends State<Dashboard> {
             appBar: AppBar(
               titleTextStyle: GoogleFonts.poppins(
                   fontSize: 19,
-                  color: Colors.white,
+                  color: _colorFromHex(Widgets.colorWhite),
                   fontWeight: FontWeight.w500),
               title: const Text(Strings.labelDashboard),
               elevation: 0.1,
@@ -305,7 +329,7 @@ class _DashboardState extends State<Dashboard> {
             body: isLoading
                 ? buildCircularProgress(context)
                 : Container(
-                    color: Colors.black12,
+                    color: _colorFromHex(Widgets.colorWhite),
                     child: Column(children: [
                       SizedBox(height: 20),
                       Card(

@@ -50,11 +50,20 @@ android {
         versionName flutterVersionName
     }
 
+     signingConfigs {
+        release {
+            keyAlias 'upload'
+            keyPassword 'driver'
+            storeFile file('key.keystore')
+            storePassword 'driver'
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }

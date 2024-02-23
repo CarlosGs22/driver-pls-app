@@ -78,7 +78,7 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
               hintStyle: GoogleFonts.poppins(
                   fontSize: 17, color: _colorFromHex(Widgets.colorGrayLight)),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: _colorFromHex(Widgets.colorWhite),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4.0),
                 borderSide: BorderSide(
@@ -334,7 +334,7 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
     return Scaffold(
         appBar: AppBar(
           titleTextStyle: GoogleFonts.poppins(
-              fontSize: 19, color: Colors.white, fontWeight: FontWeight.w500),
+              fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
           title: const Text(Strings.labelTaximetro),
           elevation: 0.1,
           backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -381,10 +381,10 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
                             child: InkWell(
                               splashColor: _colorFromHex(
                                   Widgets.colorPrimary), // inkwell color
-                              child: const SizedBox(
+                              child:  SizedBox(
                                 width: 50,
                                 height: 50,
-                                child: Icon(Icons.add, color: Colors.white),
+                                child: Icon(Icons.add, color: _colorFromHex(Widgets.colorWhite)),
                               ),
                               onTap: () {
                                 mapController.animateCamera(
@@ -401,10 +401,10 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
                             child: InkWell(
                               splashColor: _colorFromHex(
                                   Widgets.colorPrimary), // inkwell color
-                              child: const SizedBox(
+                              child:  SizedBox(
                                 width: 50,
                                 height: 50,
-                                child: Icon(Icons.remove, color: Colors.white),
+                                child: Icon(Icons.remove, color: _colorFromHex(Widgets.colorWhite)),
                               ),
                               onTap: () {
                                 mapController.animateCamera(
@@ -426,8 +426,8 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10.0),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white70,
+                        decoration:  BoxDecoration(
+                          color: _colorFromHex(Widgets.colorWhite),
                           borderRadius: BorderRadius.all(
                             Radius.circular(20.0),
                           ),
@@ -528,8 +528,8 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
                                     'Mostrar ruta'.toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style:  TextStyle(
+                                      color: _colorFromHex(Widgets.colorWhite),
                                       fontSize: 20.0,
                                     ),
                                   ),
@@ -561,11 +561,11 @@ class _TaximeterScreenState extends State<TaximeterScreen> {
                           child: InkWell(
                             splashColor: _colorFromHex(
                                 Widgets.colorPrimary), // inkwell color
-                            child: const SizedBox(
+                            child:  SizedBox(
                               width: 56,
                               height: 56,
                               child:
-                                  Icon(Icons.my_location, color: Colors.white),
+                                  Icon(Icons.my_location, color: _colorFromHex(Widgets.colorWhite)),
                             ),
                             onTap: () async {
                               bool permision =

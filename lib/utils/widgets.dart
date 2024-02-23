@@ -5,11 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class Widgets {
-  static const String colorPrimary = "#1c4089";
-  static const String colorSecundary = "#1477b6";
-  static const String colorSecundayLight = "#D4F5F5";
+  static const String colorPrimary = "#000000";
+  static const String colorSecundary = "#2B2B99";
+  static const String colorSecundayLight2 = "#4466BA";
+  static const String colorSecundayLight = "#A8359F";
   static const String colorGray = "#9b9c9e";
   static const String colorGrayLight = "#9b9c9e2";
+  static const String colorWhite = "#FFFFFF";
+  static const String colorGrayBackground = "#313237";
 
   static Color _colorFromHex2(String hexColor) {
     final hexCode = hexColor.replaceAll('#', '');
@@ -49,9 +52,9 @@ buildText(
 InputDecoration buildInputDecoration(
     String hintText, IconData icon, Color colorFill) {
   return InputDecoration(
-    prefixIcon: Icon(icon, color: Colors.white38),
+    prefixIcon: Icon(icon, color: Widgets._colorFromHex2(Widgets.colorWhite)),
     hintText: hintText,
-    hintStyle: GoogleFonts.poppins(fontSize: 16, color: Colors.white38),
+    hintStyle: GoogleFonts.poppins(fontSize: 16, color: Widgets._colorFromHex2(Widgets.colorWhite)),
     filled: true,
     fillColor: colorFill,
     border: InputBorder.none,
@@ -141,7 +144,7 @@ buildTextFormField(Widget widget, double widht, double height,
             BoxShadow(
                 color: shadowColor, blurRadius: 10, offset: const Offset(1, 1)),
           ],
-          color: Colors.white,
+          color: Widgets._colorFromHex2(Widgets.colorWhite),
           borderRadius: const BorderRadius.all(Radius.circular(20))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -158,7 +161,7 @@ buidlDefaultFlushBar(
     backgroundColor: Widgets._colorFromHex2(Widgets.colorPrimary),
     duration: Duration(seconds: duration),
     action: SnackBarAction(
-      textColor: Colors.white,
+      textColor: Widgets._colorFromHex2(Widgets.colorWhite),
       onPressed: () {},
       label: tittle,
     ),
@@ -234,13 +237,13 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
                     Text(textTittle1.isNotEmpty ? textTittle1 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: Widgets._colorFromHex2(Widgets.colorSecundary),
+                          color: Widgets._colorFromHex2(Widgets.colorWhite),
                           fontWeight: FontWeight.w500,
                         )),
                     Text(textValue1.isNotEmpty ? textValue1 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: Widgets._colorFromHex2(Widgets.colorGray),
+                          color: Widgets._colorFromHex2(Widgets.colorGrayLight),
                           fontWeight: FontWeight.w500,
                         )),
                   ],
@@ -260,13 +263,13 @@ buildDetailform(String textTittle1, String textValue1, String textTittle2,
                     Text(textTittle2.isNotEmpty ? textTittle2 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: Widgets._colorFromHex2(Widgets.colorSecundary),
+                          color: Widgets._colorFromHex2(Widgets.colorWhite),
                           fontWeight: FontWeight.w500,
                         )),
                     Text(textValue2.isNotEmpty ? textValue2 : "",
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: Widgets._colorFromHex2(Widgets.colorGray),
+                          color: Widgets._colorFromHex2(Widgets.colorGrayLight),
                           fontWeight: FontWeight.w500,
                         ))
                   ],
@@ -299,7 +302,7 @@ setStatusTrip(String stat, String confirm) {
   switch (status) {
     case 1:
       if (confirmado == 1) {
-           res = "ACEPTAR";
+        res = "ACEPTAR";
       } else {
         if (confirmado == 2) {
           res = "CONTINUAR";
@@ -364,3 +367,119 @@ List<Widget> listWidget(Map<String, dynamic> mapData) {
 
   return chips;
 }
+
+ void modalWaitTime(BuildContext context,
+      Map<String, dynamic> response) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+        return AlertDialog(
+              title: Center(
+                child: Text(
+                  'Atención',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    color:   Widgets._colorFromHex2(Widgets.colorPrimary),
+                  ),
+                ),
+              ),
+              content: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(
+                    maxHeight:
+                        MediaQuery.of(context).size.height - keyboardHeight),
+                child: SingleChildScrollView(
+                    child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        response["message"] ?? "NA",
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          color:  Widgets._colorFromHex2(Widgets.colorPrimary),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      //  Text(
+                      //   response["tolerancia"] ?? "NA",
+                      //   style: TextStyle(
+                      //     fontSize: 17.0,
+                      //     color:  Widgets._colorFromHex2(Widgets.colorPrimary),
+                      //   ),
+                      // ),
+                      Column(
+                        children: [
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   crossAxisAlignment: CrossAxisAlignment.start,
+                          //   children: [
+                          //     Text("Hora \nprogramada",
+                          //         style: GoogleFonts.poppins(
+                          //           fontSize: 21,
+                          //           color:
+                          //               Widgets._colorFromHex2((Widgets.colorPrimary)),
+                          //           fontWeight: FontWeight.w500,
+                          //         )),
+                          //     Text(
+                          //      response["hora_programada"] ?? "NA",
+                          //       style: GoogleFonts.poppins(
+                          //         fontSize: 21,
+                          //         color: Widgets._colorFromHex2((Widgets.colorPrimary)),
+                          //         fontWeight: FontWeight.w500,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          // SizedBox(height: 10,),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          //   crossAxisAlignment: CrossAxisAlignment.start,
+                          //   children: [
+                          //     Text("Hora \nactual",
+                          //         style: GoogleFonts.poppins(
+                          //           fontSize: 21,
+                          //           color:
+                          //              Widgets._colorFromHex2((Widgets.colorPrimary)),
+                          //           fontWeight: FontWeight.w500,
+                          //         )),
+                          //     Text(
+                          //        response["hora_actual"] ?? "NA",
+                          //       style: GoogleFonts.poppins(
+                          //         fontSize: 21,
+                          //         color:    Widgets._colorFromHex2((Widgets.colorPrimary)),
+                          //         fontWeight: FontWeight.w500,
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          //   SizedBox(height: 10,),
+                            
+                          Row(
+                            children: [
+                              Expanded(
+                                flex: 10,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 3, right: 3),
+                                  child: longButtons("Enterado", () {
+                                    Navigator.pop(context);
+                                  },
+                                      color:
+                                         Widgets._colorFromHex2(Widgets.colorPrimary)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )),
+              );
+            
+      },
+    );
+  }

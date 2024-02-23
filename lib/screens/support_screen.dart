@@ -30,7 +30,6 @@ class _SupportState extends State<SupportScreen> {
 
   final TextEditingController _descriptionController = TextEditingController();
 
-
   bool isLoading = false;
 
   List<String> listaCategoriaSoporte = [];
@@ -104,11 +103,10 @@ class _SupportState extends State<SupportScreen> {
         }
       } else {
         if (await canLaunch(whatsappURl_android)) {
-         _descriptionController.text = "";
+          _descriptionController.text = "";
 
           await launch(whatsappURl_android);
         } else {
-         
           MotionToast.error(
                   title: const Text("Error"),
                   description: const Text("WhatsApp no instalado"))
@@ -131,7 +129,8 @@ class _SupportState extends State<SupportScreen> {
     if (form!.validate()) {
       form.save();
 
-      print(type);
+      final cliente =
+          Provider.of<ClienteProvider>(context, listen: false).cliente;
 
       var msj = "Hola tengo una incidencia: \n \n";
 
@@ -139,7 +138,7 @@ class _SupportState extends State<SupportScreen> {
 
       msj += "\n \n " + _descriptionController.text;
 
-      _setWhatsAppMessage("6141088623", msj, context);
+      _setWhatsAppMessage((cliente.whatsapp), msj, context);
     }
   }
 
@@ -183,7 +182,6 @@ class _SupportState extends State<SupportScreen> {
                     ),
                     SizedBox(
                       child: DropdownSearch<String>(
-                        
                         showSearchBox: true,
                         validator: (value) => validateField(value.toString()),
                         dropdownSearchDecoration: InputDecoration(
@@ -195,7 +193,7 @@ class _SupportState extends State<SupportScreen> {
                               fontSize: 17,
                               color: _colorFromHex(Widgets.colorGrayLight)),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: _colorFromHex(Widgets.colorWhite),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(4.0),
                             borderSide: BorderSide(
@@ -215,7 +213,6 @@ class _SupportState extends State<SupportScreen> {
                           errorStyle: GoogleFonts.poppins(color: Colors.red),
                         ),
                         items: listaCategoriaSoporte,
-                        
                         onChanged: (value) => _setStateColor(value, 0),
                         onSaved: (value) => type = value.toString(),
                         selectedItem: "",
@@ -232,16 +229,15 @@ class _SupportState extends State<SupportScreen> {
                         children: <Widget>[
                           TextFormField(
                               maxLines: 7,
-                             controller: _descriptionController,
+                              controller: _descriptionController,
                               autofocus: false,
                               validator: (value) =>
                                   validateField(value.toString()),
                               onChanged: (value) => _setStateColor(value, 1),
-        
                               decoration: InputDecoration(
                                 labelText: Strings.hintSupportDescription,
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: _colorFromHex(Widgets.colorWhite),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(4.0),
                                   borderSide: BorderSide(

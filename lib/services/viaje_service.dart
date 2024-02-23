@@ -33,9 +33,9 @@ class ViajeService {
             auxViajeList.add(ViajeModel(
                 idViaje: element["id_viaje"].toString(),
                 ocupantes: int.tryParse(element["ocupantes"]) ?? 0,
-                nombreEmpresa: element["nombre_empresa"],
+                nombreEmpresa: element["nombre_empresa"] ?? "",
                 idEmp: int.tryParse(element["id_emp"]) ?? 0,
-                nombreSucursal: element["nombre_sucursal"],
+                nombreSucursal: element["nombre_sucursal"] ?? "",
                 idSuc: int.tryParse(element["id_suc"]) ?? 0,
                 tipo: element["tipo"],
                 fechaViaje: element["fecha"],
@@ -90,9 +90,9 @@ class ViajeService {
             auxViajeList.add(ViajeModel(
                 idViaje: element["id_viaje"].toString(),
                 ocupantes: int.tryParse(element["ocupantes"]) ?? 0,
-                nombreEmpresa: element["nombre_empresa"],
+                nombreEmpresa: element["nombre_empresa"] ?? "",
                 idEmp: int.tryParse(element["id_emp"]) ?? 0,
-                nombreSucursal: element["nombre_sucursal"],
+                nombreSucursal: element["nombre_sucursal"] ?? "",
                 idSuc: int.tryParse(element["id_suc"]) ?? 0,
                 tipo: element["tipo"],
                 fechaViaje: element["fecha"],

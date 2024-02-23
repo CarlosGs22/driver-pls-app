@@ -11,6 +11,7 @@ import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
 import 'package:driver_please_flutter/screens/preview_evidence.dart';
 import 'package:driver_please_flutter/screens/recibo_viaje_screen.dart';
+import 'package:driver_please_flutter/screens/start_trip.dart';
 import 'package:driver_please_flutter/screens/trip_list_assigned_screen.dart';
 import 'package:driver_please_flutter/services/ruta_viaje_service.dart';
 import 'package:driver_please_flutter/services/viaje_resumen_service.dart';
@@ -40,12 +41,14 @@ class TripDetailScreen extends StatefulWidget {
   ViajeModel viaje;
   var redirect;
   bool panelVisible;
+  bool bandCancelTrip;
 
   TripDetailScreen(
       {Key? key,
       required this.viaje,
       required this.redirect,
-      required this.panelVisible})
+      required this.panelVisible,
+      required this.bandCancelTrip})
       : super(key: key);
 
   @override
@@ -149,32 +152,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     });
   }
 
-  _getMarkers() async {
-    Set<Marker> auxMarkers = {};
-
-    final Uint8List markerIcon =
-        await Utility.getBytesFromAsset('assets/images/pinAzul.png', 80);
-
-    for (var element in rutaViajes) {
-      auxMarkers.add(Marker(
-          markerId: MarkerId(element.toString()),
-          icon: BitmapDescriptor.fromBytes(markerIcon),
-          draggable: false,
-          position: LatLng(element.latitud, element.longitud),
-          onTap: () {}));
-    }
-    if (mounted) {
-      setState(() {
-        markers = auxMarkers;
-      });
-    }
-  }
 
   _getRutaViajes() async {
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
-    List<RutaViajeModel> auxRutaViajes =
-        await RutaViajeService.getViajes(context, widget.viaje.idViaje,path: cliente.path);
+    List<RutaViajeModel> auxRutaViajes = await RutaViajeService.getViajes(
+        context, widget.viaje.idViaje,
+        path: cliente.path);
 
     if (auxRutaViajes.isNotEmpty) {
       setState(() {
@@ -184,11 +169,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _getViajeResumen() async {
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     Map<String, dynamic> auxViajeResumen =
-        await ViajeResumenService.getViajeResumen(
-            context, widget.viaje.idViaje,path: cliente.path);
+        await ViajeResumenService.getViajeResumen(context, widget.viaje.idViaje,
+            path: cliente.path);
 
     if (auxViajeResumen.isNotEmpty) {
       setState(() {
@@ -211,15 +197,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setColor();
     Intl.defaultLocale = "es_MX";
     initializeDateFormatting();
-    _initializeCamera();
+  _initializeCamera();
 
     getLocationName();
   }
 
   @override
   void dispose() {
-    super.dispose();
+   
     _camController.dispose();
+ 
+
+    super.dispose();
   }
 
   Future<File> _takePicture() async {
@@ -283,7 +272,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                     hintStyle: GoogleFonts.poppins(
                                         fontSize: 17, color: colorListLocal[0]),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor:
+                                        _colorFromHex(Widgets.colorWhite),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(4.0),
                                       borderSide: BorderSide(
@@ -307,8 +297,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                               child: longButtons("Cancelar", () {
                                 Navigator.pop(context);
                               },
-                                  color:
-                                      _colorFromHex(Widgets.colorSecundary)))),
+                                  color: _colorFromHex(Widgets.colorWhite),
+                                  textColor:
+                                      _colorFromHex(Widgets.colorPrimary)))),
                       Expanded(
                           flex: 5,
                           child: Padding(
@@ -337,13 +328,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         "tripStatus": 6
       });
 
-      final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
-
+      final cliente =
+          Provider.of<ClienteProvider>(context, listen: false).cliente;
 
       HttpClass.httpData(
               context,
-              Uri.parse(
-                cliente.path +   "aplicacion/saveIncidence.php"),
+              Uri.parse(cliente.path + "aplicacion/saveIncidence.php"),
               formIncidence,
               {},
               "POST")
@@ -366,6 +356,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   viaje: widget.viaje,
                   redirect: "MAIN",
                   panelVisible: true,
+                  bandCancelTrip: false,
                 )),
         (Route<dynamic> route) => false,
       );
@@ -377,14 +368,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   _sendRequestOnConfirm(
       var formParams, var option, ViajeModel viaje, var redirec) {
-
-        final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
-
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     HttpClass.httpData(
             context,
-            Uri.parse(
-              cliente.path  +  "aplicacion/confirmViaje.php"),
+            Uri.parse(cliente.path + "aplicacion/confirmViaje.php"),
             formParams,
             {},
             "POST")
@@ -403,6 +392,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         panelVisible: true,
                         viaje: widget.viaje,
                         redirect: "MAIN",
+                        bandCancelTrip: true,
                       )));
         } else {
           widget.viaje.status = 6;
@@ -440,7 +430,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
             padding: const EdgeInsets.only(top: 10.0),
             child: Container(
               decoration: BoxDecoration(
-                color: _colorFromHex(Widgets.colorSecundayLight),
+                color: _colorFromHex(Widgets.colorWhite),
                 borderRadius: const BorderRadius.all(
                   Radius.circular(20.0),
                 ),
@@ -463,8 +453,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                 _sendRequestOnConfirm(
                                     formParams, option, viaje, "2");
                               },
-                                  color:
-                                      _colorFromHex(Widgets.colorSecundary)))),
+                                  color: _colorFromHex(Widgets.colorWhite),
+                                  textColor:
+                                      _colorFromHex(Widgets.colorPrimary)))),
                       Expanded(
                           flex: 5,
                           child: Padding(
@@ -485,8 +476,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               ),
             )),
         buttons: []).show();
-
-    
   }
 
   Future<void> _initializeCamera() async {
@@ -509,7 +498,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-       
         return WillPopScope(
           onWillPop: () async {
             return false;
@@ -560,14 +548,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               "Cancelar",
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: _colorFromHex(Widgets.colorPrimary),
                                 fontSize: 20.0,
                               ),
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            primary: _colorFromHex(Widgets.colorSecundary),
+                            primary: _colorFromHex(Widgets.colorWhite),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0),
                             ),
@@ -581,15 +569,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                             setState(() {
                               onLoadingCam = true;
                             });
-                           
+
                             _handleSendEvidence(evidence, rutaViajeModel);
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
                               "Aceptar",
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: _colorFromHex(Widgets.colorWhite),
                                 fontSize: 18.0,
                               ),
                             ),
@@ -614,13 +602,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   _handleSendEvidence(File evidence, RutaViajeModel rutaViajeModel) async {
-    
     try {
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
+      final cliente =
+          Provider.of<ClienteProvider>(context, listen: false).cliente;
 
       Navigator.pop(context);
       Navigator.pop(context);
-      
+
       setState(() {
         onLoadingCam = true;
       });
@@ -638,8 +626,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           .writeAsBytes(Uint8List.fromList(img.encodePng(image)));
 
       // Luego, aquí puedes enviar la imagen al servidor como lo hacías antes.
-      var request = http.MultipartRequest('POST',
-          Uri.parse(cliente.path + "aplicacion/evidencia.php"));
+      var request = http.MultipartRequest(
+          'POST', Uri.parse(cliente.path + "aplicacion/evidencia.php"));
       request.files.add(await http.MultipartFile.fromPath(
           'evidencia', processedImageFile.path));
 
@@ -708,7 +696,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               title: Text("Evidencia"),
               titleTextStyle: GoogleFonts.poppins(
                   fontSize: 19,
-                  color: Colors.white,
+                  color: _colorFromHex(Widgets.colorWhite),
                   fontWeight: FontWeight.w500),
               elevation: 0.1,
               backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -726,7 +714,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       child: Text(
                         'Fecha: ${DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now())}',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: _colorFromHex(Widgets.colorWhite),
                           fontSize: 18.0,
                         ),
                       ),
@@ -736,7 +724,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                       child: Text(
                         'Ubicación: ' + locationName,
                         style: TextStyle(
-                          color: Colors.white,
+                          color: _colorFromHex(Widgets.colorWhite),
                           fontSize: 18.0,
                         ),
                       ),
@@ -758,7 +746,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               },
               child: onLoadingCam
                   ? buildCircularProgress(context)
-                  : Icon(Icons.camera, color: Colors.white),
+                  : Icon(Icons.camera,
+                      color: _colorFromHex(Widgets.colorWhite)),
             ),
           );
         },
@@ -776,6 +765,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               });
             }
           },
+          backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
           appBar: AppBar(
             title: const Text(Strings.labelDetailTrip),
             elevation: 0.1,
@@ -820,6 +810,12 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                           viaje: widget.viaje,
                                                           rutaViaje: rutaViajes,
                                                         )));
+
+                                            // Navigator.push(
+                                            //     context,
+                                            //     MaterialPageRoute(
+                                            //         builder: (context) =>
+                                            //             StartTrip(viaje: widget.viaje)));
                                           } else {
                                             _handleOnConfirmTrip(
                                                 widget.viaje.idViaje,
@@ -831,9 +827,10 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: <Widget>[
-                                            const Icon(
+                                            Icon(
                                               Icons.moving_sharp,
-                                              color: Colors.white,
+                                              color: _colorFromHex(
+                                                  Widgets.colorWhite),
                                               size: 40,
                                             ), // icon
                                             Text(
@@ -842,9 +839,11 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                       .toString(),
                                                   widget.viaje.confirmado
                                                       .toString()),
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                   fontSize: 18,
-                                                  color: Colors.white),
+                                                  fontWeight: FontWeight.w500,
+                                                  color: _colorFromHex(
+                                                      Widgets.colorWhite)),
                                             ), // text
                                           ],
                                         ),
@@ -901,7 +900,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           ? ExpandedTile(
                               theme: ExpandedTileThemeData(
                                 headerColor:
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorPrimary),
                                 headerRadius: 5.0,
                                 headerPadding: const EdgeInsets.all(10),
                                 headerSplashColor:
@@ -914,7 +913,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                               title: Text(
                                 "Recibo de pago",
                                 style: TextStyle(
-                                  color: _colorFromHex(Widgets.colorPrimary),
+                                  color: _colorFromHex(Widgets.colorWhite),
                                   fontSize: 16,
                                 ),
                               ),
@@ -935,8 +934,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
                       ExpandedTile(
                         theme: ExpandedTileThemeData(
-                          headerColor:
-                              _colorFromHex(Widgets.colorSecundayLight),
+                          headerColor: _colorFromHex(Widgets.colorPrimary),
                           headerRadius: 5.0,
                           headerPadding: const EdgeInsets.all(10),
                           headerSplashColor:
@@ -949,8 +947,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         title: Text(
                           Strings.labelTripItinerario,
                           style: TextStyle(
-                            color: _colorFromHex(Widgets.colorPrimary),
-                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: _colorFromHex(Widgets.colorWhite),
+                            fontSize: 17,
                           ),
                         ),
                         content: SingleChildScrollView(
@@ -963,39 +962,44 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
                                   return Card(
+                                    color: _colorFromHex(Widgets.colorPrimary),
                                     child: ListTile(
-                                      leading: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Parada " + (index + 1).toString(),
-                                            style: TextStyle(
-                                                color: _colorFromHex(
-                                                    Widgets.colorPrimary),
-                                                fontSize: 14),
-                                          ),
-                                          Icon(
-                                            Icons.room_outlined,
-                                            size: 16,
-                                            color: _colorFromHex(
-                                                Widgets.colorPrimary),
-                                          ),
-                                          if (validateNullOrEmptyString(
-                                                  rutaViajes[index].hora) !=
-                                              null) ...[
+                                      leading: Container(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
                                             Text(
-                                              "Hora " + rutaViajes[index].hora,
+                                              "Parada " +
+                                                  (index + 1).toString(),
                                               style: TextStyle(
                                                   color: _colorFromHex(
-                                                      Widgets.colorPrimary),
-                                                  fontSize: 15),
+                                                      Widgets.colorWhite),
+                                                  fontSize: 14),
                                             ),
+                                            Icon(
+                                              Icons.room_outlined,
+                                              size: 16,
+                                              color: _colorFromHex(
+                                                  Widgets.colorWhite),
+                                            ),
+                                            if (validateNullOrEmptyString(
+                                                    rutaViajes[index].hora) !=
+                                                null) ...[
+                                              Text(
+                                                "Hora " +
+                                                    rutaViajes[index].hora,
+                                                style: TextStyle(
+                                                    color: _colorFromHex(
+                                                        Widgets.colorWhite),
+                                                    fontSize: 15),
+                                              ),
+                                            ],
                                           ],
-                                        ],
+                                        ),
                                       ),
                                       title: validateNullOrEmptyString(
                                                   rutaViajes[index].parada1) !=
@@ -1004,7 +1008,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                               rutaViajes[index].parada1,
                                               style: TextStyle(
                                                   color: _colorFromHex(
-                                                      Widgets.colorPrimary),
+                                                      Widgets.colorWhite),
                                                   fontSize: 12),
                                             )
                                           : validateNullOrEmptyString(
@@ -1016,14 +1020,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                       .personaNombre,
                                                   style: TextStyle(
                                                       color: _colorFromHex(
-                                                          Widgets.colorPrimary),
+                                                          Widgets.colorWhite),
                                                       fontSize: 12),
                                                 )
                                               : Text(
                                                   "NA",
                                                   style: TextStyle(
                                                       color: _colorFromHex(
-                                                          Widgets.colorPrimary),
+                                                          Widgets.colorWhite),
                                                       fontSize: 12),
                                                 ),
                                       subtitle: Column(
@@ -1042,7 +1046,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                       .nombreEmpresa,
                                               style: TextStyle(
                                                   color: _colorFromHex(
-                                                      Widgets.colorPrimary),
+                                                      Widgets.colorWhite),
                                                   fontSize: 12),
                                             ),
                                             const SizedBox(height: 5),
@@ -1053,7 +1057,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                       .nombreSucursal,
                                               style: TextStyle(
                                                   color: _colorFromHex(
-                                                      Widgets.colorPrimary),
+                                                      Widgets.colorWhite),
                                                   fontSize: 12),
                                             ),
                                             const SizedBox(),
@@ -1063,31 +1067,34 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                 rutaViajes[index].direccion,
                                             style: TextStyle(
                                                 color: _colorFromHex(
-                                                    Widgets.colorPrimary),
+                                                    Widgets.colorWhite),
                                                 fontSize: 12),
                                           ),
                                           const SizedBox(height: 5),
-                                          if (validateNullOrEmptyString(
-                                                  rutaViajes[index]
-                                                      .personaTelefono) !=
-                                              null) ...[
+                                          if ( validateNullOrEmptyString(rutaViajes[index]
+                                                      .tipoDestino) != "SUC" &&  validateNullOrEmptyString(rutaViajes[index]
+                                                      .tipoDestino) != null)
+                                              ...[
                                             Text(
                                               "Contacto " +
                                                   rutaViajes[index]
                                                       .personaTelefono,
                                               style: TextStyle(
                                                   color: _colorFromHex(
-                                                      Widgets.colorPrimary),
+                                                      Widgets.colorWhite),
                                                   fontSize: 12),
                                             ),
                                           ],
                                           Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
+                                              validateNullOrEmptyString(rutaViajes[index]
+                                                      .tipoDestino) != "SUC" &&  validateNullOrEmptyString(rutaViajes[index]
+                                                      .tipoDestino) != null ?
                                               IconButton(
                                                 icon: const Icon(Icons.phone),
                                                 color: _colorFromHex(
-                                                    Widgets.colorPrimary),
+                                                    Widgets.colorWhite),
                                                 onPressed:
                                                     validateNullOrEmptyString(
                                                                 rutaViajes[
@@ -1133,12 +1140,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                             }
                                                           }
                                                         : null,
-                                              ),
+                                              )
+                                              : SizedBox(),
+                                              
                                               IconButton(
                                                 icon: const Icon(
                                                     Icons.alt_route_outlined),
                                                 color: _colorFromHex(
-                                                    Widgets.colorPrimary),
+                                                    Widgets.colorWhite),
                                                 onPressed: validateNullOrEmptyString(
                                                                 rutaViajes[
                                                                         index]
@@ -1192,7 +1201,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                               IconButton(
                                                 icon: const Icon(Icons.message),
                                                 color: _colorFromHex(
-                                                    Widgets.colorPrimary),
+                                                    Widgets.colorWhite),
                                                 onPressed:
                                                     validateNullOrEmptyString(
                                                                 rutaViajes[
@@ -1262,7 +1271,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                       icon: const Icon(
                                                           Icons.image),
                                                       color: _colorFromHex(
-                                                          Widgets.colorPrimary),
+                                                          Widgets.colorWhite),
                                                       onPressed: () {
                                                         _handleShowCamara(
                                                             rutaViajes[index]);
@@ -1291,7 +1300,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           ? ExpandedTile(
                               theme: ExpandedTileThemeData(
                                 headerColor:
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorPrimary),
                                 headerRadius: 5.0,
                                 headerPadding: const EdgeInsets.all(10),
                                 headerSplashColor:
@@ -1304,7 +1313,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                               title: Text(
                                 "Incidencias",
                                 style: TextStyle(
-                                  color: _colorFromHex(Widgets.colorPrimary),
+                                  color: _colorFromHex(Widgets.colorWhite),
                                   fontSize: 16,
                                 ),
                               ),
@@ -1346,7 +1355,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           ? ExpandedTile(
                               theme: ExpandedTileThemeData(
                                 headerColor:
-                                    _colorFromHex(Widgets.colorSecundayLight),
+                                    _colorFromHex(Widgets.colorPrimary),
                                 headerRadius: 5.0,
                                 headerPadding: const EdgeInsets.all(10),
                                 headerSplashColor:
@@ -1359,7 +1368,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                               title: Text(
                                 "Nota",
                                 style: TextStyle(
-                                  color: _colorFromHex(Widgets.colorPrimary),
+                                  color: _colorFromHex(Widgets.colorWhite),
                                   fontSize: 16,
                                 ),
                               ),
@@ -1394,11 +1403,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
                       SizedBox(height: 13),
 
-                      (widget.viaje.status == 1 || widget.viaje.status == 2) &&
-                              widget.panelVisible == true
-                          ? longButtons("RECHAZAR ASIGNACIÓN", _closeTripAlert,
-                              color: _colorFromHex(Widgets.colorPrimary),
-                              textColor: Colors.white)
+                      widget.bandCancelTrip
+                          ? (widget.viaje.status == 1 ||
+                                      widget.viaje.status == 2) &&
+                                  widget.panelVisible == true
+                              ? longButtons(
+                                  "RECHAZAR ASIGNACIÓN", _closeTripAlert,
+                                  color: _colorFromHex(Widgets.colorPrimary),
+                                  textColor: _colorFromHex(Widgets.colorWhite))
+                              : const SizedBox()
                           : const SizedBox(),
                       const SizedBox(
                         height: 13,
@@ -1432,8 +1445,8 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                     polylines: {
                                       Polyline(
                                         polylineId: const PolylineId('Ruta'),
-                                        color:
-                                            _colorFromHex(Widgets.colorPrimary),
+                                        color: _colorFromHex(
+                                            Widgets.colorSecundayLight2),
                                         points: listaLatLong,
                                       ),
                                     },

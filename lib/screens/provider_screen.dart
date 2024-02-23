@@ -69,7 +69,8 @@ class _LoginState extends State<ProviderScreen> {
 
   _handleShowProveedor() {
     List<dynamic> sexList = [
-      {"id": "1", "description": "Demo"},
+      //{"id": "1", "description": "Demo"},
+      {"id": "2", "description": "Driver Please"},
     ];
     DropDownState(
       DropDown(
@@ -190,106 +191,86 @@ class _LoginState extends State<ProviderScreen> {
     return WillPopScope(
         onWillPop: showExitPopup,
         child: Scaffold(
-            body: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: [color1, color2],
-                )),
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        left: 18.0,
-                        right: 18.0,
-                        top: MediaQuery.of(context).size.height * 0.1),
-                    child: Form(
-                      key: formKey,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/images/logoApp.png',
-                              width: 120,
-                              height: 110,
-                              fit: BoxFit.fitHeight,
-                            ),
-                            buildText(
-                                Strings.labelAppNameTitle,
-                                44,
-                                _colorFromHex(Widgets.colorPrimary),
-                                0.16,
-                                "popins",
-                                false,
-                                19,
-                                TextAlign.center,
-                                FontWeight.normal,
-                                Colors.transparent),
-                            const SizedBox(
-                              height: 12.0,
-                            ),
-                            SizedBox(
-                                //height: 48,
-                                child: TextFormField(
-                                    autofocus: false,
-                                    readOnly: true,
-                                    validator: (value) =>
-                                        validateField(value.toString()),
-                                    onTap: () {
-                                      _handleShowProveedor();
-                                    },
-                                    controller: proveedorController,
-                                    decoration: InputDecoration(
-                                      prefixIcon: Icon(Icons.home,
-                                          color: colorListLocal[0]),
-                                      hintText: Strings.hintLoginProvider,
-                                      hintStyle: GoogleFonts.poppins(
-                                          fontSize: 17,
-                                          color: colorListLocal[0]),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                        borderSide: BorderSide(
-                                          color: colorListLocal[0],
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                        borderSide: BorderSide(
-                                          color: colorListLocal[0],
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                      border: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(4.0))),
-                                      errorStyle: GoogleFonts.poppins(
-                                          color: Colors.red),
-                                    ),
-                                    style: GoogleFonts.poppins(
-                                        color: colorListLocal[0]))),
-                            const SizedBox(
-                              height: 13.0,
-                            ),
-                            isLoading
-                                ? buildCircularProgress(context)
-                                : longButtons(Strings.labelLoginProviderBtn,
-                                    _handleLoginClick,
-                                    color: _colorFromHex(Widgets.colorPrimary)),
-                            const SizedBox(
-                              height: 5.0,
-                            ),
-                          ],
+            body: Center(
+              child: Container(
+                padding: EdgeInsets.only(
+                    left: 18.0,
+                    right: 18.0,
+                    top: MediaQuery.of(context).size.height * 0.1),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                         Image.asset(
+                          'assets/images/movilisticaLogoTrans.png',
+                          width: 350,
+                          //height: 335,
+                          fit: BoxFit.fitHeight,
                         ),
-                      ),
+                        
+                        SizedBox(
+                            //height: 48,
+                            child: TextFormField(
+                                autofocus: false,
+                                readOnly: true,
+                                validator: (value) =>
+                                    validateField(value.toString()),
+                                onTap: () {
+                                  _handleShowProveedor();
+                                },
+                                controller: proveedorController,
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(Icons.home,
+                                      color: colorListLocal[0]),
+                                  hintText: Strings.hintLoginProvider,
+                                  hintStyle: GoogleFonts.poppins(
+                                      fontSize: 17,
+                                      color: colorListLocal[0]),
+                                  filled: true,
+                                  fillColor: _colorFromHex(Widgets.colorWhite),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(4.0),
+                                    borderSide: BorderSide(
+                                      color: colorListLocal[0],
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(4.0),
+                                    borderSide: BorderSide(
+                                      color: colorListLocal[0],
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  border: const OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(4.0))),
+                                  errorStyle: GoogleFonts.poppins(
+                                      color: Colors.red),
+                                ),
+                                style: GoogleFonts.poppins(
+                                    color: colorListLocal[0]))),
+                        const SizedBox(
+                          height: 13.0,
+                        ),
+                        isLoading
+                            ? buildCircularProgress(context)
+                            : longButtons(Strings.labelLoginProviderBtn,
+                                _handleLoginClick,
+                                color: _colorFromHex(Widgets.colorPrimary)),
+                        const SizedBox(
+                          height: 5.0,
+                        ),
+                      ],
                     ),
                   ),
-                ))));
+                ),
+              ),
+            )));
   }
 
   Future<bool> showExitPopup() async {
