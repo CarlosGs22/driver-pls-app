@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/cliente_provider.dart';
+import 'package:driver_please_flutter/screens/comment_screen.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 
 import 'package:driver_please_flutter/screens/trip_detail_screen.dart';
@@ -52,8 +53,8 @@ class _TripListState extends State<TripListAssignedScreen> {
 
   _getViajes() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final cliente = Provider.of<ClienteProvider>(context, listen: false).cliente;
-
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
 
     List<ViajeModel> viajes = await ViajeService.getViajes(context,
         pageNumber: _pageNumber,
@@ -93,10 +94,11 @@ class _TripListState extends State<TripListAssignedScreen> {
       backgroundColor: _colorFromHex(Widgets.colorGrayBackground),
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
+            fontSize: 19,
+            color: _colorFromHex(Widgets.colorWhite),
+            fontWeight: FontWeight.w500),
         title: const Text(Strings.labelListTripAssigned),
         elevation: 0.1,
-        
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
       ),
       drawer: MainDrawer(1),
@@ -126,6 +128,22 @@ class _TripListState extends State<TripListAssignedScreen> {
                             minLeadingWidth: 0,
                             minVerticalPadding: 0,
                             subtitle: InkWell(
+                              onLongPress: () {
+                                if (validateNullOrEmptyString(
+                                        viaje.comentario) !=
+                                    null) {
+                                  return;
+                                }
+
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => CommentScreen(
+                                              viaje: viaje,
+                                              redirectTo:
+                                                  TripListAssignedScreen(),
+                                            )));
+                              },
                               onTap: () {
                                 Navigator.push(
                                     context,
@@ -135,6 +153,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                               redirect: null,
                                               panelVisible: true,
                                               bandCancelTrip: false,
+                                              bandItinerario: false,
                                             )));
                               },
                               child: Column(
@@ -147,8 +166,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         Icons.circle,
                                         _colorFromHex(Widgets.colorPrimary),
                                         "Empresa: ${viaje.nombreEmpresa}",
-                                        _colorFromHex(
-                                            Widgets.colorWhite),
+                                        _colorFromHex(Widgets.colorWhite),
                                         8),
                                   ],
                                   if (validateNullOrEmptyString(
@@ -158,8 +176,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                         Icons.circle,
                                         _colorFromHex(Widgets.colorPrimary),
                                         "Sucursal: ${viaje.nombreSucursal}",
-                                        _colorFromHex(
-                                            Widgets.colorWhite),
+                                        _colorFromHex(Widgets.colorWhite),
                                         8),
                                   ],
                                   if (validateNullOrEmptyString(
@@ -172,8 +189,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                             setFormatDatetime(setFormatDate(
                                                 viaje.fechaViaje
                                                     .replaceAll(" ", ""))),
-                                        _colorFromHex(
-                                            Widgets.colorWhite),
+                                        _colorFromHex(Widgets.colorWhite),
                                         8),
                                   ],
                                   buildBubblePadding(
@@ -192,14 +208,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                               ),
                             ),
                             leading: InkWell(
-                                onTap: () {
-                                  /*if (validateNullOrEmptyString(
-                                          viaje.confirmado) ==
-                                      "1") {
-                                    _handleOnConfirmTrip(
-                                        index, viaje.idViaje, viaje);
-                                  }*/
-                                },
+                                onTap: () {},
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -240,6 +249,20 @@ class _TripListState extends State<TripListAssignedScreen> {
                         minLeadingWidth: 0,
                         minVerticalPadding: 0,
                         subtitle: InkWell(
+                          onLongPress: () {
+                            if (validateNullOrEmptyString(viaje.comentario) !=
+                                null) {
+                              return;
+                            }
+
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CommentScreen(
+                                          viaje: viaje,
+                                          redirectTo: TripListAssignedScreen(),
+                                        )));
+                          },
                           onTap: () {
                             Navigator.push(
                                 context,
@@ -249,6 +272,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                           redirect: null,
                                           panelVisible: true,
                                           bandCancelTrip: false,
+                                          bandItinerario: false,
                                         )));
                           },
                           child: Column(
@@ -319,8 +343,8 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     "ID",
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(
-                                            Widgets.colorPrimary),
+                                        color:
+                                            _colorFromHex(Widgets.colorPrimary),
                                         fontSize: 20),
                                   ),
                                 ),
@@ -330,8 +354,8 @@ class _TripListState extends State<TripListAssignedScreen> {
                                     viaje.idViaje,
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(
-                                            Widgets.colorWhite),
+                                        color:
+                                            _colorFromHex(Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),
@@ -358,8 +382,7 @@ class _TripListState extends State<TripListAssignedScreen> {
                                   idUser: idAgent,
                                   status: 1,
                                   order: "1",
-                                  path: path
-                                  );
+                                  path: path);
                           setState(() {
                             _viajes = viajes;
                           });

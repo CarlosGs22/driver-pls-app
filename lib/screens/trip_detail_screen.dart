@@ -9,6 +9,7 @@ import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/cliente_provider.dart';
 import 'package:driver_please_flutter/screens/dashboard_screen.dart';
 import 'package:driver_please_flutter/screens/map/google_map.dart';
+import 'package:driver_please_flutter/screens/map/google_map_huawei.dart';
 import 'package:driver_please_flutter/screens/preview_evidence.dart';
 import 'package:driver_please_flutter/screens/recibo_viaje_screen.dart';
 import 'package:driver_please_flutter/screens/start_trip.dart';
@@ -36,19 +37,22 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:device_info_plus/device_info_plus.dart';
 
 class TripDetailScreen extends StatefulWidget {
   ViajeModel viaje;
   var redirect;
   bool panelVisible;
   bool bandCancelTrip;
+  bool bandItinerario;
 
   TripDetailScreen(
       {Key? key,
       required this.viaje,
       required this.redirect,
       required this.panelVisible,
-      required this.bandCancelTrip})
+      required this.bandCancelTrip,
+      required this.bandItinerario})
       : super(key: key);
 
   @override
@@ -152,7 +156,6 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     });
   }
 
-
   _getRutaViajes() async {
     final cliente =
         Provider.of<ClienteProvider>(context, listen: false).cliente;
@@ -185,7 +188,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
   @override
   void initState() {
-    _controller = ExpandedTileController(isExpanded: false);
+    _controller = ExpandedTileController(isExpanded: widget.bandItinerario);
     _controllerTarifa = ExpandedTileController(isExpanded: false);
     _controllerRecibo = ExpandedTileController(isExpanded: false);
     _controllerIncidencia = ExpandedTileController(isExpanded: false);
@@ -197,16 +200,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     setColor();
     Intl.defaultLocale = "es_MX";
     initializeDateFormatting();
-  _initializeCamera();
+    _initializeCamera();
 
     getLocationName();
   }
 
   @override
   void dispose() {
-   
     _camController.dispose();
- 
 
     super.dispose();
   }
@@ -357,6 +358,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   redirect: "MAIN",
                   panelVisible: true,
                   bandCancelTrip: false,
+                  bandItinerario: false,
                 )),
         (Route<dynamic> route) => false,
       );
@@ -393,6 +395,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         viaje: widget.viaje,
                         redirect: "MAIN",
                         bandCancelTrip: true,
+                        bandItinerario: false,
                       )));
         } else {
           widget.viaje.status = 6;
@@ -794,7 +797,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                         splashColor: _colorFromHex(
                                             Widgets.colorSecundayLight),
 
-                                        onTap: () {
+                                        onTap: () async {
                                           if (widget.viaje.status == 3 ||
                                               widget.viaje.status == 6) {
                                             return;
@@ -802,15 +805,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
                                           if (widget.viaje.status == 1 &&
                                               widget.viaje.confirmado == "2") {
+                                                
                                             Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
+                                                  context,
+                                                  MaterialPageRoute(
                                                     builder: (context) =>
                                                         WidgetGoogleMap(
-                                                          viaje: widget.viaje,
-                                                          rutaViaje: rutaViajes,
-                                                        )));
+                                                      viaje: widget.viaje,
+                                                      rutaViaje: rutaViajes,
+                                                    ),
+                                                  ),
+                                                );
 
+                                           
                                             // Navigator.push(
                                             //     context,
                                             //     MaterialPageRoute(
@@ -1071,10 +1078,14 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                                 fontSize: 12),
                                           ),
                                           const SizedBox(height: 5),
-                                          if ( validateNullOrEmptyString(rutaViajes[index]
-                                                      .tipoDestino) != "SUC" &&  validateNullOrEmptyString(rutaViajes[index]
-                                                      .tipoDestino) != null)
-                                              ...[
+                                          if (validateNullOrEmptyString(
+                                                      rutaViajes[index]
+                                                          .tipoDestino) !=
+                                                  "SUC" &&
+                                              validateNullOrEmptyString(
+                                                      rutaViajes[index]
+                                                          .tipoDestino) !=
+                                                  null) ...[
                                             Text(
                                               "Contacto " +
                                                   rutaViajes[index]
@@ -1088,61 +1099,64 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                                           Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              validateNullOrEmptyString(rutaViajes[index]
-                                                      .tipoDestino) != "SUC" &&  validateNullOrEmptyString(rutaViajes[index]
-                                                      .tipoDestino) != null ?
-                                              IconButton(
-                                                icon: const Icon(Icons.phone),
-                                                color: _colorFromHex(
-                                                    Widgets.colorWhite),
-                                                onPressed:
-                                                    validateNullOrEmptyString(
-                                                                rutaViajes[
+                                              validateNullOrEmptyString(
+                                                              rutaViajes[index]
+                                                                  .tipoDestino) !=
+                                                          "SUC" &&
+                                                      validateNullOrEmptyString(
+                                                              rutaViajes[index]
+                                                                  .tipoDestino) !=
+                                                          null
+                                                  ? IconButton(
+                                                      icon: const Icon(
+                                                          Icons.phone),
+                                                      color: _colorFromHex(
+                                                          Widgets.colorWhite),
+                                                      onPressed: validateNullOrEmptyString(
+                                                                  rutaViajes[
+                                                                          index]
+                                                                      .personaTelefono) !=
+                                                              null
+                                                          ? () async {
+                                                              Uri link = Uri(
+                                                                scheme: 'tel',
+                                                                path: rutaViajes[
                                                                         index]
-                                                                    .personaTelefono) !=
-                                                            null
-                                                        ? () async {
-                                                            Uri link = Uri(
-                                                              scheme: 'tel',
-                                                              path: rutaViajes[
-                                                                      index]
-                                                                  .personaTelefono,
-                                                            );
+                                                                    .personaTelefono,
+                                                              );
 
-                                                            try {
-                                                              if (await canLaunchUrl(
-                                                                  link)) {
-                                                                await launchUrl(
-                                                                    link,
-                                                                    mode: LaunchMode
-                                                                        .externalApplication);
-                                                              } else {
+                                                              try {
+                                                                if (await canLaunchUrl(
+                                                                    link)) {
+                                                                  await launchUrl(
+                                                                      link,
+                                                                      mode: LaunchMode
+                                                                          .externalApplication);
+                                                                } else {
+                                                                  MotionToast.error(
+                                                                          title: const Text(
+                                                                              "Error"),
+                                                                          description: const Text(
+                                                                              "No se puede abrir el enlace"))
+                                                                      .show(
+                                                                          context);
+                                                                }
+                                                              } catch (error) {
+                                                                print("AKIII");
+                                                                print(error);
                                                                 MotionToast.error(
                                                                         title: const Text(
                                                                             "Error"),
                                                                         description:
                                                                             const Text(
-                                                                                "No se puede abrir el enlace"))
+                                                                                "Error No se puede abrir el enlace"))
                                                                     .show(
                                                                         context);
                                                               }
-                                                            } catch (error) {
-                                                              print("AKIII");
-                                                              print(error);
-                                                              MotionToast.error(
-                                                                      title: const Text(
-                                                                          "Error"),
-                                                                      description:
-                                                                          const Text(
-                                                                              "Error No se puede abrir el enlace"))
-                                                                  .show(
-                                                                      context);
                                                             }
-                                                          }
-                                                        : null,
-                                              )
-                                              : SizedBox(),
-                                              
+                                                          : null,
+                                                    )
+                                                  : SizedBox(),
                                               IconButton(
                                                 icon: const Icon(
                                                     Icons.alt_route_outlined),

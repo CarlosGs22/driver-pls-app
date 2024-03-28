@@ -25,7 +25,7 @@ class HttpClass {
 
           Utility.printWrapped( "************RESPONSE -> " + value.statusCode.toString());
 
-          Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
+          // Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
 
           var response = json.decode(value.body);
 
@@ -39,13 +39,13 @@ class HttpClass {
         });
       } else {
         return await post(url, body: params, headers: headers)
-            .timeout(const Duration(seconds: 60))
+            .timeout(const Duration(seconds: 120))
             .then((value) {
           Utility.printWrapped("**************API-URL -> " + url.toString());
 
           Utility.printWrapped("************PARAMS -> " + params.toString());
 
-          Utility.printWrapped("************RESPONSE -> " + value.body);
+          // Utility.printWrapped("************RESPONSE -> " + value.body);
 
           var response = json.decode(value.body);
 

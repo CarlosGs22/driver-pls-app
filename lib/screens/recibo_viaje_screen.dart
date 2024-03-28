@@ -45,7 +45,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
         (validateNullOrEmptyNumber(widget.viajeResumen["subtotal"]) ?? 0)));
 
         //   double costEspera = (double.parse(
-        // (validateNullOrEmptyNumber(widget.viajeResumen["costo_espera"]) ?? 0)));
+        // (validateNullOrEmptyNumber(widget.viajeResumen["costo_espera"]) ?? 0).toString()));
 
         // total_viaje = total_viaje + costEspera;
 
@@ -149,7 +149,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
-                              'Costo tiempo \n de espera',
+                              'Tiempo de espera',
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,
@@ -331,7 +331,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                         color: Color(0xFFC50F0F),
                       ),
                       Text(
-                        "Servicio de logistica inteligente $nombreCliente (Servicio LINDP)",
+                        "Servicio de Logística Móvil",
                         style: TextStyle(
                           fontFamily: 'Open Sans',
                           fontSize: 17,
@@ -346,7 +346,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             const Text(
-                              'Tasa de servicio LINDP',
+                              'Tasa de servicio de LM',
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,
@@ -379,7 +379,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             const Text(
-                              'Costo de tasa de servicio LINDP',
+                              'Costo de tasa de servicio LM',
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,
@@ -477,7 +477,7 @@ class _ReciboViajeScreenState extends State<ReciboViajeScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             const Text(
-                              'Costo de tasa de servicio LINDP',
+                              'Costo de tasa de servicio LM',
                               style: TextStyle(
                                 fontFamily: 'Open Sans',
                                 fontSize: 15,

@@ -286,6 +286,8 @@ Future<dynamic> insertTripNetwork(BuildContext context) async {
       if (data.isNotEmpty) {
         var cliente = prefs.getString("path_cliente");
 
+        data.addAll({"TRIPDATA" : "1"});
+
         var response = HttpClass.httpData(
             context,
             Uri.parse(cliente! + "aplicacion/insertviajes.php"),
@@ -507,24 +509,40 @@ String _agregarCero(int valor) {
   return valor < 10 ? '0$valor' : '$valor';
 }
 
-bool validarContinuar(String horaProgramadaString) {
-  List<String> partesHora = horaProgramadaString.split(':');
-  int horas = int.parse(partesHora[0]);
-  int minutos = int.parse(partesHora[1]);
-  int segundos = int.parse(partesHora[2]);
+bool puedeIniciarViaje(String fechaInicio, String horaProgramada) {
+  List<String> partesFecha = fechaInicio.split('-');
+  int year = int.parse(partesFecha[0]);
+  int month = int.parse(partesFecha[1]);
+  int day = int.parse(partesFecha[2]);
 
-  DateTime horaProgramada = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, horas, minutos, segundos);
+  // Parsear la hora
+  List<String> partesHora = horaProgramada.split(':');
+  int hour = int.parse(partesHora[0]);
+  int minute = int.parse(partesHora[1]);
+
+  // Crear el objeto DateTime combinando la fecha y la hora
+  DateTime horaProgramadaTimeOfDay = DateTime(
+    year,
+    month,
+    day,
+    hour,
+    minute,
+  );
+
   DateTime horaActual = DateTime.now();
 
-    print(horaProgramada);
-  print(horaActual);
+  // Calcular la diferencia de tiempo en minutos usando la clase Duration
+  Duration diferencia = horaProgramadaTimeOfDay.difference(horaActual);
+  int diferenciaEnMinutos = diferencia.inMinutes;
 
+  print("Actual: $horaActual");
+  print("Programada: $horaProgramadaTimeOfDay");
+  print(diferenciaEnMinutos <= 5);
+  print(diferenciaEnMinutos);
 
-  return horaActual.isAfter(horaProgramada) ||
-      horaActual.isAtSameMomentAs(horaProgramada);
+  return diferenciaEnMinutos <= 5;
 }
 
-// Método para convertir una cadena de hora (HH:mm:ss) a un objeto DateTime
 DateTime convertirHoraStringADateTime(String horaString) {
   List<String> partes = horaString.split(':');
   int horas = int.parse(partes[0]);

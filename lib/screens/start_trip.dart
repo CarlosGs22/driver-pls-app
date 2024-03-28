@@ -641,6 +641,7 @@ class _StartTripState extends State<StartTrip> {
                   redirect: "MAIN",
                   panelVisible: true,
                   bandCancelTrip: false,
+                  bandItinerario: false,
                 )),
         (Route<dynamic> route) => false,
       );

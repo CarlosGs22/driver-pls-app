@@ -99,6 +99,7 @@ class _DashboardState extends State<Dashboard> {
                 0.0,
             descripcion: element["descripcion"] ?? "",
             idRuta: element["id_ruta"] ?? "",
+            comentario: element["comentario"] ?? "",
           ));
         }
 
@@ -114,6 +115,7 @@ class _DashboardState extends State<Dashboard> {
                       redirect: null,
                       panelVisible: true,
                       bandCancelTrip: false,
+                      bandItinerario: false,
                     )));
       });
     } catch (e) {

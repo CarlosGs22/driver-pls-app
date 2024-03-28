@@ -50,6 +50,8 @@ class ViajeService {
                 subtotal: double.tryParse((validateNullOrEmptyString(element["subtotal"].toString()) ?? 0.0).toString()) ?? 0.0,
                 descripcion: element["descripcion"] ?? "",
                 idRuta: element["id_ruta"] ?? "",
+                comentario: element["comentario"] ?? "",
+                
               ));
           }
 
@@ -107,6 +109,7 @@ class ViajeService {
                 subtotal: double.tryParse((validateNullOrEmptyNumber(element["subtotal"].toString()) ?? "0").toString()) ?? 0.0,
                 descripcion: element["descripcion"] ?? "",
                 idRuta: element["id_ruta"] ?? "",
+                comentario: element["comentario"] ?? "",
               ));
 
           }

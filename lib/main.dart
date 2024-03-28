@@ -19,6 +19,7 @@ import 'package:driver_please_flutter/utils/widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,6 +40,26 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  bool hasPermissions = await FlutterBackground.hasPermissions;
+
+  final androidConfig = FlutterBackgroundAndroidConfig(
+    notificationTitle: "Aplicación en segundo plano",
+    notificationText:
+        "Movilística correrá en segundo plano",
+    notificationImportance: AndroidNotificationImportance.Default,
+    notificationIcon: AndroidResource(
+        name: 'background_icon',
+        defType: 'drawable'),
+  );
+
+  bool success =
+      await FlutterBackground.initialize(androidConfig: androidConfig);
+  if (success) {
+    bool success = await FlutterBackground.enableBackgroundExecution();
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -166,7 +187,7 @@ class _MainState extends State<Main> with ChangeNotifier {
                   return const ProviderScreen();
                 } else if (snapshot.connectionState == ConnectionState.done) {
                   getUserSessionData(context);
-                   getUserPath(context);
+                  getUserPath(context);
                   return Dashboard();
                 }
             }

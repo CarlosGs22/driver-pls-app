@@ -294,6 +294,7 @@ class _TripListState extends State<HistorialTripListScreen> {
                                             redirect: null,
                                             panelVisible: true,
                                             bandCancelTrip: false,
+                                            bandItinerario: false,
                                           )));
                             },
                             child: ListTile(

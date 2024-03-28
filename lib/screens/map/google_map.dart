@@ -20,6 +20,7 @@ import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:driver_please_flutter/utils/widgets.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_fonts/google_fonts.dart';
@@ -51,7 +52,16 @@ class WidgetGoogleMap extends StatefulWidget {
   _WidgetGoogleMapState createState() => _WidgetGoogleMapState();
 }
 
-class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
+class _WidgetGoogleMapState extends State<WidgetGoogleMap>
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  Future<void> initBackgroundTasks() async {
+    await FlutterBackground.initialize();
+    // Configura aquí tus tareas en segundo plano
+  }
+
   Set<Marker> markers = {};
   List<WidgetMarker> widgetMarkers = [];
 
@@ -109,6 +119,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   bool isLoading = false;
 
+  bool validateViaje = true;
+
   _getRutaViajes() async {
     List<LatLng> auxListLocations = [];
 
@@ -125,6 +137,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   void initState() {
     Wakelock.enable();
 
+    WidgetsBinding.instance!.addObserver(this);
+    initBackgroundTasks();
+
     initializeDateFormatting();
     _getCurrentLocationMap();
     _getRutaViajes();
@@ -136,6 +151,12 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       sendRequest();
     });
     setColor();
+
+    if (validateNullOrEmptyString(widget.viaje.idViaje) == null) {
+      setState(() {
+        validateViaje = false;
+      });
+    }
 
     /*bg.BackgroundGeolocation.ready(bg.Config(
         desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
@@ -170,11 +191,26 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      // La aplicación está volviendo al primer plano desde el segundo plano
+      // Aquí puedes realizar cualquier acción necesaria, como cargar datos nuevamente.
+      setState(
+          () {}); // Actualiza la pantalla para mostrar los datos actualizados
+    }
+  }
+
+  @override
   void dispose() {
     timer?.cancel();
     secondsElapsed = 0;
     //_closeTrip("CANCEL");
-    _locationSubscription!.cancel();
+    if (_locationSubscription != null) {
+      _locationSubscription!.cancel();
+    }
+
+    WidgetsBinding.instance!.removeObserver(this);
 
     super.dispose();
   }
@@ -319,8 +355,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
       _closeTrip("FINISH");
       _finishTrip(context, currentTrip, response);
     } else {
-      buidlDefaultFlushBar(
-          context, "Error", "Ocurrió un error al finalizar viaje", 4);
+      buidlDefaultFlushBar(context, "Ocurrió un error al finalizar viaje",
+          response["data"].toString(), 4);
     }
   }
 
@@ -816,6 +852,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
                     redirect: "MAIN",
                     panelVisible: true,
                     bandCancelTrip: false,
+                    bandItinerario: false,
                   )),
           (Route<dynamic> route) => false,
         );
@@ -838,11 +875,11 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
         context,
         MaterialPageRoute(
             builder: (context) => TripDetailScreen(
-                  viaje: widget.viaje,
-                  redirect: "MAIN",
-                  panelVisible: true,
-                  bandCancelTrip: false,
-                )),
+                viaje: widget.viaje,
+                redirect: "MAIN",
+                panelVisible: true,
+                bandCancelTrip: false,
+                bandItinerario: false)),
         (Route<dynamic> route) => false,
       );
     } else {
@@ -1055,71 +1092,18 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
   }
 
   void _handleStartWaitTime(BuildContext context) {
-    Alert(
-      context: context,
-      type: AlertType.warning,
-      title: "¡Atención!",
-      closeIcon: const SizedBox(),
-      closeFunction: () {},
-      desc:
-          "Si el personal está listo, presione ABORDO para iniciar viaje, de lo conttario, presione CONTINUAR para iniciar tiempo de espera",
-      // content: Column(
-      //   children: [
-      //     Row(
-      //       children: [
-      //         Flexible(flex: 5, child: longButtons("A bordo", () {})),
-      //         Flexible(flex: 5, child: longButtons("Continuar", () {}))
-      //       ],
-      //     ),
-      //   ],
-      // ),
-      buttons: [
-        DialogButton(
-          child: Text(
-            "A bordo",
-            style: TextStyle(
-                color: _colorFromHex(Widgets.colorWhite), fontSize: 18),
-          ),
-          onPressed: () {
-            if (validarABordo(widget.viaje.horaViaje)) {
-              Navigator.pop(context);
-              startTimer("TRIP");
-              _startTrip();
-            } else {
-              MotionToast.error(
-                      title: const Text("Error"),
-                      description: const Text(
-                          "No se puede iniciar el viaje antes de la hora programada."))
-                  .show(context);
-            }
-          },
-          color: _colorFromHex(Widgets.colorSecundary),
-        ),
-        DialogButton(
-          child: Text(
-            "Continuar",
-            style: TextStyle(
-                color: _colorFromHex(Widgets.colorWhite), fontSize: 18),
-          ),
-          onPressed: () {
-            if (validarContinuar(widget.viaje.horaViaje)) {
-              Navigator.pop(context);
-              setState(() {
-                bandWaitTime = true;
-              });
-              startTimer("WAITTIME");
-            } else {
-              MotionToast.error(
-                      title: const Text("Error"),
-                      description: const Text(
-                          "No se puede iniciar tiempo de espera antes de la hora programada."))
-                  .show(context);
-            }
-          },
-          color: _colorFromHex(Widgets.colorPrimary),
-        ),
-      ],
-    ).show();
+    if (puedeIniciarViaje(widget.viaje.fechaViaje, widget.viaje.horaViaje)) {
+      setState(() {
+        bandWaitTime = true;
+      });
+      startTimer("WAITTIME");
+    } else {
+      MotionToast.warning(
+              title: const Text("Atención"),
+              description: const Text(
+                  "No se puede iniciar tiempo de espera antes de la hora programada."))
+          .show(context);
+    }
   }
 
   void _handleStoptWaitTime(BuildContext context) {
@@ -1149,11 +1133,13 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
     return WillPopScope(onWillPop: () async {
-      if (inicialTrip == 1) {
+      if (inicialTrip == 1 || bandWaitTime) {
         return false;
       } else {
         return true;
@@ -1172,23 +1158,29 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
             backgroundColor: _colorFromHex(Widgets.colorPrimary),
             actions: [
               inicialTrip == 1
-                  ? Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10),
-                      child: Row(
-                        children: [
-                          InkWell(
-                            child: Text(
-                              "Finalizar viaje",
-                              style: GoogleFonts.poppins(
-                                  fontSize: 19,
-                                  color: _colorFromHex(Widgets.colorWhite),
-                                  fontWeight: FontWeight.w500),
+                  ? Container(
+                      alignment: Alignment.center,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _handleModalCloseTrip(context, tripProvider);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Finalizar viaje',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: _colorFromHex(Widgets.colorPrimary),
+                              fontSize: 16.0,
                             ),
-                            onTap: () {
-                              _handleModalCloseTrip(context, tripProvider);
-                            },
-                          )
-                        ],
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary: _colorFromHex(Widgets.colorWhite),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
                       ),
                     )
                   : SizedBox()
@@ -1198,452 +1190,493 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap> {
           //drawer: const MainDrawer(0),
           body: isLoading
               ? buildCircularProgress(context)
-              : SizedBox(
-                  height: height,
-                  width: width,
-                  child: Stack(
-                    children: <Widget>[
-                      GoogleMap(
-                        markers: {
-                          if (_startMarkerPosition != null)
-                            Marker(
-                                markerId: MarkerId('start'),
-                                position: _startMarkerPosition!),
-                          if (_endMarkerPosition != null)
-                            Marker(
-                                markerId: MarkerId('end'),
-                                position: _endMarkerPosition!),
-                        },
-                        polylines: {
-                          Polyline(
-                            polylineId: PolylineId('route'),
-                            color: _colorFromHex(Widgets.colorSecundayLight2),
-                            points: _polylineCoordinates,
-                          ),
-                        },
-                        onCameraIdle: () {
-                          if (inicialTrip == 1) {
-                            setState(() {
-                              _zoomMap = false;
-                            });
-                          }
-                        },
-                        onCameraMove: (CameraPosition position) {
-                          if (inicialTrip == 1) {
-                            if (!_zoomMap) {
-                              setState(() {
-                                _zoomMap = true;
-                              });
-                            }
-                          }
-                        },
-                        onMapCreated: (c) {
-                          mapController = c;
-                        },
-                        myLocationButtonEnabled: false,
-                        zoomControlsEnabled: false,
-                        myLocationEnabled: true,
-                        initialCameraPosition: _initialLocation,
-                        mapType: MapType.normal,
+              : !validateViaje
+                  ? Center(
+                    child: Text(
+                        'ID VIAJE NO PRESENTE',
+                        style: TextStyle(
+                            fontSize: 20.0,
+                            color: _colorFromHex(Widgets.colorPrimary)),
                       ),
-                      SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              ClipOval(
-                                child: Material(
-                                  color: _colorFromHex(
-                                      Widgets.colorPrimary), // button color
-                                  child: InkWell(
-                                    splashColor: _colorFromHex(
-                                        Widgets.colorPrimary), // inkwell color
-                                    child: SizedBox(
-                                      width: 50,
-                                      height: 50,
-                                      child: Icon(Icons.add,
-                                          color: _colorFromHex(
-                                              Widgets.colorWhite)),
-                                    ),
-                                    onTap: () {
-                                      setState(() {
-                                        _zoomMap = false;
-                                      });
-                                      mapController!.animateCamera(
-                                        CameraUpdate.zoomIn(),
-                                      );
-                                    },
-                                  ),
-                                ),
+                  )
+                  : SizedBox(
+                      height: height,
+                      width: width,
+                      child: Stack(
+                        children: <Widget>[
+                          GoogleMap(
+                            markers: {
+                              if (_startMarkerPosition != null)
+                                Marker(
+                                    markerId: MarkerId('start'),
+                                    position: _startMarkerPosition!),
+                              if (_endMarkerPosition != null)
+                                Marker(
+                                    markerId: MarkerId('end'),
+                                    position: _endMarkerPosition!),
+                            },
+                            polylines: {
+                              Polyline(
+                                polylineId: PolylineId('route'),
+                                color:
+                                    _colorFromHex(Widgets.colorSecundayLight2),
+                                points: _polylineCoordinates,
                               ),
-                              const SizedBox(height: 20),
-                              ClipOval(
-                                child: Material(
-                                  color: _colorFromHex(Widgets.colorPrimary),
-                                  child: InkWell(
-                                    splashColor: _colorFromHex(
-                                        Widgets.colorPrimary), // inkwell color
-                                    child: SizedBox(
-                                      width: 50,
-                                      height: 50,
-                                      child: Icon(Icons.remove,
-                                          color: _colorFromHex(
-                                              Widgets.colorWhite)),
-                                    ),
-                                    onTap: () {
-                                      setState(() {
-                                        _zoomMap = false;
-                                      });
-
-                                      mapController!.animateCamera(
-                                        CameraUpdate.zoomOut(),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              )
-                            ],
+                            },
+                            onCameraIdle: () {
+                              if (inicialTrip == 1) {
+                                setState(() {
+                                  _zoomMap = false;
+                                });
+                              }
+                            },
+                            onCameraMove: (CameraPosition position) {
+                              if (inicialTrip == 1) {
+                                if (!_zoomMap) {
+                                  setState(() {
+                                    _zoomMap = true;
+                                  });
+                                }
+                              }
+                            },
+                            onMapCreated: (c) {
+                              mapController = c;
+                            },
+                            myLocationButtonEnabled: false,
+                            zoomControlsEnabled: false,
+                            myLocationEnabled: true,
+                            initialCameraPosition: _initialLocation,
+                            mapType: MapType.normal,
                           ),
-                        ),
-                      ),
-
-                      SafeArea(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                top: 10, left: 27, right: 27, bottom: 10),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
+                          SafeArea(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 10.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  ClipOval(
+                                    child: Material(
+                                      color: _colorFromHex(
+                                          Widgets.colorPrimary), // button color
+                                      child: InkWell(
+                                        splashColor: _colorFromHex(Widgets
+                                            .colorPrimary), // inkwell color
+                                        child: SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: Icon(Icons.add,
+                                              color: _colorFromHex(
+                                                  Widgets.colorWhite)),
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            _zoomMap = false;
+                                          });
+                                          mapController!.animateCamera(
+                                            CameraUpdate.zoomIn(),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ClipOval(
+                                    child: Material(
                                       color:
                                           _colorFromHex(Widgets.colorPrimary),
-                                      blurRadius: 90,
-                                      blurStyle: BlurStyle.outer)
+                                      child: InkWell(
+                                        splashColor: _colorFromHex(Widgets
+                                            .colorPrimary), // inkwell color
+                                        child: SizedBox(
+                                          width: 50,
+                                          height: 50,
+                                          child: Icon(Icons.remove,
+                                              color: _colorFromHex(
+                                                  Widgets.colorWhite)),
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            _zoomMap = false;
+                                          });
+
+                                          mapController!.animateCamera(
+                                            CameraUpdate.zoomOut(),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  )
                                 ],
-                                color: _colorFromHex(Widgets.colorWhite),
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
                               ),
-                              //width: width * 0.9,
+                            ),
+                          ),
+                          SafeArea(
+                            child: Align(
+                              alignment: Alignment.topCenter,
                               child: Padding(
                                 padding: const EdgeInsets.only(
-                                    top: 4.0, bottom: 4.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Text(
-                                      'Recorrido',
-                                      style: TextStyle(
-                                          fontSize: 20.0,
+                                    top: 10, left: 27, right: 27, bottom: 10),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    boxShadow: [
+                                      BoxShadow(
                                           color: _colorFromHex(
-                                              Widgets.colorPrimary)),
+                                              Widgets.colorPrimary),
+                                          blurRadius: 90,
+                                          blurStyle: BlurStyle.outer)
+                                    ],
+                                    color: _colorFromHex(Widgets.colorWhite),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(20.0),
                                     ),
-                                    const SizedBox(height: 10),
-                                    Column(
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                  ),
+                                  //width: width * 0.9,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 4.0, bottom: 4.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text(
+                                          'Recorrido',
+                                          style: TextStyle(
+                                              fontSize: 20.0,
+                                              color: _colorFromHex(
+                                                  Widgets.colorPrimary)),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Column(
                                           children: [
-                                            Text("Distancia",
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 18,
-                                                    color: _colorFromHex(
-                                                        (Widgets.colorPrimary)),
-                                                    fontWeight:
-                                                        FontWeight.w500)),
-                                            Text(
-                                                currentTrip != null
-                                                    ? '${currentTrip.distanceInKilometers.toStringAsFixed(2)} km'
-                                                    : "0.00 Km",
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 18,
-                                                    color: _colorFromHex(
-                                                        (Widgets.colorPrimary)),
-                                                    fontWeight:
-                                                        FontWeight.w500))
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text("Distancia",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 18,
+                                                        color: _colorFromHex(
+                                                            (Widgets
+                                                                .colorPrimary)),
+                                                        fontWeight:
+                                                            FontWeight.w500)),
+                                                Text(
+                                                    currentTrip != null
+                                                        ? '${currentTrip.distanceInKilometers.toStringAsFixed(2)} km'
+                                                        : "0.00 Km",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 18,
+                                                        color: _colorFromHex(
+                                                            (Widgets
+                                                                .colorPrimary)),
+                                                        fontWeight:
+                                                            FontWeight.w500))
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceAround,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text("Tiempo",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 18,
+                                                        color: _colorFromHex(
+                                                            (Widgets
+                                                                .colorPrimary)),
+                                                        fontWeight:
+                                                            FontWeight.w500)),
+                                                Text(
+                                                    currentTrip != null
+                                                        ? formatTimeSeconds(
+                                                            currentTrip
+                                                                .timeInSeconds)
+                                                        : "00:00:00",
+                                                    style: GoogleFonts.poppins(
+                                                        fontSize: 18,
+                                                        color: _colorFromHex(
+                                                            (Widgets
+                                                                .colorPrimary)),
+                                                        fontWeight:
+                                                            FontWeight.w500))
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text("Tiempo",
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 18,
-                                                    color: _colorFromHex(
-                                                        (Widgets.colorPrimary)),
-                                                    fontWeight:
-                                                        FontWeight.w500)),
-                                            Text(
-                                                currentTrip != null
-                                                    ? formatTimeSeconds(
-                                                        currentTrip
-                                                            .timeInSeconds)
-                                                    : "00:00:00",
-                                                style: GoogleFonts.poppins(
-                                                    fontSize: 18,
-                                                    color: _colorFromHex(
-                                                        (Widgets.colorPrimary)),
-                                                    fontWeight:
-                                                        FontWeight.w500))
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 4, right: 4),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          // inicialTrip == 0 && !bandWaitTime
-                                          //     ? Flexible(
-                                          //         flex: 5,
-                                          //         child: Padding(
-                                          //           padding:
-                                          //               const EdgeInsets.only(
-                                          //                   left: 4, right: 4),
-                                          //           child: SizedBox(
-                                          //             height: 55,
-                                          //             child: ElevatedButton(
-                                          //               onPressed: () {
-                                          //                 switch (inicialTrip) {
-                                          //                   case 0:
-                                          //                     Map<String,
-                                          //                             dynamic>
-                                          //                         waitTime = {};
-
-                                          //                     // if (widget.viaje
-                                          //                     //         .tipo ==
-                                          //                     //     "SALIDA") {
-                                          //                     //   waitTime =
-                                          //                     //       puedeIniciarViaje(
-                                          //                     //          widget.viaje.horaViaje);
-                                          //                     // }
-
-                                          //                     // if (widget.viaje
-                                          //                     //         .tipo ==
-                                          //                     //     "ENTRADA") {
-                                          //                     //   waitTime =
-                                          //                     //       puedeIniciarViaje(widget
-                                          //                     //           .rutaViaje
-                                          //                     //           .first
-                                          //                     //           .hora);
-                                          //                     // }
-
-                                          //                     // if (waitTime
-                                          //                     //     .isNotEmpty) {
-                                          //                     //   modalWaitTime(
-                                          //                     //       context,
-                                          //                     //       waitTime);
-                                          //                     //   return;
-                                          //                     // }
-
-                                          //                     return;
-
-                                          //                     startTimer(
-                                          //                         "TRIP");
-                                          //                     _startTrip();
-                                          //                     break;
-                                          //                   case 1:
-                                          //                     _cancelTrip(
-                                          //                         context);
-                                          //                     break;
-                                          //                 }
-                                          //               },
-                                          //               child: Padding(
-                                          //                 padding:
-                                          //                     const EdgeInsets
-                                          //                         .all(8.0),
-                                          //                 child: Text(
-                                          //                   inicialTrip == 0
-                                          //                       ? 'INICIAR VIAJE'
-                                          //                       : "CANCELAR VIAJE",
-                                          //                   textAlign: TextAlign
-                                          //                       .center,
-                                          //                   style: TextStyle(
-                                          //                     color: _colorFromHex(
-                                          //                         Widgets
-                                          //                             .colorWhite),
-                                          //                     fontSize: 16.0,
-                                          //                   ),
-                                          //                 ),
-                                          //               ),
-                                          //               style: ElevatedButton
-                                          //                   .styleFrom(
-                                          //                 primary: _colorFromHex(
-                                          //                     Widgets
-                                          //                         .colorPrimary),
-                                          //                 shape:
-                                          //                     RoundedRectangleBorder(
-                                          //                   borderRadius:
-                                          //                       BorderRadius
-                                          //                           .circular(
-                                          //                               20.0),
-                                          //                 ),
-                                          //               ),
-                                          //             ),
-                                          //           ),
-                                          //         ))
-                                          //     : SizedBox(),
-
-                                          //TIEMPO DE ESPERA
-
-                                          inicialTrip == 0
-                                              ? Flexible(
-                                                  flex: 5,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            left: 4, right: 4),
-                                                    child: SizedBox(
-                                                      height: 55,
-                                                      width: 200,
-                                                      child: ElevatedButton(
-                                                        onPressed: () {
-                                                          if (!bandWaitTime) {
-                                                            _handleStartWaitTime(
-                                                                context);
-                                                          } else {
-                                                            _handleStoptWaitTime(
-                                                                context);
-                                                          }
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Text(
-                                                            !bandWaitTime
-                                                                ? "TIEMPO DE ESPERA"
-                                                                : "FINALIZAR TIEMPO DE ESPERA",
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: TextStyle(
-                                                              color: _colorFromHex(
-                                                                  Widgets
-                                                                      .colorWhite),
-                                                              fontSize: 14.0,
+                                        const SizedBox(height: 10),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 4, right: 4),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              widget.viaje.tipo != "SALIDA" &&
+                                                      inicialTrip == 0
+                                                  ? Flexible(
+                                                      flex: 5,
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                left: 4,
+                                                                right: 4),
+                                                        child: SizedBox(
+                                                          height: 55,
+                                                          child: ElevatedButton(
+                                                            onPressed: () {
+                                                              startTimer(
+                                                                  "TRIP");
+                                                              _startTrip();
+                                                            },
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Text(
+                                                                'INICIAR VIAJE',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: _colorFromHex(
+                                                                      Widgets
+                                                                          .colorWhite),
+                                                                  fontSize:
+                                                                      16.0,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            style:
+                                                                ElevatedButton
+                                                                    .styleFrom(
+                                                              primary:
+                                                                  _colorFromHex(
+                                                                      Widgets
+                                                                          .colorPrimary),
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20.0),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
-                                                        style: ElevatedButton
-                                                            .styleFrom(
-                                                          primary: _colorFromHex(
-                                                              Widgets
-                                                                  .colorPrimary),
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20.0),
+                                                      ))
+                                                  : SizedBox()
+
+                                              //TIEMPO DE ESPERA
+                                            ],
+                                          ),
+                                        ),
+                                        !bandWaitTime
+                                            ? SizedBox()
+                                            : Container(
+                                                alignment:
+                                                    Alignment.bottomCenter,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 30,
+                                                          right: 30,
+                                                          bottom: 10,
+                                                          top: 10),
+                                                  child: SizedBox(
+                                                    height: 55,
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .width,
+                                                    child: ElevatedButton(
+                                                      onPressed: () {
+                                                        _handleStoptWaitTime(
+                                                            context);
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Text(
+                                                          "INICIAR VIAJE",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                            color: _colorFromHex(
+                                                                Widgets
+                                                                    .colorWhite),
+                                                            fontSize: 14.0,
                                                           ),
                                                         ),
                                                       ),
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        primary: _colorFromHex(
+                                                            Widgets
+                                                                .colorPrimary),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      20.0),
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ))
-                                              : SizedBox()
-                                        ],
-                                      ),
-                                    ),
-                                    bandFinishTrip == 0
-                                        ? inicialTrip == 1
-                                            ? ElevatedButton(
-                                                onPressed: () {
-                                                  showFlexibleBottomSheet(
-                                                    minHeight: 0,
-                                                    initHeight: 0.8,
-                                                    maxHeight: 1,
-                                                    context: context,
-                                                    builder: (context,
-                                                        scrollController,
-                                                        bottomSheetOffset) {
-                                                      return TripDetailScreen(
-                                                        viaje: widget.viaje,
-                                                        redirect: null,
-                                                        panelVisible: false,
-                                                        bandCancelTrip: false,
+                                                  ),
+                                                ),
+                                              ),
+                                        bandFinishTrip == 0
+                                            ? inicialTrip == 1
+                                                ? ElevatedButton(
+                                                    onPressed: () {
+                                                      showFlexibleBottomSheet(
+                                                        minHeight: 0,
+                                                        initHeight: 0.8,
+                                                        maxHeight: 1,
+                                                        context: context,
+                                                        builder: (context,
+                                                            scrollController,
+                                                            bottomSheetOffset) {
+                                                          return TripDetailScreen(
+                                                            viaje: widget.viaje,
+                                                            redirect: null,
+                                                            panelVisible: false,
+                                                            bandCancelTrip:
+                                                                false,
+                                                            bandItinerario:
+                                                                true,
+                                                          );
+                                                        },
+                                                        anchors: [0, 0.5, 1],
                                                       );
                                                     },
-                                                    anchors: [0, 0.5, 1],
-                                                  );
-                                                },
-                                                child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    "Ver detalle",
-                                                    style: TextStyle(
-                                                      color: _colorFromHex(
-                                                          Widgets.colorWhite),
-                                                      fontSize: 20.0,
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.all(8.0),
+                                                      child: Text(
+                                                        "Ver detalle",
+                                                        style: TextStyle(
+                                                          color: _colorFromHex(
+                                                              Widgets
+                                                                  .colorWhite),
+                                                          fontSize: 20.0,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      primary: _colorFromHex(
+                                                          Widgets.colorPrimary),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20.0),
+                                                      ),
+                                                    ),
+                                                  )
+                                                : const SizedBox()
+                                            : buildCircularProgress(context),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SafeArea(
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 12, bottom: 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    inicialTrip == 0 &&
+                                            !bandWaitTime &&
+                                            widget.viaje.tipo != "ENTRADA"
+                                        ? Flexible(
+                                            flex: 5,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 4, right: 4),
+                                              child: SizedBox(
+                                                height: 55,
+                                                width: 200,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    _handleStartWaitTime(
+                                                        context);
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Text(
+                                                      "INICIAR TIEMPO DE ESPERA",
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                        color: _colorFromHex(
+                                                            Widgets.colorWhite),
+                                                        fontSize: 14.0,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    primary: _colorFromHex(
+                                                        Widgets.colorPrimary),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20.0),
                                                     ),
                                                   ),
                                                 ),
-                                                style: ElevatedButton.styleFrom(
-                                                  primary: _colorFromHex(
-                                                      Widgets.colorPrimary),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0),
-                                                  ),
-                                                ),
-                                              )
-                                            : const SizedBox()
-                                        : buildCircularProgress(context),
+                                              ),
+                                            ))
+                                        : SizedBox(),
+                                    Flexible(
+                                      flex: 5,
+                                      child: ClipOval(
+                                        child: Material(
+                                          color: _colorFromHex(Widgets
+                                              .colorPrimary), // button color
+                                          child: InkWell(
+                                            splashColor: _colorFromHex(Widgets
+                                                .colorPrimary), // inkwell color
+                                            child: SizedBox(
+                                              width: 56,
+                                              height: 56,
+                                              child: Icon(Icons.my_location,
+                                                  color: _colorFromHex(
+                                                      Widgets.colorWhite)),
+                                            ),
+                                            onTap: () async {
+                                              _getCurrentLocationMap();
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      // Show current location button
-                      SafeArea(
-                        child: Align(
-                          alignment: Alignment.bottomRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                right: 10.0, bottom: 10.0),
-                            child: ClipOval(
-                              child: Material(
-                                color: _colorFromHex(
-                                    Widgets.colorPrimary), // button color
-                                child: InkWell(
-                                  splashColor: _colorFromHex(
-                                      Widgets.colorPrimary), // inkwell color
-                                  child: SizedBox(
-                                    width: 56,
-                                    height: 56,
-                                    child: Icon(Icons.my_location,
-                                        color:
-                                            _colorFromHex(Widgets.colorWhite)),
-                                  ),
-                                  onTap: () async {
-                                    _getCurrentLocationMap();
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )));
+                        ],
+                      )));
     }));
   }
 

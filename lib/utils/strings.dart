@@ -27,7 +27,7 @@ class Strings {
   static const String labelTripLocation = "Sucursal";
   static const String labelTripType = "Tipo";
   static const String labelTripOccupants = "Pasajeros";
-  static const String hintIncidence = "Escribe una incidencia";
+  static const String hintIncidence = "Escribe un \n comentario";
   static const String labelSendTripbtn = "Enviar";
   static const String labelTripStatus = "Estado del viaje";
   static const String labelContact = "Contacto";
@@ -39,7 +39,12 @@ class Strings {
   static const String hintSupportType = "Tipo";
   static const String hintSupportDescription = "Descripción";
   static const String hintSupportTitlePanel =
-      "Envíanos un mensaje con tu incidencia. \n \n Recuerda que es importante agregar el número de ID del viaje que deseas aclarar";
+      "Envíanos un mensaje para \n solicitar alguna aclaración";
+
+ static const String hintCommentTitlePanel =
+      "Envíanos tu comentario para \n solicitar alguna aclaración";
+  
+
   static const String labelSupportWhatsApp = "Enviar";
 
   static const String labelTripId = "ID de viaje";

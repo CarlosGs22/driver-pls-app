@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:driver_please_flutter/models/viaje_model.dart';
 import 'package:driver_please_flutter/providers/cliente_provider.dart';
+import 'package:driver_please_flutter/screens/comment_screen.dart';
 import 'package:driver_please_flutter/screens/drawer/main_drawer.dart';
 import 'package:driver_please_flutter/screens/support_screen.dart';
 
@@ -84,7 +85,9 @@ class _TripListState extends State<TripListFinishedScreen> {
       },
       appBar: AppBar(
         titleTextStyle: GoogleFonts.poppins(
-            fontSize: 19, color: _colorFromHex(Widgets.colorWhite), fontWeight: FontWeight.w500),
+            fontSize: 19,
+            color: _colorFromHex(Widgets.colorWhite),
+            fontWeight: FontWeight.w500),
         title: const Text(Strings.labelListTripFinished),
         elevation: 0.1,
         backgroundColor: _colorFromHex(Widgets.colorPrimary),
@@ -116,6 +119,20 @@ class _TripListState extends State<TripListFinishedScreen> {
                         top: 10, bottom: 10, left: 5, right: 5),
                     backGroundColor: _colorFromHex(Widgets.colorPrimary),
                     child: InkWell(
+                        onLongPress: () {
+                          if (validateNullOrEmptyString(viaje.comentario) !=
+                              null) {
+                            return;
+                          }
+
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CommentScreen(
+                                        viaje: viaje,
+                                        redirectTo: TripListFinishedScreen(),
+                                      )));
+                        },
                         onTap: () {
                           Navigator.push(
                               context,
@@ -125,6 +142,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                                         redirect: null,
                                         panelVisible: true,
                                         bandCancelTrip: false,
+                                        bandItinerario: false,
                                       )));
                         },
                         child: ListTile(
@@ -142,8 +160,8 @@ class _TripListState extends State<TripListFinishedScreen> {
                                         viaje.fechaInicio.toString()),
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(
-                                            Widgets.colorWhite),
+                                        color:
+                                            _colorFromHex(Widgets.colorWhite),
                                         fontSize: 16),
                                   ),
                                 ),
@@ -185,8 +203,8 @@ class _TripListState extends State<TripListFinishedScreen> {
                                     "ID",
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(
-                                            Widgets.colorWhite),
+                                        color:
+                                            _colorFromHex(Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),
@@ -196,8 +214,8 @@ class _TripListState extends State<TripListFinishedScreen> {
                                     viaje.idViaje,
                                     style: TextStyle(
                                         fontStyle: FontStyle.italic,
-                                        color: _colorFromHex(
-                                            Widgets.colorWhite),
+                                        color:
+                                            _colorFromHex(Widgets.colorWhite),
                                         fontSize: 20),
                                   ),
                                 ),

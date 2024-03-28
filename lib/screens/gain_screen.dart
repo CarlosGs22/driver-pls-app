@@ -318,12 +318,13 @@ class _GainScreenState extends State<GainScreen> {
     int totalSumaViajes = 0;
 
     for (var i = 1; i < mapInicialGanancias.length; i++) {
-      totalSumaViajes++;
+   totalSumaViajes++;
 
       if (validateNullOrEmptyNumber(mapInicialGanancias[i]["subtotal"]) != 0) {
         total_viaje =
             double.parse(mapInicialGanancias[i]["subtotal"].toString());
       }
+
 
       if (validateNullOrEmptyNumber(mapInicialGanancias[i]["costo_comision"]) !=
           0) {
@@ -433,7 +434,7 @@ class _GainScreenState extends State<GainScreen> {
                             child: Padding(
                               padding: EdgeInsets.all(10),
                               child: buildText(
-                                  totalSumaViajes.toString(),
+                                  (totalSumaViajes).toString(),
                                   15,
                                   _colorFromHex(Widgets.colorWhite),
                                   0.16,
@@ -456,6 +457,13 @@ class _GainScreenState extends State<GainScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
+    print("aKII");
+    print(mapGanancias);
+
+
+
     // return WillPopScope(
     //     onWillPop: showExitPopup,
     return Scaffold(
@@ -648,7 +656,7 @@ class _GainScreenState extends State<GainScreen> {
                                                 buildText(
                                                     "\$" +
                                                         (mapGanancias[0]
-                                                                ["ganancias"] ??
+                                                                ["total_ganancias"] ??
                                                             "0"),
                                                     18,
                                                     _colorFromHex(
