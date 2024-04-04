@@ -537,10 +537,10 @@ bool puedeIniciarViaje(String fechaInicio, String horaProgramada) {
 
   print("Actual: $horaActual");
   print("Programada: $horaProgramadaTimeOfDay");
-  print(diferenciaEnMinutos <= 5);
+  print(diferenciaEnMinutos <= 10);
   print(diferenciaEnMinutos);
 
-  return diferenciaEnMinutos <= 5;
+  return diferenciaEnMinutos <= 10;
 }
 
 DateTime convertirHoraStringADateTime(String horaString) {

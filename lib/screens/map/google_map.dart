@@ -101,6 +101,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
 
   int secondsElapsed = 0;
   Timer? timer;
+  Timer? timerUpdateActualAddress;
 
   loc.Location _locationServicex = loc.Location();
 
@@ -204,6 +205,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
   @override
   void dispose() {
     timer?.cancel();
+    timerUpdateActualAddress?.cancel();
     secondsElapsed = 0;
     //_closeTrip("CANCEL");
     if (_locationSubscription != null) {
@@ -1015,6 +1017,26 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
     }
   }
 
+  void _handleUpdateActualAddress() {
+    final cliente =
+        Provider.of<ClienteProvider>(context, listen: false).cliente;
+
+    timerUpdateActualAddress =
+        Timer.periodic(Duration(seconds: 30), (timer) async {
+      var params = {
+        "id_viaje": widget.viaje.idViaje,
+        "lat_lng": json.encode([
+          _currentLocation!.latitude.toString(),
+          _currentLocation!.longitude.toString()
+        ])
+      };
+      bool responseActualAdress = await getActualAddress(context,
+          (cliente.path + "aplicacion/updateDireccionActual.php"), params);
+      print("RESPUESTA UBICACIÓN ACTUAL");
+      print(responseActualAdress.toString());
+    });
+  }
+
   void _startTrip() async {
     var locat = loc.Location();
     _currentLocation = await locat.getLocation();
@@ -1046,6 +1068,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
       inicialTrip = 1;
       _zoomMap = true;
     });
+
+    _handleUpdateActualAddress();
 
     locat.enableBackgroundMode(enable: true);
     locat.changeSettings(
@@ -1192,13 +1216,13 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
               ? buildCircularProgress(context)
               : !validateViaje
                   ? Center(
-                    child: Text(
+                      child: Text(
                         'ID VIAJE NO PRESENTE',
                         style: TextStyle(
                             fontSize: 20.0,
                             color: _colorFromHex(Widgets.colorPrimary)),
                       ),
-                  )
+                    )
                   : SizedBox(
                       height: height,
                       width: width,

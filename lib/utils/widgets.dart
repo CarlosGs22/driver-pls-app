@@ -1,3 +1,4 @@
+import 'package:driver_please_flutter/utils/http_class.dart';
 import 'package:driver_please_flutter/utils/utility.dart';
 import 'package:driver_please_flutter/utils/validator.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,8 @@ InputDecoration buildInputDecoration(
   return InputDecoration(
     prefixIcon: Icon(icon, color: Widgets._colorFromHex2(Widgets.colorWhite)),
     hintText: hintText,
-    hintStyle: GoogleFonts.poppins(fontSize: 16, color: Widgets._colorFromHex2(Widgets.colorWhite)),
+    hintStyle: GoogleFonts.poppins(
+        fontSize: 16, color: Widgets._colorFromHex2(Widgets.colorWhite)),
     filled: true,
     fillColor: colorFill,
     border: InputBorder.none,
@@ -368,118 +370,128 @@ List<Widget> listWidget(Map<String, dynamic> mapData) {
   return chips;
 }
 
- void modalWaitTime(BuildContext context,
-      Map<String, dynamic> response) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+void modalWaitTime(BuildContext context, Map<String, dynamic> response) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
-        return AlertDialog(
-              title: Center(
-                child: Text(
-                  'Atención',
-                  style: TextStyle(
-                    fontSize: 24.0,
-                    color:   Widgets._colorFromHex2(Widgets.colorPrimary),
+      return AlertDialog(
+        title: Center(
+          child: Text(
+            'Atención',
+            style: TextStyle(
+              fontSize: 24.0,
+              color: Widgets._colorFromHex2(Widgets.colorPrimary),
+            ),
+          ),
+        ),
+        content: Container(
+            width: double.maxFinite,
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height - keyboardHeight),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    response["message"] ?? "NA",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Widgets._colorFromHex2(Widgets.colorPrimary),
+                    ),
                   ),
-                ),
-              ),
-              content: Container(
-                width: double.maxFinite,
-                constraints: BoxConstraints(
-                    maxHeight:
-                        MediaQuery.of(context).size.height - keyboardHeight),
-                child: SingleChildScrollView(
-                    child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        response["message"] ?? "NA",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          color:  Widgets._colorFromHex2(Widgets.colorPrimary),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                      //  Text(
-                      //   response["tolerancia"] ?? "NA",
-                      //   style: TextStyle(
-                      //     fontSize: 17.0,
-                      //     color:  Widgets._colorFromHex2(Widgets.colorPrimary),
-                      //   ),
+                  //  Text(
+                  //   response["tolerancia"] ?? "NA",
+                  //   style: TextStyle(
+                  //     fontSize: 17.0,
+                  //     color:  Widgets._colorFromHex2(Widgets.colorPrimary),
+                  //   ),
+                  // ),
+                  Column(
+                    children: [
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     Text("Hora \nprogramada",
+                      //         style: GoogleFonts.poppins(
+                      //           fontSize: 21,
+                      //           color:
+                      //               Widgets._colorFromHex2((Widgets.colorPrimary)),
+                      //           fontWeight: FontWeight.w500,
+                      //         )),
+                      //     Text(
+                      //      response["hora_programada"] ?? "NA",
+                      //       style: GoogleFonts.poppins(
+                      //         fontSize: 21,
+                      //         color: Widgets._colorFromHex2((Widgets.colorPrimary)),
+                      //         fontWeight: FontWeight.w500,
+                      //       ),
+                      //     ),
+                      //   ],
                       // ),
-                      Column(
+                      // SizedBox(height: 10,),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     Text("Hora \nactual",
+                      //         style: GoogleFonts.poppins(
+                      //           fontSize: 21,
+                      //           color:
+                      //              Widgets._colorFromHex2((Widgets.colorPrimary)),
+                      //           fontWeight: FontWeight.w500,
+                      //         )),
+                      //     Text(
+                      //        response["hora_actual"] ?? "NA",
+                      //       style: GoogleFonts.poppins(
+                      //         fontSize: 21,
+                      //         color:    Widgets._colorFromHex2((Widgets.colorPrimary)),
+                      //         fontWeight: FontWeight.w500,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      //   SizedBox(height: 10,),
+
+                      Row(
                         children: [
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //   crossAxisAlignment: CrossAxisAlignment.start,
-                          //   children: [
-                          //     Text("Hora \nprogramada",
-                          //         style: GoogleFonts.poppins(
-                          //           fontSize: 21,
-                          //           color:
-                          //               Widgets._colorFromHex2((Widgets.colorPrimary)),
-                          //           fontWeight: FontWeight.w500,
-                          //         )),
-                          //     Text(
-                          //      response["hora_programada"] ?? "NA",
-                          //       style: GoogleFonts.poppins(
-                          //         fontSize: 21,
-                          //         color: Widgets._colorFromHex2((Widgets.colorPrimary)),
-                          //         fontWeight: FontWeight.w500,
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          // SizedBox(height: 10,),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //   crossAxisAlignment: CrossAxisAlignment.start,
-                          //   children: [
-                          //     Text("Hora \nactual",
-                          //         style: GoogleFonts.poppins(
-                          //           fontSize: 21,
-                          //           color:
-                          //              Widgets._colorFromHex2((Widgets.colorPrimary)),
-                          //           fontWeight: FontWeight.w500,
-                          //         )),
-                          //     Text(
-                          //        response["hora_actual"] ?? "NA",
-                          //       style: GoogleFonts.poppins(
-                          //         fontSize: 21,
-                          //         color:    Widgets._colorFromHex2((Widgets.colorPrimary)),
-                          //         fontWeight: FontWeight.w500,
-                          //       ),
-                          //     ),
-                          //   ],
-                          // ),
-                          //   SizedBox(height: 10,),
-                            
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 10,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 3, right: 3),
-                                  child: longButtons("Enterado", () {
-                                    Navigator.pop(context);
-                                  },
-                                      color:
-                                         Widgets._colorFromHex2(Widgets.colorPrimary)),
-                                ),
-                              ),
-                            ],
+                          Expanded(
+                            flex: 10,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 3, right: 3),
+                              child: longButtons("Enterado", () {
+                                Navigator.pop(context);
+                              },
+                                  color: Widgets._colorFromHex2(
+                                      Widgets.colorPrimary)),
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                )),
-              );
-            
-      },
-    );
+                ],
+              ),
+            )),
+      );
+    },
+  );
+}
+
+ Future<bool> getActualAddress(
+    BuildContext context, var path,var params) async {
+  var response =
+      await HttpClass.httpData(context, Uri.parse(path), params, {}, "POST");
+
+  if (response["code"] == 200) {
+    return true;
+  } else {
+    return false;
   }
+}
+
+
