@@ -563,3 +563,4 @@ bool validarABordo(String horaProgramadaString) {
   // Verificar si la hora actual está dentro de los 5 minutos antes o después de la hora programada
   return horaProgramada.difference(horaActual).inMinutes.abs() <= 4;
 }
+

@@ -52,26 +52,25 @@ class UserPreferences {
     String placas = prefs.getString("placas").toString();
 
     var agent = User(
-      id: userId,
-      name: name,
-      lastName: lastName,
-      email: email,
-      mobile: mobile,
-      country: country,
-      state: state,
-      city: city,
-      status: status,
-      comission: comission,
-      rateKm: ratekm,
-      rateM: rateM,
-      password: password,
-      pass: pass,
-      marca: marca,
-      tipo: tipo,
-      modelo: modelo,
-      color: color,
-      placas: placas
-    );
+        id: userId,
+        name: name,
+        lastName: lastName,
+        email: email,
+        mobile: mobile,
+        country: country,
+        state: state,
+        city: city,
+        status: status,
+        comission: comission,
+        rateKm: ratekm,
+        rateM: rateM,
+        password: password,
+        pass: pass,
+        marca: marca,
+        tipo: tipo,
+        modelo: modelo,
+        color: color,
+        placas: placas);
     return agent;
   }
 
@@ -84,6 +83,12 @@ class UserPreferences {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(key, value);
     return prefs.commit();
+  }
+
+  Future<bool> removeValueUser(var key) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove(key);
+    return true;
   }
 
   Future<bool> saveUserUpdate(User user) async {

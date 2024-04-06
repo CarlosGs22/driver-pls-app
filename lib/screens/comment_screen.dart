@@ -41,9 +41,20 @@ class _CommentState extends State<CommentScreen> {
 
   final TextEditingController _descriptionController = TextEditingController();
 
+  final TextEditingController _solcitudTiempoController =
+      TextEditingController();
+
+  final TextEditingController _solcitudDistanciaController =
+      TextEditingController();
+
+  final TextEditingController _solcitudTiempoEsperaController =
+      TextEditingController();
+
   bool isLoading = false;
 
   List<String> listaCategoriaSoporte = [];
+
+  TimeOfDay _selectedTime = TimeOfDay.now();
 
   _getCategoriaSoporte() async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -84,6 +95,26 @@ class _CommentState extends State<CommentScreen> {
     }
   }
 
+  // Future<void> _selectTime(BuildContext context,var type) async {
+  //   final TimeOfDay? picked = await showTimePicker(
+  //     context: context,
+  //     initialTime: _selectedTime,
+  //     initialEntryMode: TimePickerEntryMode.input
+  //   );
+  //   if (picked != null && picked != _selectedTime) {
+  //     setState(() {
+  //       _selectedTime = picked;
+  //       if (type == "1") {
+  //         _solcitudTiempoEsperaController.text  = '${picked.hour}:${picked.minute}';
+
+  //       } else {
+  //         _solcitudTiempoController.text = '${picked.hour}:${picked.minute}';
+  //       }
+  
+  //     });
+  //   }
+  // }
+
   setColor() {
     colorListLocal = List.generate(3, (index) {
       return _colorFromHex(Widgets.colorGrayLight);
@@ -104,7 +135,10 @@ class _CommentState extends State<CommentScreen> {
 
       Map<String, dynamic> params = {
         "idViaje": widget.viaje.idViaje,
-        "comentario": _descriptionController.text
+        "comentario": _descriptionController.text,
+        "soltiempo": _solcitudTiempoController.text,
+        "solespera": _solcitudTiempoEsperaController.text,
+        "soldistancia": _solcitudDistanciaController.text,
       };
 
       HttpClass.httpData(
@@ -240,24 +274,6 @@ class _CommentState extends State<CommentScreen> {
                                       filled: true,
                                       fillColor:
                                           _colorFromHex(Widgets.colorWhite),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                        borderSide: BorderSide(
-                                          color: colorListLocal[1],
-                                        ),
-                                      ),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(4.0),
-                                        borderSide: BorderSide(
-                                          color: colorListLocal[1],
-                                          width: 1.3,
-                                        ),
-                                      ),
-                                      border: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0))),
                                       errorStyle: GoogleFonts.poppins(
                                           color: Colors.red),
                                     ),
@@ -269,6 +285,89 @@ class _CommentState extends State<CommentScreen> {
                           const SizedBox(
                             height: 17.0,
                           ),
+
+                          //SOLICITUD
+
+                          TextFormField(
+                              controller: _solcitudTiempoController,
+                              autofocus: false,
+                               maxLength: 6,
+                              onTap: (){
+                                 
+                              },
+                              validator: (value) {
+                                if(!validateTimeFormat(value.toString())){
+                                  return "Formato incorrecto";
+                                }
+                              },
+                                
+                              onChanged: (value) => _setStateColor(value, 1),
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: _colorFromHex(Widgets.colorGray)),
+                                labelText: Strings.hintRequestTime,
+                                filled: true,
+                                fillColor: _colorFromHex(Widgets.colorWhite),
+                                errorStyle:
+                                    GoogleFonts.poppins(color: Colors.red),
+                              ),
+                              style: GoogleFonts.poppins(
+                                  color: colorListLocal[1])),
+                          const SizedBox(
+                            height: 17.0,
+                          ),
+
+                          TextFormField(
+                              controller: _solcitudTiempoEsperaController,
+                              autofocus: false,
+                              maxLength: 6,
+                              onTap: (){
+                                 
+                              },
+                              validator: (value){
+                                 if(!validateTimeFormat(value.toString())){
+                                  return "Formato incorrecto";
+                                }
+                              },
+                              onChanged: (value) => _setStateColor(value, 1),
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: _colorFromHex(Widgets.colorGray)),
+                                labelText: Strings.hintRequestWaitTime,
+                                filled: true,
+                                fillColor: _colorFromHex(Widgets.colorWhite),
+                                errorStyle:
+                                    GoogleFonts.poppins(color: Colors.red),
+                              ),
+                              style: GoogleFonts.poppins(
+                                  color: colorListLocal[1])),
+                          const SizedBox(
+                            height: 17.0,
+                          ),
+                          TextFormField(
+                              controller: _solcitudDistanciaController,
+                              autofocus: false,
+                              maxLength: 5,
+                              keyboardType: TextInputType.numberWithOptions(),
+                              validator: (value) =>
+                                  validateField(value.toString()),
+                              onChanged: (value) => _setStateColor(value, 1),
+                              decoration: InputDecoration(
+                                labelStyle: TextStyle(
+                                    color: _colorFromHex(Widgets.colorGray)),
+                                labelText: Strings.hintRequestDistance,
+                                filled: true,
+                                fillColor: _colorFromHex(Widgets.colorWhite),
+                                errorStyle:
+                                    GoogleFonts.poppins(color: Colors.red),
+                              ),
+                              style: GoogleFonts.poppins(
+                                  color: colorListLocal[1])),
+
+                                   const SizedBox(
+                            height: 17.0,
+                          ),
+
                           isLoading
                               ? buildCircularProgress(context)
                               : longButtons(Strings.labelSupportWhatsApp,

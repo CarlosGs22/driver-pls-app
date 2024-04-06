@@ -31,6 +31,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:motion_toast/motion_toast.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -675,6 +676,22 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
+  Future<String> requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+
+    if (permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse) {
+      return "200";
+    } else {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return "400";
+      }
+
+      return "500";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<LatLng> listaLatLong = [];
@@ -805,19 +822,28 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
 
                                           if (widget.viaje.status == 1 &&
                                               widget.viaje.confirmado == "2") {
-                                                
-                                            Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        WidgetGoogleMap(
-                                                      viaje: widget.viaje,
-                                                      rutaViaje: rutaViajes,
-                                                    ),
+                                            if (await requestLocationPermission() ==
+                                                "200") {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      WidgetGoogleMap(
+                                                    viaje: widget.viaje,
+                                                    rutaViaje: rutaViajes,
                                                   ),
-                                                );
+                                                ),
+                                              );
+                                            } else {
+                                              MotionToast.error(
+                                                      title: const Text(
+                                                          "Habilite los permisos de ubicación"),
+                                                      description: Text("Desde la configuración"))
+                                                  .show(context);
 
-                                           
+                                                  openAppSettings();
+                                            }
+
                                             // Navigator.push(
                                             //     context,
                                             //     MaterialPageRoute(

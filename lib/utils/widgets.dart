@@ -292,6 +292,14 @@ staticbuildBottomSheet(BuildContext context, Widget widget) {
   );
 }
 
+bool validateTimeFormat(String timeString) {
+  // Expresión regular para validar el formato de tiempo (hh:mm)
+  RegExp regex = RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$');
+  return regex.hasMatch(timeString);
+}
+
+
+
 setStatusTrip(String stat, String confirm) {
   print("DATOS");
 

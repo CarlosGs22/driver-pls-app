@@ -55,4 +55,8 @@ class Strings {
   static const String labelUpdateProfileBtn = "Actualizar";
 
     static const String labelLoginGoProvider = "Proveedor";
+
+    static const String hintRequestTime = "Sol. Tiempo HH:mm";
+    static const String hintRequestWaitTime = "Sol. Tiempo de espera HH:mm";
+     static const String hintRequestDistance = "Sol. Distancia ";
 }

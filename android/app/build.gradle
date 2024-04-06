@@ -51,19 +51,19 @@ android {
     }
 
      signingConfigs {
-        release {
-            keyAlias 'upload'
-            keyPassword 'driver'
-            storeFile file('key.keystore')
-            storePassword 'driver'
-        }
+        // release {
+        //     keyAlias 'upload'
+        //     keyPassword 'driver'
+        //     storeFile file('key.keystore'terter)
+        //     storePassword 'driver'
+        // }
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
         }
     }
 }

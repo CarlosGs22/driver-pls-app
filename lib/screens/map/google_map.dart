@@ -25,10 +25,12 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:motion_toast/motion_toast.dart';
 import 'package:provider/provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widget_marker_google_map/widget_marker_google_map.dart';
 
 import 'package:http/http.dart' as http;
@@ -158,18 +160,7 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
       });
     }
 
-    /*bg.BackgroundGeolocation.ready(bg.Config(
-        desiredAccuracy: bg.Config.DESIRED_ACCURACY_HIGH,
-        distanceFilter: 1.0,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        debug: true,
-        logLevel: bg.Config.LOG_LEVEL_VERBOSE
-    )).then((bg.State state) {
-      if (!state.enabled) {
-        bg.BackgroundGeolocation.start();
-      }
-    });*/
+
   }
 
   _setStateColor(value, int indexColor) {
@@ -194,10 +185,8 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      // La aplicación está volviendo al primer plano desde el segundo plano
-      // Aquí puedes realizar cualquier acción necesaria, como cargar datos nuevamente.
       setState(
-          () {}); // Actualiza la pantalla para mostrar los datos actualizados
+          () {}); 
     }
   }
 
@@ -230,6 +219,10 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
           });
         });
 
+        DateTime now = DateTime.now();
+        String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss')
+            .format(now); 
+        UserPreferences().saveValueUser("INICIALDATE", formattedDate);
         break;
 
       case "TRIP":
@@ -245,14 +238,21 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
     }
   }
 
-  _sendRequestTrip() {
+  _sendRequestTrip() async {
     final cliente =
         Provider.of<ClienteProvider>(context, listen: false).cliente;
 
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+
     var formParams = {
       "id_viaje": widget.viaje.idViaje,
-      "segundos_espera": secondsWaitTime.toString()
+      "segundos_espera": secondsWaitTime.toString(),
     };
+
+    if(validateNullOrEmptyString(prefs.getString("INICIALDATE")) != null) {
+      formParams.addAll({"fecha_inicial" : prefs.getString("INICIALDATE").toString()});
+    }
 
     HttpClass.httpData(
             context,
@@ -264,6 +264,9 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
       setState(() {
         secondsWaitTime = 0;
       });
+
+      UserPreferences().removeValueUser("INICIALDATE");
+
       print("CAMBIO DE STATUS DE VIAJE");
       print(response);
     });
@@ -1192,13 +1195,13 @@ class _WidgetGoogleMapState extends State<WidgetGoogleMap>
               ? buildCircularProgress(context)
               : !validateViaje
                   ? Center(
-                    child: Text(
+                      child: Text(
                         'ID VIAJE NO PRESENTE',
                         style: TextStyle(
                             fontSize: 20.0,
                             color: _colorFromHex(Widgets.colorPrimary)),
                       ),
-                  )
+                    )
                   : SizedBox(
                       height: height,
                       width: width,

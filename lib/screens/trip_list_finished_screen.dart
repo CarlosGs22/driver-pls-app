@@ -120,10 +120,7 @@ class _TripListState extends State<TripListFinishedScreen> {
                     backGroundColor: _colorFromHex(Widgets.colorPrimary),
                     child: InkWell(
                         onLongPress: () {
-                          if (validateNullOrEmptyString(viaje.comentario) !=
-                              null) {
-                            return;
-                          }
+                          
 
                           Navigator.push(
                               context,
@@ -134,6 +131,10 @@ class _TripListState extends State<TripListFinishedScreen> {
                                       )));
                         },
                         onTap: () {
+
+                         
+
+
                           Navigator.push(
                               context,
                               MaterialPageRoute(

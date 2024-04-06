@@ -25,7 +25,7 @@ class HttpClass {
 
           Utility.printWrapped( "************RESPONSE -> " + value.statusCode.toString());
 
-          // Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
+          Utility.printWrapped( "************RESPONSE -> " + value.body.toString());
 
           var response = json.decode(value.body);
 
@@ -45,7 +45,7 @@ class HttpClass {
 
           Utility.printWrapped("************PARAMS -> " + params.toString());
 
-          // Utility.printWrapped("************RESPONSE -> " + value.body);
+           Utility.printWrapped("************RESPONSE -> " + value.body);
 
           var response = json.decode(value.body);
 
